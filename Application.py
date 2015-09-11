@@ -7,10 +7,8 @@ from MainWindow import *
 
 class Application:
 	def __init__(self):
-		self.root = Tk()
-		
 		self.mainWindow = MainWindow(self)
 	
 	
 	def run(self):
-		self.root.mainloop()
+		self.mainWindow.root.mainloop()
