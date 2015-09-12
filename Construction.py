@@ -15,7 +15,7 @@ class Construction:
 		self.elements = []
 		
 		
-		if constructionFile == None:	# Пустая конструкция
+		if constructionFile is None:	# Пустая конструкция
 			return None
 		
 		

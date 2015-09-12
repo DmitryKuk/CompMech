@@ -8,7 +8,7 @@ from tkinter import *
 class Graph(Frame):
 	def __init__(self, mainWindow, **kwargs):
 		# Данные
-		self.virtualSize	= (0, 0)	# В физических единицах от начала координат
+		self.virtSize = (0, 0)	# В физических единицах от начала координат
 		
 		self.sizeStr = StringVar()
 		self.elementStr = StringVar()
@@ -23,10 +23,8 @@ class Graph(Frame):
 		
 		# Холст
 		canvasKwargs = { "cursor": "crosshair", "bg": "orange" }
-		if "width" in kwargs:
-			canvasKwargs["width"] = kwargs["width"]
-		if "height" in kwargs:
-			canvasKwargs["height"] = kwargs["height"]
+		if "width" in kwargs:	canvasKwargs["width"] = kwargs["width"]
+		if "height" in kwargs:	canvasKwargs["height"] = kwargs["height"]
 		
 		self.canvas = Canvas(self, **canvasKwargs)
 		self.canvas.grid(column = 0, row = 0, sticky = N + E + S + W)
@@ -59,7 +57,8 @@ class Graph(Frame):
 	
 	
 	def onMouseMotion(self, event):
-		self.updateLabels(event.x, event.y)
+		self.updateLabels(self.canvas.canvasx(event.x),
+						  self.canvas.canvasy(event.y))
 	
 	
 	def onMouseLeave(self, event):
@@ -70,24 +69,64 @@ class Graph(Frame):
 		self.updateLabels()
 	
 	
-	def updateLabels(self, cursorX = 0 , cursorY = 0):
-		self.sizeStr.set("Размер: (%.4f, %.4f)" % self.virtualSize)
+	def updateLabels(self, cursorX = 0, cursorY = None):
+		if cursorY is None: cursorY = self.realHeight() * 0.5
+		
+		self.sizeStr.set("Размер: (%.3f, %.3f)" % self.virtSize)
 		self.elementStr.set("")
 		
 		# Вычисляем положение курсора в виртуальных координатах
-		realX, realY = self.canvas.winfo_width(), self.canvas.winfo_height()
-		(virtX, virtY) = self.virtualSize
+		# realX, realY = self.realWidth(), self.realHeight()
+		# (virtX, virtY) = self.virtSize
 		
-		if realX == 0: cursorX = 0
-		else: cursorX *= virtX / realX
+		# if realX == 0: cursorX = 0
+		# else: cursorX *= virtX / realX
 		
-		if realY == 0: cursorY = 0
-		else: cursorY = (realY - cursorY) * virtY / realY
+		# if realY == 0: cursorY = 0
+		# else: cursorY = ((realY - cursorY) / realY - 0.5) * virtY
 		
-		print("Virtual: (%.4f, %.4f)" % (cursorX, cursorY))
-		self.cursorStr.set("(%.4f, %.4f)" % (cursorX, cursorY))
+		self.cursorStr.set("(%.3f, %.3f)" % self.realToVirtCoord((cursorX, cursorY)))
 	
 	
 	def setVirtualSize(self, size):
-		self.virtualSize = size
+		self.virtSize = size
 		self.updateLabels()
+	
+	
+	# Размеры
+	def realWidth(self):
+		return float(self.canvas.cget("width"))
+	
+	
+	def realHeight(self):
+		return float(self.canvas.cget("height"))
+	
+	
+	def virtWidth(self):
+		return float(self.virtSize[0])
+	
+	
+	def virtHeight(self):
+		return float(self.virtSize[1])
+	
+	
+	# Преобразования координат
+	def realToVirtCoord(self, realCoord):
+		(rX, rY) = realCoord
+		rW, rH = self.realWidth(), self.realHeight()
+		vW, vH = self.virtWidth(), self.virtHeight()
+		
+		if rW <= 0:	vX = 0
+		else:		vX = rX / rW * vW
+		
+		if rH <= 0:	vY = 0
+		else:		vY = ((rH - rY) / rH - 0.5) * vH
+		
+		# Debug print
+		# print("(rX, rY) = (%f, %f)" % (rX, rY))
+		# print("(rW, rH) = (%f, %f)" % (rW, rH))
+		# print("(vW, vH) = (%f, %f)" % (vW, vH))
+		# print("(vX, vY) = (%f, %f)" % (vX, vY))
+		# print()
+		
+		return (vX, vY)

@@ -13,8 +13,8 @@ class Bar:
 		self.Sigma = 0
 		self.q = 0
 		
-		if json != None:
-			if default == None:
+		if not (json is None):
+			if default is None:
 				self.L = json.get("L", 0)
 				self.A = json.get("A", 0)
 				self.E = json.get("E", 0)

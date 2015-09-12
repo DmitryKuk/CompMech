@@ -8,8 +8,8 @@ class Node:
 		self.fixed = False
 		self.F = 0
 		
-		if json != None:
-			if default == None:
+		if not (json is None):
+			if default is None:
 				self.fixed = json.get("fixed", False)
 				self.F = json.get("F", 0)
 			else:
