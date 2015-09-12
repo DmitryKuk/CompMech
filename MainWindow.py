@@ -38,6 +38,8 @@ class MainWindow(Tk):
 		self.button3["text"] = "Нажми меня 3"
 		self.button3.bind("<Button-1>", self.onButtonClicked)
 		self.button3.grid(column = 1, row = 3)
+		
+		self.bind("<Configure>", self.onWindowConfigure)
 	
 	
 	def onButtonClicked(self, event):
@@ -58,6 +60,11 @@ class MainWindow(Tk):
 				print("Невозможно открыть файл: %s" % e)
 			except Exception as e:
 				print("Неизвестная ошибка: %s" % e)
+	
+	
+	def onWindowConfigure(self, event):
+		print("Перерисуем...")
+		self.drawConstruction()
 	
 	
 	def drawConstruction(self):

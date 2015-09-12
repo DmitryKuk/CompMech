@@ -179,3 +179,16 @@ class Graph(Frame):
 		else:		rY = rH - oS - (vY / vH + 0.5) * (rH - oS - oN)
 		
 		return (rX, rY)
+	
+	
+	def drawBar(self, x, L, H):
+		leftTop     = self.virtToRealCoord((    x,  0.5 * H))
+		rightBottom = self.virtToRealCoord((x + L, -0.5 * H))
+		
+		self.canvas.create_rectangle(leftTop[0],     leftTop[1],
+									 rightBottom[0], rightBottom[1],
+									 fill = "yellow")
+	
+	
+	def clear(self):
+		self.canvas.delete(*self.canvas.find_all())

@@ -2,8 +2,11 @@
 
 # Author: Dmitry Kukovinets (d1021976@gmail.com)
 
-from Construction import Construction
+import math
 
+from Construction import Construction
+from Bar import Bar
+from Node import Node
 
 class Logic:
 	def emptyConstruction(self):
@@ -18,13 +21,21 @@ class Logic:
 		return construction.size()
 	
 	
-	def drawConstruction(self, construction, graph):
-		graph.setVirtualSize(self.size(construction))
-	
-	
 	def offsetWEFunc(self, realSize, virtSize):
 		return 40
 	
 	
 	def offsetNSFunc(self, realSize, virtSize):
 		return realSize[1] * 0.15
+	
+	
+	def drawConstruction(self, construction, graph):
+		graph.clear()
+		graph.setVirtualSize(self.size(construction))
+		
+		x = 0
+		for element in construction.elements:
+			if type(element) == Bar:
+				print("Стержень: %s" % element)
+				graph.drawBar(x, element.L, math.sqrt(element.A))
+				x += element.L
