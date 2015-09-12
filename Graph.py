@@ -14,6 +14,10 @@ class Graph(Frame):
 		self.elementStr = StringVar()
 		self.cursorStr = StringVar()
 		
+		# Смещения (в пикселях)
+		self.offsetW, self.offsetE	= 20, 20
+		self.offsetN, self.offsetS	=  0,  0	# 15% сверху и снизу, см. setVirtualSize()
+		
 		
 		# Frame
 		kwargs["borderwidth"] = 1
@@ -72,24 +76,20 @@ class Graph(Frame):
 	def updateLabels(self, cursorX = 0, cursorY = None):
 		if cursorY is None: cursorY = self.realHeight() * 0.5
 		
+		self.offsetN = self.offsetS = self.realHeight() * 0.15
+		
 		self.sizeStr.set("Размер: (%.3f, %.3f)" % self.virtSize)
 		self.elementStr.set("")
 		
-		# Вычисляем положение курсора в виртуальных координатах
-		# realX, realY = self.realWidth(), self.realHeight()
-		# (virtX, virtY) = self.virtSize
-		
-		# if realX == 0: cursorX = 0
-		# else: cursorX *= virtX / realX
-		
-		# if realY == 0: cursorY = 0
-		# else: cursorY = ((realY - cursorY) / realY - 0.5) * virtY
-		
 		self.cursorStr.set("(%.3f, %.3f)" % self.realToVirtCoord((cursorX, cursorY)))
+		
+		vC = self.realToVirtCoord((cursorX, cursorY))
+		rC = self.virtToRealCoord(vC)
 	
 	
 	def setVirtualSize(self, size):
 		self.virtSize = size
+		print("Offset: N, S = %f" % self.offsetN)
 		self.updateLabels()
 	
 	
@@ -116,11 +116,14 @@ class Graph(Frame):
 		rW, rH = self.realWidth(), self.realHeight()
 		vW, vH = self.virtWidth(), self.virtHeight()
 		
+		oW, oE = self.offsetW, self.offsetE
+		oN, oS = self.offsetN, self.offsetS
+		
 		if rW <= 0:	vX = 0
-		else:		vX = rX / rW * vW
+		else:		vX = (rX - oW) / (rW - oW - oE) * vW
 		
 		if rH <= 0:	vY = 0
-		else:		vY = ((rH - rY) / rH - 0.5) * vH
+		else:		vY = ((rH - rY - oS) / (rH - oS - oN) - 0.5) * vH
 		
 		# Debug print
 		# print("(rX, rY) = (%f, %f)" % (rX, rY))
@@ -130,3 +133,20 @@ class Graph(Frame):
 		# print()
 		
 		return (vX, vY)
+	
+	
+	def virtToRealCoord(self, virtCoord):
+		(vX, vY) = virtCoord
+		rW, rH = self.realWidth(), self.realHeight()
+		vW, vH = self.virtWidth(), self.virtHeight()
+		
+		oW, oE = self.offsetW, self.offsetE
+		oN, oS = self.offsetN, self.offsetS
+		
+		if vW <= 0:	rX = 0
+		else:		rX = vX * (rW - oW - oE) / vW + oW
+		
+		if vH <= 0:	rY = 0
+		else:		rY = rH - oS - (vY / vH + 0.5) * (rH - oS - oN)
+		
+		return (rX, rY)
