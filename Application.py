@@ -9,7 +9,11 @@ from Logic import *
 class Application:
 	def __init__(self):
 		self.logic = Logic()
-		self.mainWindow = MainWindow(self)
+		self.mainWindow = MainWindow(self,
+									 offsetWFunc = self.logic.offsetWEFunc,
+									 offsetNFunc = self.logic.offsetNSFunc,
+									 offsetEFunc = self.logic.offsetWEFunc,
+									 offsetSFunc = self.logic.offsetNSFunc)
 	
 	
 	def run(self):

@@ -5,8 +5,17 @@
 from tkinter import *
 
 
+def zeroOffsetFunc(self, realSize, virtSize):
+	return 0
+
+
 class Graph(Frame):
-	def __init__(self, mainWindow, **kwargs):
+	def __init__(self, mainWindow,
+				 offsetWFunc = zeroOffsetFunc,
+				 offsetNFunc = zeroOffsetFunc,
+				 offsetEFunc = zeroOffsetFunc,
+				 offsetSFunc = zeroOffsetFunc,
+				 **kwargs):
 		# Данные
 		self.virtSize = (0, 0)	# В физических единицах от начала координат
 		
@@ -14,15 +23,20 @@ class Graph(Frame):
 		self.elementStr = StringVar()
 		self.cursorStr = StringVar()
 		
-		# Смещения (в пикселях)
-		self.offsetW, self.offsetE	= 20, 20
-		self.offsetN, self.offsetS	=  0,  0	# 15% сверху и снизу, см. setVirtualSize()
+		# Смещения
+		self.offset = (0, 0, 0, 0)	# W, N, E, S
+		
+		# Функции смещения
+		self.offsetWFunc = offsetWFunc
+		self.offsetNFunc = offsetNFunc
+		self.offsetEFunc = offsetEFunc
+		self.offsetSFunc = offsetSFunc
 		
 		
 		# Frame
 		kwargs["borderwidth"] = 1
 		kwargs["relief"] = "groove"
-		Frame.__init__(self, mainWindow, kwargs)
+		Frame.__init__(self, mainWindow, **kwargs)
 		
 		
 		# Холст
@@ -57,12 +71,11 @@ class Graph(Frame):
 		self.cursorLabel = Label(self.labelArea, textvariable = self.cursorStr, anchor = E)
 		self.cursorLabel.grid(column = 2, row = 0, sticky = E)
 		
-		self.updateLabels()
+		self.onWindowConfigure(None)
 	
 	
 	def onMouseMotion(self, event):
-		self.updateLabels(self.canvas.canvasx(event.x),
-						  self.canvas.canvasy(event.y))
+		self.updateLabels(event.x, event.y)
 	
 	
 	def onMouseLeave(self, event):
@@ -70,13 +83,13 @@ class Graph(Frame):
 	
 	
 	def onWindowConfigure(self, event):
+		self.updateOffset()
 		self.updateLabels()
 	
 	
-	def updateLabels(self, cursorX = 0, cursorY = None):
-		if cursorY is None: cursorY = self.realHeight() * 0.5
-		
-		self.offsetN = self.offsetS = self.realHeight() * 0.15
+	def updateLabels(self, cursorX = None, cursorY = None):
+		if cursorX is None: cursorX = self.offset[0]			# => vX = 0
+		if cursorY is None: cursorY = self.realHeight() * 0.5	# => vY = 0
 		
 		self.sizeStr.set("Размер: (%.3f, %.3f)" % self.virtSize)
 		self.elementStr.set("")
@@ -89,17 +102,20 @@ class Graph(Frame):
 	
 	def setVirtualSize(self, size):
 		self.virtSize = size
-		print("Offset: N, S = %f" % self.offsetN)
 		self.updateLabels()
 	
 	
 	# Размеры
 	def realWidth(self):
-		return float(self.canvas.cget("width"))
+		return float(self.canvas.winfo_width())
 	
 	
 	def realHeight(self):
-		return float(self.canvas.cget("height"))
+		return float(self.canvas.winfo_height())
+	
+	
+	def realSize(self):
+		return (self.realWidth(), self.realHeight())
 	
 	
 	def virtWidth(self):
@@ -110,14 +126,28 @@ class Graph(Frame):
 		return float(self.virtSize[1])
 	
 	
+	def virtSize(self):
+		return (self.virtWidth(), self.virtHeight())
+	
+	
+	def updateOffset(self):
+		self.offset = (self.offsetWFunc(self.realSize(), self.virtSize),
+					   self.offsetNFunc(self.realSize(), self.virtSize),
+					   self.offsetEFunc(self.realSize(), self.virtSize),
+					   self.offsetSFunc(self.realSize(), self.virtSize))
+	
+	
+	def realOffset(self):
+		return self.offset
+	
+	
 	# Преобразования координат
 	def realToVirtCoord(self, realCoord):
 		(rX, rY) = realCoord
-		rW, rH = self.realWidth(), self.realHeight()
-		vW, vH = self.virtWidth(), self.virtHeight()
+		(rW, rH) = self.realSize()
+		(vW, vH) = self.virtSize
 		
-		oW, oE = self.offsetW, self.offsetE
-		oN, oS = self.offsetN, self.offsetS
+		(oW, oE, oN, oS) = self.realOffset()
 		
 		if rW <= 0:	vX = 0
 		else:		vX = (rX - oW) / (rW - oW - oE) * vW
@@ -137,11 +167,10 @@ class Graph(Frame):
 	
 	def virtToRealCoord(self, virtCoord):
 		(vX, vY) = virtCoord
-		rW, rH = self.realWidth(), self.realHeight()
-		vW, vH = self.virtWidth(), self.virtHeight()
+		(rW, rH) = self.realSize()
+		(vW, vH) = self.virtSize
 		
-		oW, oE = self.offsetW, self.offsetE
-		oN, oS = self.offsetN, self.offsetS
+		(oW, oE, oN, oS) = self.realOffset()
 		
 		if vW <= 0:	rX = 0
 		else:		rX = vX * (rW - oW - oE) / vW + oW

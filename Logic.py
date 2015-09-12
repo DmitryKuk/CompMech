@@ -20,3 +20,11 @@ class Logic:
 	
 	def drawConstruction(self, construction, graph):
 		graph.setVirtualSize(self.size(construction))
+	
+	
+	def offsetWEFunc(self, realSize, virtSize):
+		return 40
+	
+	
+	def offsetNSFunc(self, realSize, virtSize):
+		return realSize[1] * 0.15

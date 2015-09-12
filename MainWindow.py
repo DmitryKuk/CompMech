@@ -9,13 +9,13 @@ from Graph import Graph
 
 
 class MainWindow(Tk):
-	def __init__(self, application):
+	def __init__(self, application, **kwargs):
 		Tk.__init__(self)
 		
 		self.application = application
 		self.construction = self.application.logic.emptyConstruction()
 		
-		self.graph = Graph(self, width = 700, height = 300)
+		self.graph = Graph(self, width = 700, height = 300, **kwargs)
 		self.graph.grid(column = 0, row = 0, rowspan = 4, sticky = N + E + S + W)
 		
 		# Делаем колонку с виджетом с графиком растяжимой
