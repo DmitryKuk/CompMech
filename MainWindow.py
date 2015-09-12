@@ -5,34 +5,36 @@
 from tkinter import *
 import tkinter.filedialog
 
+from Graph import Graph
 
-class MainWindow:
+
+class MainWindow(Tk):
 	def __init__(self, application):
-		self.root = Tk()
+		Tk.__init__(self)
 		
-		self.canvas = Canvas(self.root,
-							 width = 500, height = 200,
-							 bg = "red",
-							 cursor = "crosshair")
-		self.canvas.grid(column = 0, row = 0, rowspan = 4, sticky=N+E+S+W)
+		self.application = application
+		self.construction = self.application.logic.emptyConstruction()
 		
-		# Making left column (with canvas) stretchible
-		self.root.columnconfigure(0, weight = 1)
+		self.graph = Graph(self, width = 700, height = 300)
+		self.graph.grid(column = 0, row = 0, rowspan = 4, sticky = N + E + S + W)
 		
-		self.button1 = Button(self.root)
+		# Делаем колонку с виджетом с графиком растяжимой
+		self.columnconfigure(0, weight = 1)
+		
+		self.button1 = Button(self)
 		self.button1["text"] = "Открыть файл"
 		self.button1.bind("<Button-1>", self.onButtonOpenFileClicked)
 		self.button1.grid(column = 1, row = 0)
 		
-		# Empty space (stretchible)
-		self.root.rowconfigure(1, weight = 1)
+		# Пустое пространство (растяжимое)
+		self.rowconfigure(1, weight = 1)
 		
-		self.button2 = Button(self.root)
+		self.button2 = Button(self)
 		self.button2["text"] = "Нажми меня 2"
 		self.button2.bind("<Button-1>", self.onButtonClicked)
 		self.button2.grid(column = 1, row = 2)
 		
-		self.button3 = Button(self.root)
+		self.button3 = Button(self)
 		self.button3["text"] = "Нажми меня 3"
 		self.button3.bind("<Button-1>", self.onButtonClicked)
 		self.button3.grid(column = 1, row = 3)
@@ -43,9 +45,20 @@ class MainWindow:
 	
 	
 	def onButtonOpenFileClicked(self, event):
-		f = tkinter.filedialog.askopenfile(mode = 'r', parent = self.root)
+		filename = tkinter.filedialog.askopenfilename(parent = self)
 		
-		if f == None:
-			print("Файл не открыт")
-		else:
-			print("Открыт файл \"%s\"" % f.name)
+		if len(filename) != 0:
+			try:
+				file = open(filename, 'r')
+				self.construction = self.application.logic.getConstructionFromFile(file)
+				file.close()
+				
+				self.drawConstruction()
+			except IOError as e:
+				print("Невозможно открыть файл: %s" % e)
+			except Exception as e:
+				print("Неизвестная ошибка: %s" % e)
+	
+	
+	def drawConstruction(self):
+		self.application.logic.drawConstruction(self.construction, self.graph)
