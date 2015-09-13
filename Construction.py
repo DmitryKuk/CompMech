@@ -13,6 +13,7 @@ class Construction:
 		self.defaultBar = Bar()
 		self.defaultNode = Node()
 		self.elements = []
+		self.sizeX, self.sizeY = 0, 0
 		
 		
 		if constructionFile is None:	# Пустая конструкция
@@ -50,6 +51,13 @@ class Construction:
 				
 			if lastWasBar:
 				self.elements.append(self.defaultNode)
+			
+			
+			# Вычисляем размер конструкции
+			for element in self.elements:
+				(elSizeX, elSizeY) = element.size()
+				self.sizeX += elSizeX
+				self.sizeY = max(self.sizeY, elSizeY)
 		except KeyError:
 			print("В конструкции нет элементов. Вы в порядке?")
 	
@@ -69,11 +77,4 @@ class Construction:
 	
 	
 	def size(self):
-		sizeX, sizeY = 0, 0
-		
-		for element in self.elements:
-			(elSizeX, elSizeY) = element.size()
-			sizeX += elSizeX
-			sizeY = max(sizeY, elSizeY)
-		
-		return (sizeX, sizeY)
+		return (self.sizeX, self.sizeY)

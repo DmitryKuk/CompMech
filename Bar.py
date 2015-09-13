@@ -13,6 +13,8 @@ class Bar:
 		self.Sigma = 0
 		self.q = 0
 		
+		self.height = 0
+		
 		if not (json is None):
 			if default is None:
 				self.L = json.get("L", 0)
@@ -26,6 +28,8 @@ class Bar:
 				self.E = json.get("E", default.E)
 				self.Sigma = json.get("Sigma", default.Sigma)
 				self.q = json.get("q", default.q)
+		
+		self.height = math.sqrt(self.A)		# Квадратное сечение
 	
 	
 	def __str__(self):
@@ -35,7 +39,7 @@ class Bar:
 	
 	
 	def size(self):
-		return (self.L, math.sqrt(self.A))
+		return (self.L, self.height)
 
 
 def similarToBar(json):

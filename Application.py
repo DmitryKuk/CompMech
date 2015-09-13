@@ -9,6 +9,7 @@ from Logic import *
 class Application:
 	def __init__(self):
 		self.construction = None
+		self.elements = None
 		
 		self.logic = Logic(self)
 		self.mainWindow = MainWindow(self,

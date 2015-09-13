@@ -14,6 +14,7 @@ class Logic:
 		self.application = application
 		
 		self.application.construction = Construction()
+		self.application.elements = {}
 	
 	
 	def processConstructionFile(self, constructionFile):
@@ -33,8 +34,10 @@ class Logic:
 		for element in self.application.construction.elements:
 			if type(element) == Bar:
 				# print("Стержень: %s" % element)
-				self.application.mainWindow.graph.drawBar(x, element.L, math.sqrt(element.A),
-														  fill = "yellow")
+				elId = self.application.mainWindow.graph.drawBar(x, element.L, element.height,
+																 fill = "yellow")
 				x += element.L
+				
+				self.application.elements[elId] = element
 		
 		self.application.mainWindow.graph.drawCoordinateAxis()
