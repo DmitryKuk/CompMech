@@ -8,12 +8,14 @@ from Logic import *
 
 class Application:
 	def __init__(self):
-		self.logic = Logic()
+		self.construction = None
+		
+		self.logic = Logic(self)
 		self.mainWindow = MainWindow(self,
-									 offsetWFunc = self.logic.offsetWEFunc,
-									 offsetNFunc = self.logic.offsetNSFunc,
-									 offsetEFunc = self.logic.offsetWEFunc,
-									 offsetSFunc = self.logic.offsetNSFunc)
+									 offsetWFunc = self.logic.offsetFunc,
+									 offsetNFunc = self.logic.offsetFunc,
+									 offsetEFunc = self.logic.offsetFunc,
+									 offsetSFunc = self.logic.offsetFunc)
 	
 	
 	def run(self):

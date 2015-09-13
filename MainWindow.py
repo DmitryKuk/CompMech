@@ -13,7 +13,6 @@ class MainWindow(Tk):
 		Tk.__init__(self)
 		
 		self.application = application
-		self.construction = self.application.logic.emptyConstruction()
 		
 		self.graph = Graph(self, width = 700, height = 300, **kwargs)
 		self.graph.grid(column = 0, row = 0, rowspan = 4, sticky = N + E + S + W)
@@ -52,10 +51,8 @@ class MainWindow(Tk):
 		if len(filename) != 0:
 			try:
 				file = open(filename, 'r')
-				self.construction = self.application.logic.getConstructionFromFile(file)
+				self.application.logic.processConstructionFile(file)
 				file.close()
-				
-				self.drawConstruction()
 			except IOError as e:
 				print("Невозможно открыть файл: %s" % e)
 			except Exception as e:
@@ -63,8 +60,4 @@ class MainWindow(Tk):
 	
 	
 	def onWindowConfigure(self, event):
-		self.drawConstruction()
-	
-	
-	def drawConstruction(self):
-		self.application.logic.drawConstruction(self.construction, self.graph)
+		self.application.logic.drawConstruction()

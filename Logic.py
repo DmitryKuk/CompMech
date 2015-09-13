@@ -8,36 +8,33 @@ from Construction import Construction
 from Bar import Bar
 from Node import Node
 
+
 class Logic:
-	def emptyConstruction(self):
-		return Construction()
+	def __init__(self, application):
+		self.application = application
+		
+		self.application.construction = Construction()
 	
 	
-	def getConstructionFromFile(self, constructionFile):
-		return Construction(constructionFile)
+	def processConstructionFile(self, constructionFile):
+		self.application.construction = Construction(constructionFile)
+		self.drawConstruction()
 	
 	
-	def size(self, construction):
-		return construction.size()
-	
-	
-	def offsetWEFunc(self, realSize, virtSize):
+	def offsetFunc(self, realSize, virtSize):
 		return 40
 	
 	
-	def offsetNSFunc(self, realSize, virtSize):
-		return 40 #realSize[1] * 0.15
-	
-	
-	def drawConstruction(self, construction, graph):
-		graph.clear()
-		graph.setVirtualSize(self.size(construction))
+	def drawConstruction(self):
+		self.application.mainWindow.graph.clear()
+		self.application.mainWindow.graph.setVirtualSize(self.application.construction.size())
 		
 		x = 0
-		for element in construction.elements:
+		for element in self.application.construction.elements:
 			if type(element) == Bar:
 				# print("Стержень: %s" % element)
-				graph.drawBar(x, element.L, math.sqrt(element.A), fill = "yellow")
+				self.application.mainWindow.graph.drawBar(x, element.L, math.sqrt(element.A),
+														  fill = "yellow")
 				x += element.L
 		
-		graph.drawCoordinateAxis()
+		self.application.mainWindow.graph.drawCoordinateAxis()
