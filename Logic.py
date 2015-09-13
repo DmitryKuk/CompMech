@@ -26,7 +26,7 @@ class Logic:
 	
 	
 	def offsetNSFunc(self, realSize, virtSize):
-		return realSize[1] * 0.15
+		return 40 #realSize[1] * 0.15
 	
 	
 	def drawConstruction(self, construction, graph):
@@ -36,6 +36,8 @@ class Logic:
 		x = 0
 		for element in construction.elements:
 			if type(element) == Bar:
-				print("Стержень: %s" % element)
-				graph.drawBar(x, element.L, math.sqrt(element.A))
+				# print("Стержень: %s" % element)
+				graph.drawBar(x, element.L, math.sqrt(element.A), fill = "yellow")
 				x += element.L
+		
+		graph.drawCoordinateAxis()

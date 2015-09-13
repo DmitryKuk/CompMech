@@ -23,7 +23,7 @@ class MainWindow(Tk):
 		
 		self.button1 = Button(self)
 		self.button1["text"] = "Открыть файл"
-		self.button1.bind("<Button-1>", self.onButtonOpenFileClicked)
+		self.button1.bind("<ButtonRelease-1>", self.onButtonOpenFileClicked)
 		self.button1.grid(column = 1, row = 0)
 		
 		# Пустое пространство (растяжимое)
@@ -31,12 +31,12 @@ class MainWindow(Tk):
 		
 		self.button2 = Button(self)
 		self.button2["text"] = "Нажми меня 2"
-		self.button2.bind("<Button-1>", self.onButtonClicked)
+		self.button2.bind("<ButtonRelease-1>", self.onButtonClicked)
 		self.button2.grid(column = 1, row = 2)
 		
 		self.button3 = Button(self)
 		self.button3["text"] = "Нажми меня 3"
-		self.button3.bind("<Button-1>", self.onButtonClicked)
+		self.button3.bind("<ButtonRelease-1>", self.onButtonClicked)
 		self.button3.grid(column = 1, row = 3)
 		
 		self.bind("<Configure>", self.onWindowConfigure)
@@ -63,7 +63,6 @@ class MainWindow(Tk):
 	
 	
 	def onWindowConfigure(self, event):
-		print("Перерисуем...")
 		self.drawConstruction()
 	
 	
