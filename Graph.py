@@ -16,6 +16,14 @@ class Graph(Frame):
 				 offsetEFunc = zeroOffsetFunc,
 				 offsetSFunc = zeroOffsetFunc,
 				 **kwargs):
+		# Frame
+		kwargs["borderwidth"] = 1
+		kwargs["relief"] = "ridge"
+		Frame.__init__(self, mainWindow, **kwargs)
+		
+		self.mainWindow = mainWindow
+		
+		
 		# Данные
 		self.virtualSize = (0, 0)	# В физических единицах от начала координат
 		
@@ -34,14 +42,8 @@ class Graph(Frame):
 		
 		# Линии осей (идентификаторы холста)
 		self.coordinateAxis = (None, None)
-		
-		self.mainWindow = mainWindow
-		
-		
-		# Frame
-		kwargs["borderwidth"] = 1
-		kwargs["relief"] = "ridge"
-		Frame.__init__(self, mainWindow, **kwargs)
+		self.axisArgs = { "fill": "blue", "arrow": LAST, "dash": (5, 5),
+						  "state": DISABLED, "tags": "coordinateAxis" }
 		
 		
 		# Холст
@@ -251,10 +253,10 @@ class Graph(Frame):
 		
 		return self.canvas.create_rectangle(leftTop[0],     leftTop[1],
 											rightBottom[0], rightBottom[1],
-											**kwargs)
+											tags = "bar", **kwargs)
 	
 	def drawNode(self, x, F, **kwargs):
-		return self.drawVAxis(x, fill = "green", dash = (3, 3), **kwargs)
+		return self.drawVAxis(x, fill = "green", dash = (3, 3), tags = "node", **kwargs)
 	
 	
 	def drawLineReal(self, p0, p1, **kwargs):
@@ -287,26 +289,20 @@ class Graph(Frame):
 	
 	
 	def drawCoordinateAxisX(self):
-		axisArgs = { "fill": "blue", "arrow": LAST, "dash": (5, 5), "state": DISABLED }
-		
 		if self.virtualSize[0] != 0 and self.virtualSize[1] != 0:
-			self.coordinateAxis = (self.drawHAxis(0, **axisArgs), self.coordinateAxis[1])
-		return self.coordinateAxis
+			self.coordinateAxis = (self.drawHAxis(0, **self.axisArgs), self.coordinateAxis[1])
+		return self.coordinateAxis[0]
 	
 	
 	def drawCoordinateAxisY(self):
-		axisArgs = { "fill": "blue", "arrow": LAST, "dash": (5, 5), "state": DISABLED }
-		
 		if self.virtualSize[0] != 0 and self.virtualSize[1] != 0:
-			self.coordinateAxis = (self.coordinateAxis[0], self.drawVAxis(0, **axisArgs))
-		return self.coordinateAxis
+			self.coordinateAxis = (self.coordinateAxis[0], self.drawVAxis(0, **self.axisArgs))
+		return self.coordinateAxis[1]
 	
 	
 	def drawCoordinateAxis(self):
-		axisArgs = { "fill": "blue", "arrow": LAST, "dash": (5, 5), "state": DISABLED }
-		
-		if self.virtualSize[0] != 0 and self.virtualSize[1] != 0:
-			self.coordinateAxis = self.drawAxis((0, 0), **axisArgs)
+		self.drawCoordinateAxisX()
+		self.drawCoordinateAxisY()
 		return self.coordinateAxis
 	
 	

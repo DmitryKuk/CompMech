@@ -62,5 +62,6 @@ class MainWindow(Tk):
 	
 	
 	def onWindowConfigure(self, event):
-		self.application.logic.drawConstruction()
-		# Кеширование размера окна не работает! Нужна принудительная перерисовка
+		if type(event.widget) != Label:	# Игнорируем события от меток (когда меняется надпись)
+			self.application.logic.drawConstruction()
+			# Кеширование размера окна не работает! Нужна принудительная перерисовка
