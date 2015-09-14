@@ -27,17 +27,30 @@ class Logic:
 	
 	
 	def drawConstruction(self):
+		self.application.elements = {}
 		self.application.mainWindow.graph.clear()
 		self.application.mainWindow.graph.setVirtualSize(self.application.construction.size())
 		
-		x = 0
+		# Ось Oy рисуем до элементов, чтобы поверх неё отобразилась ось узла (x = 0)
+		self.application.mainWindow.graph.drawCoordinateAxisY()
+		
 		for element in self.application.construction.elements:
+			elID = None
 			if type(element) == Bar:
 				# print("Стержень: %s" % element)
-				elId = self.application.mainWindow.graph.drawBar(x, element.L, element.height,
-																 fill = "yellow")
-				x += element.L
-				
-				self.application.elements[elId] = element
+				elID = self.application.mainWindow.graph.drawBar(element.x,
+																 element.L, element.height,
+																 element.q,
+																 fill = "yellow",
+																 activefill = "orange")
+			else:
+				elID = self.application.mainWindow.graph.drawNode(element.x, element.F)
+			
+			self.application.elements[elID] = element
 		
-		self.application.mainWindow.graph.drawCoordinateAxis()
+		# Ось Ox рисуем после элементов, чтобы её было видно
+		self.application.mainWindow.graph.drawCoordinateAxisX()
+	
+	
+	def elementDescStr(self, elementID):
+		return self.application.elements[elementID].__str__()

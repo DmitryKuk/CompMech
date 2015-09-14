@@ -2,7 +2,7 @@
 
 # Author: Dmitry Kukovinets (d1021976@gmail.com)
 
-import json
+import json, copy
 
 from Bar import *
 from Node import *
@@ -38,11 +38,11 @@ class Construction:
 			lastWasBar = True
 			
 			for item in construction["construction"]:
-				element = self.element(item)
+				element = self.elementFromJSON(item)
 				
 				if type(element) == Bar:
 					if lastWasBar:
-						self.elements.append(self.defaultNode)
+						self.elements.append(copy.deepcopy(self.defaultNode))
 					lastWasBar = True
 				else:
 					lastWasBar = False
@@ -50,19 +50,23 @@ class Construction:
 				self.elements.append(element)
 				
 			if lastWasBar:
-				self.elements.append(self.defaultNode)
-			
-			
-			# Вычисляем размер конструкции
-			for element in self.elements:
-				(elSizeX, elSizeY) = element.size()
-				self.sizeX += elSizeX
-				self.sizeY = max(self.sizeY, elSizeY)
+				self.elements.append(copy.deepcopy(self.defaultNode))
 		except KeyError:
 			print("В конструкции нет элементов. Вы в порядке?")
+		
+		
+		# Вычисляем размер конструкции и координаты элементов
+		x = 0
+		for element in self.elements:
+			(elSizeX, elSizeY) = element.size()
+			self.sizeX += elSizeX
+			self.sizeY = max(self.sizeY, elSizeY)
+			
+			element.x = copy.deepcopy(x)	# Координата элемента
+			x += elSizeX
 	
 	
-	def element(self, item):
+	def elementFromJSON(self, item):
 		isBar = similarToBar(item)
 		isNode = similarToNode(item)
 		

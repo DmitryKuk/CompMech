@@ -8,6 +8,8 @@ class Node:
 		self.fixed = False
 		self.F = 0
 		
+		self.x = None	# Будет рассчитано конструкцией
+		
 		if not (json is None):
 			if default is None:
 				self.fixed = json.get("fixed", False)
@@ -18,7 +20,9 @@ class Node:
 	
 	
 	def __str__(self):
-		return "{'fixed': %s, 'F': %s}" % (self.fixed, self.F)
+		if self.fixed:	fixedStr = "зафиксирован"
+		else:			fixedStr = "свободен"
+		return "Узел: x = %s; F = %s; %s" % (self.x, self.F, fixedStr)
 	
 	
 	def size(self):

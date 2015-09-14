@@ -14,6 +14,8 @@ class MainWindow(Tk):
 		
 		self.application = application
 		
+		self.title("Компьютерная механика")
+		
 		self.graph = Graph(self, width = 700, height = 300, **kwargs)
 		self.graph.grid(column = 0, row = 0, rowspan = 4, sticky = N + E + S + W)
 		
@@ -55,8 +57,8 @@ class MainWindow(Tk):
 				file.close()
 			except IOError as e:
 				print("Невозможно открыть файл: %s" % e)
-			except Exception as e:
-				print("Неизвестная ошибка: %s" % e)
+			# except Exception as e:
+			# 	print("Неизвестная ошибка: %s" % e)
 	
 	
 	def onWindowConfigure(self, event):

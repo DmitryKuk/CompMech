@@ -13,6 +13,7 @@ class Bar:
 		self.Sigma = 0
 		self.q = 0
 		
+		self.x = None	# Будет рассчитано конструкцией
 		self.height = 0
 		
 		if not (json is None):
@@ -33,9 +34,10 @@ class Bar:
 	
 	
 	def __str__(self):
-		return "{'L': %s, 'A': %s, 'E': %s, 'Sigma': %s, 'q': %s}" % (self.L, self.A,
-																	  self.E, self.Sigma,
-																	  self.q)
+		return "Стержень: x = %s; L = %s; A = %s; E = %s; σ = %s; q = %s" % (self.x,
+																			 self.L, self.A,
+																			 self.E, self.Sigma,
+																			 self.q)
 	
 	
 	def size(self):

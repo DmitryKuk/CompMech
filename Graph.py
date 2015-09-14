@@ -35,6 +35,8 @@ class Graph(Frame):
 		# Линии осей (идентификаторы холста)
 		self.coordinateAxis = (None, None)
 		
+		self.mainWindow = mainWindow
+		
 		
 		# Frame
 		kwargs["borderwidth"] = 1
@@ -96,16 +98,32 @@ class Graph(Frame):
 	
 	
 	def updateCursorPos(self, cursorX = None, cursorY = None):
+		needDescStr = True
+		
 		if cursorX is None:
 			cursorX = self.realOffset()[0]				# => vX = 0
+			needDescStr = False
 		
 		if cursorY is None:
 			rH = self.realHeight()
 			(oW, oE, oN, oS) = self.realOffset()
 			cursorY = 0.5 * (rH - oS + oN)				# => vY = 0
+			needDescStr = False
 		
 		self.cursorStr.set("(%.3f, %.3f)" % self.realToVirtCoord((cursorX, cursorY)))
-		self.elementStr.set("")
+		
+		# Пытаемся получить информацию о ближайшем элементе
+		elementID = self.canvas.find_closest(cursorX, cursorY, halo = 10)
+		
+		try:
+			elementDescStr = self.mainWindow.application.logic.elementDescStr(elementID[0])
+		except KeyError:
+			needDescStr = False
+		except IndexError:
+			needDescStr = False
+		
+		if needDescStr: self.elementStr.set(elementDescStr)
+		else: self.elementStr.set("")
 		
 		# Тест преобразований координат
 		# vC = self.realToVirtCoord((cursorX, cursorY))
@@ -191,29 +209,52 @@ class Graph(Frame):
 		return (vX, vY)
 	
 	
-	def virtToRealCoord(self, virtCoord):
-		(vX, vY) = virtCoord
-		(rW, rH) = self.realSize()
-		(vW, vH) = self.virtSize()
-		
+	def virtToRealX(self, vX):
+		rW, vW = self.realWidth(), self.virtWidth()
 		(oW, oE, oN, oS) = self.realOffset()
 		
 		if vW <= 0:	rX = 0
 		else:		rX = vX * (rW - oW - oE) / vW + oW
 		
+		return rX
+	
+	
+	def virtToRealY(self, vY):
+		rH, vH = self.realHeight(), self.virtHeight()
+		(oW, oE, oN, oS) = self.realOffset()
+		
 		if vH <= 0:	rY = 0
 		else:		rY = (0.5 - vY / vH) * (rH - oN - oS) + oN
 		
-		return (rX, rY)
+		return rY
 	
 	
-	def drawBar(self, x, L, H, **kwargs):
+	def virtToRealCoord(self, virtCoord):
+		# (vX, vY) = virtCoord
+		# (rW, rH) = self.realSize()
+		# (vW, vH) = self.virtSize()
+		
+		# (oW, oE, oN, oS) = self.realOffset()
+		
+		# if vW <= 0:	rX = 0
+		# else:		rX = vX * (rW - oW - oE) / vW + oW
+		
+		# if vH <= 0:	rY = 0
+		# else:		rY = (0.5 - vY / vH) * (rH - oN - oS) + oN
+		
+		return (self.virtToRealX(virtCoord[0]), self.virtToRealY(virtCoord[1]))
+	
+	
+	def drawBar(self, x, L, H, q, **kwargs):
 		leftTop     = self.virtToRealCoord((    x,  0.5 * H))
 		rightBottom = self.virtToRealCoord((x + L, -0.5 * H))
 		
 		return self.canvas.create_rectangle(leftTop[0],     leftTop[1],
 											rightBottom[0], rightBottom[1],
 											**kwargs)
+	
+	def drawNode(self, x, F, **kwargs):
+		return self.drawVAxis(x, fill = "green", dash = (3, 3), **kwargs)
 	
 	
 	def drawLineReal(self, p0, p1, **kwargs):
@@ -225,26 +266,47 @@ class Graph(Frame):
 		return self.drawLineReal(p0[0], p0[1], p1[0], p1[1], **kwargs)
 	
 	
+	def drawHAxis(self, vY = 0, **kwargs):
+		rW = self.realWidth()
+		rY = self.virtToRealY(vY)
+		
+		return self.drawLineReal((0, rY), (rW - 5, rY), **kwargs)
+	
+	
+	def drawVAxis(self, vX = 0, **kwargs):
+		rH = self.realHeight()
+		rX = self.virtToRealX(vX)
+		
+		return self.drawLineReal((rX, rH), (rX, 5), **kwargs)
+	
+	
 	def drawAxis(self, center = (0, 0), **kwargs):
-		(rW, rH) = self.realSize()
-		(oW, oE, oN, oS) = self.realOffset()
-		(rX, rY) = self.virtToRealCoord(center)
-		
-		axisX = self.drawLineReal((0, rY),
-								  (rW - 5, rY),
-								  **kwargs)
-		
-		axisY = self.drawLineReal((rX, rH),
-								  (rX, 0 + 5),
-								  **kwargs)
-		
+		axisX = self.drawHAxis(center[1], **kwargs)
+		axisY = self.drawVAxis(center[0], **kwargs)
 		return (axisX, axisY)
+	
+	
+	def drawCoordinateAxisX(self):
+		axisArgs = { "fill": "blue", "arrow": LAST, "dash": (5, 5), "state": DISABLED }
+		
+		if self.virtualSize[0] != 0 and self.virtualSize[1] != 0:
+			self.coordinateAxis = (self.drawHAxis(0, **axisArgs), self.coordinateAxis[1])
+		return self.coordinateAxis
+	
+	
+	def drawCoordinateAxisY(self):
+		axisArgs = { "fill": "blue", "arrow": LAST, "dash": (5, 5), "state": DISABLED }
+		
+		if self.virtualSize[0] != 0 and self.virtualSize[1] != 0:
+			self.coordinateAxis = (self.coordinateAxis[0], self.drawVAxis(0, **axisArgs))
+		return self.coordinateAxis
 	
 	
 	def drawCoordinateAxis(self):
 		axisArgs = { "fill": "blue", "arrow": LAST, "dash": (5, 5), "state": DISABLED }
 		
-		self.coordinateAxis = self.drawAxis((0, 0), **axisArgs)
+		if self.virtualSize[0] != 0 and self.virtualSize[1] != 0:
+			self.coordinateAxis = self.drawAxis((0, 0), **axisArgs)
 		return self.coordinateAxis
 	
 	
