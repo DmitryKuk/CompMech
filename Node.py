@@ -27,6 +27,10 @@ class Node:
 	
 	def size(self):
 		return (0, 0)
+	
+	
+	def loads(self):
+		return (self.F, 0)
 
 
 def similarToNode(json):

@@ -16,6 +16,10 @@ class Construction:
 		self.sizeX, self.sizeY = 0, 0
 		
 		
+		# Максимальные нагрузки
+		self.maxF, self.maxq = 0, 0
+		
+		
 		if constructionFile is None:	# Пустая конструкция
 			return None
 		
@@ -55,14 +59,21 @@ class Construction:
 			print("В конструкции нет элементов. Вы в порядке?")
 		
 		
-		# Вычисляем размер конструкции и координаты элементов
+		# Вычисляем размеры конструкции, максимальные нагрузки и координаты элементов
 		x = 0
 		for element in self.elements:
+			# Нагрузки
+			(F, q) = element.loads()
+			self.maxF = max(abs(self.maxF), abs(F))
+			self.maxq = max(abs(self.maxq), abs(q))
+			
+			# Размеры
 			(elSizeX, elSizeY) = element.size()
 			self.sizeX += elSizeX
 			self.sizeY = max(self.sizeY, elSizeY)
 			
-			element.x = copy.deepcopy(x)	# Координата элемента
+			# Координата элемента
+			element.x = copy.deepcopy(x)
 			x += elSizeX
 	
 	
@@ -82,3 +93,7 @@ class Construction:
 	
 	def size(self):
 		return (self.sizeX, self.sizeY)
+	
+	
+	def loads(self):
+		return (self.maxF, self.maxq)

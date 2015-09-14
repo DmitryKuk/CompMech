@@ -15,6 +15,7 @@ class Graph(Frame):
 				 offsetNFunc = zeroOffsetFunc,
 				 offsetEFunc = zeroOffsetFunc,
 				 offsetSFunc = zeroOffsetFunc,
+				 watchForElement = True,
 				 **kwargs):
 		# Frame
 		kwargs["borderwidth"] = 1
@@ -23,9 +24,16 @@ class Graph(Frame):
 		
 		self.mainWindow = mainWindow
 		
+		# Обновлять информацию об элементе под курсором
+		self.watchForElement = watchForElement
 		
-		# Данные
+		# Размер графика
 		self.virtualSize = (0, 0)	# В физических единицах от начала координат
+		
+		# Максимальные нагрузки
+		self.maxF, self.maxq = 0, 0	# Максимальные нагрузки (в физических единицах; для масштаба)
+		self.maxFReal = 0			# Максимальная длина стрелки силы в пикселях
+									# (чтобы оставалась в пределах графика)
 		
 		self.sizeStr = StringVar()
 		self.elementStr = StringVar()
@@ -114,18 +122,27 @@ class Graph(Frame):
 		
 		self.cursorStr.set("(%.3f, %.3f)" % self.realToVirtCoord((cursorX, cursorY)))
 		
-		# Пытаемся получить информацию о ближайшем элементе
-		elementID = self.canvas.find_closest(cursorX, cursorY, halo = 10)
-		
-		try:
-			elementDescStr = self.mainWindow.application.logic.elementDescStr(elementID[0])
-		except KeyError:
-			needDescStr = False
-		except IndexError:
-			needDescStr = False
-		
-		if needDescStr: self.elementStr.set(elementDescStr)
-		else: self.elementStr.set("")
+		if self.watchForElement:
+			try:
+				ID = None
+				
+				timesToRepeat = 3	# Чтобы избежать зацикливания
+				while timesToRepeat > 0:
+					timesToRepeat -= 1
+					
+					# Пытаемся получить информацию о ближайшем элементе...
+					ID = self.canvas.find_closest(cursorX, cursorY, halo = 10, start = ID)[0]
+					if not (ID in set(self.coordinateAxis)):	# ...не координатной оси
+						break
+				
+				elementDescStr = self.mainWindow.application.logic.elementDescStr(ID)
+			except KeyError:
+				needDescStr = False
+			except IndexError:
+				needDescStr = False
+			
+			if needDescStr: self.elementStr.set(elementDescStr)
+			else: self.elementStr.set("")
 		
 		# Тест преобразований координат
 		# vC = self.realToVirtCoord((cursorX, cursorY))
@@ -138,6 +155,10 @@ class Graph(Frame):
 	def setVirtualSize(self, size):
 		self.virtualSize = size
 		self.updateLabels()
+	
+	
+	def setMaxLoads(self, F, q):
+		self.maxF, self.maxq = abs(F), abs(q)
 	
 	
 	# Размеры
@@ -171,6 +192,9 @@ class Graph(Frame):
 					   self.offsetNFunc(rS, vS),
 					   self.offsetEFunc(rS, vS),
 					   self.offsetSFunc(rS, vS))
+		
+		# Обновляем максимальные нагрузки
+		self.maxFReal = min(self.offset[0], self.offset[2])	# W, E
 	
 	
 	def realOffset(self):
@@ -232,31 +256,38 @@ class Graph(Frame):
 	
 	
 	def virtToRealCoord(self, virtCoord):
-		# (vX, vY) = virtCoord
-		# (rW, rH) = self.realSize()
-		# (vW, vH) = self.virtSize()
-		
-		# (oW, oE, oN, oS) = self.realOffset()
-		
-		# if vW <= 0:	rX = 0
-		# else:		rX = vX * (rW - oW - oE) / vW + oW
-		
-		# if vH <= 0:	rY = 0
-		# else:		rY = (0.5 - vY / vH) * (rH - oN - oS) + oN
-		
 		return (self.virtToRealX(virtCoord[0]), self.virtToRealY(virtCoord[1]))
 	
 	
-	def drawBar(self, x, L, H, q, **kwargs):
-		leftTop     = self.virtToRealCoord((    x,  0.5 * H))
-		rightBottom = self.virtToRealCoord((x + L, -0.5 * H))
+	def drawBar(self, bar):
+		leftTop     = self.virtToRealCoord((        bar.x,  0.5 * bar.height))
+		rightBottom = self.virtToRealCoord((bar.x + bar.L, -0.5 * bar.height))
 		
-		return self.canvas.create_rectangle(leftTop[0],     leftTop[1],
+		rect = self.canvas.create_rectangle(leftTop[0],     leftTop[1],
 											rightBottom[0], rightBottom[1],
-											tags = "bar", **kwargs)
+											fill = "yellow", activefill = "orange", tags = "bar")
+		if bar.q > 0:
+			qID = self.drawLine((bar.x, 0), (bar.x + bar.L, 0),
+								fill = "green", dash = (10, 10), arrow = LAST,
+								width = 31)
+			return [rect, qID]
+		elif bar.q < 0:
+			qID = self.drawLine((bar.x, 0), (bar.x + bar.L, 0),
+								fill = "green", dash = (10, 10), arrow = FIRST,
+								width = 31)
+			return [rect, qID]
+		else:
+			return [rect]
+		
 	
-	def drawNode(self, x, F, **kwargs):
-		return self.drawVAxis(x, fill = "green", dash = (3, 3), tags = "node", **kwargs)
+	def drawNode(self, node):
+		p0 = (node.x - float(node.F * self.maxFReal * self.virtWidth())
+					   / (self.maxF * self.realWidth()),
+			  0)
+		p1 = (node.x, 0)
+		
+		return [self.drawLine(p0, p1, fill = "red", arrow = LAST, width = 21, tags = "nodeLoad"),
+				self.drawVAxis(node.x, fill = "green", dash = (3, 3), tags = "node")]
 	
 	
 	def drawLineReal(self, p0, p1, **kwargs):
@@ -265,7 +296,7 @@ class Graph(Frame):
 	
 	def drawLine(self, point0, point1, **kwargs):
 		p0, p1 = self.virtToRealCoord(point0), self.virtToRealCoord(point1)
-		return self.drawLineReal(p0[0], p0[1], p1[0], p1[1], **kwargs)
+		return self.drawLineReal(p0, p1, **kwargs)
 	
 	
 	def drawHAxis(self, vY = 0, **kwargs):

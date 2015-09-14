@@ -30,23 +30,22 @@ class Logic:
 		self.application.elements = {}
 		self.application.mainWindow.graph.clear()
 		self.application.mainWindow.graph.setVirtualSize(self.application.construction.size())
+		self.application.mainWindow.graph.setMaxLoads(*self.application.construction.loads())
 		
 		# Ось Oy рисуем до элементов, чтобы поверх неё отобразилась ось узла (x = 0)
 		self.application.mainWindow.graph.drawCoordinateAxisY()
 		
+		# Сначала рисуем только стержни, чтобы нагрузки узлов отображались поверх них
 		for element in self.application.construction.elements:
-			elID = None
 			if type(element) == Bar:
-				# print("Стержень: %s" % element)
-				elID = self.application.mainWindow.graph.drawBar(element.x,
-																 element.L, element.height,
-																 element.q,
-																 fill = "yellow",
-																 activefill = "orange")
-			else:
-				elID = self.application.mainWindow.graph.drawNode(element.x, element.F)
-			
-			self.application.elements[elID] = element
+				IDs = self.application.mainWindow.graph.drawBar(element)
+				for ID in IDs: self.application.elements[ID] = element
+		
+		# Рисуем узлы (с нагрузками)
+		for element in self.application.construction.elements:
+			if type(element) == Node:
+				IDs = self.application.mainWindow.graph.drawNode(element)
+				for ID in IDs: self.application.elements[ID] = element
 		
 		# Ось Ox рисуем после элементов, чтобы её было видно
 		self.application.mainWindow.graph.drawCoordinateAxisX()

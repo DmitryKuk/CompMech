@@ -42,6 +42,10 @@ class Bar:
 	
 	def size(self):
 		return (self.L, self.height)
+	
+	
+	def loads(self):
+		return (0, self.q)
 
 
 def similarToBar(json):
