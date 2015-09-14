@@ -216,24 +216,33 @@ class Graph(Frame):
 											**kwargs)
 	
 	
+	def drawLineReal(self, p0, p1, **kwargs):
+		return self.canvas.create_line(p0[0], p0[1], p1[0], p1[1], **kwargs)
+	
+	
 	def drawLine(self, point0, point1, **kwargs):
 		p0, p1 = self.virtToRealCoord(point0), self.virtToRealCoord(point1)
-		
-		return self.canvas.create_line(p0[0], p0[1],
-									   p1[0], p1[1],
-									   **kwargs)
+		return self.drawLineReal(p0[0], p0[1], p1[0], p1[1], **kwargs)
 	
 	
-	def drawAxis(self, center, **kwargs):
-		(vW, vH) = self.virtSize()
-		(oW, oE, oN, oS) = self.virtOffset()
+	def drawAxis(self, center = (0, 0), **kwargs):
+		(rW, rH) = self.realSize()
+		(oW, oE, oN, oS) = self.realOffset()
+		(rX, rY) = self.virtToRealCoord(center)
 		
-		return (self.drawLine((      -oW,    center[1]), (  vW + oE,   center[1]), **kwargs),
-				self.drawLine((center[0], -vH / 2 - oS), (center[0], vH / 2 + oW), **kwargs))
+		axisX = self.drawLineReal((0, rY),
+								  (rW - 5, rY),
+								  **kwargs)
+		
+		axisY = self.drawLineReal((rX, rH),
+								  (rX, 0 + 5),
+								  **kwargs)
+		
+		return (axisX, axisY)
 	
 	
 	def drawCoordinateAxis(self):
-		axisArgs = { "fill": "blue", "dash": (5, 5), "state": DISABLED }
+		axisArgs = { "fill": "blue", "arrow": LAST, "dash": (5, 5), "state": DISABLED }
 		
 		self.coordinateAxis = self.drawAxis((0, 0), **axisArgs)
 		return self.coordinateAxis
