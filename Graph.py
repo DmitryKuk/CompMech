@@ -262,12 +262,16 @@ class Graph(Frame):
 	
 	
 	def drawBar(self, bar):
+		barArgs = { "fill": "yellow", "activefill": "orange", "tags": "bar" }
+		qLineArgs = { "fill": "green", "width": 5, "arrow": FIRST, "arrowshape": (5, 12, 13),
+					  "tags": "barLoad" }
+		
 		leftTop     = self.virtToRealCoord((        bar.x,  0.5 * bar.height))
 		rightBottom = self.virtToRealCoord((bar.x + bar.L, -0.5 * bar.height))
 		
 		rect = self.canvas.create_rectangle(leftTop[0],     leftTop[1],
 											rightBottom[0], rightBottom[1],
-											fill = "yellow", activefill = "orange", tags = "bar")
+											**barArgs)
 		retList = [rect]	# Список идентификаторов нарисованных объектов
 		
 		virtToRealCoeff = self.virtWidth() / self.realWidth()
@@ -276,48 +280,62 @@ class Graph(Frame):
 		
 		qLen = (bar.q ** 2) / (self.maxqOnL * self.specq)	# Длина стрелки q
 		
-		qLineArgs = { "fill": "green", "width": 5, "arrow": FIRST, "arrowshape": (5, 12, 13),
-					  "tags": "barLoad" }
-		
 		if bar.q > 0:
 			x1, xmin = bar.x + bar.L, bar.x + qIndent
 			while x1 > xmin:
 				x2 = max(x1 - qLen, xmin)
-				qID = self.drawLine((x1, 0), (x2, 0), **qLineArgs)
-				retList.append(qID)
+				retList.append(self.drawLine((x1, 0), (x2, 0), **qLineArgs))
 				x1 -= qLen + qSpace
-			return retList
-			
-			# qID = self.drawLine((bar.x, 0), (bar.x + bar.L, 0),
-			# 					fill = "green", dash = (10, 10), arrow = LAST,
-			# 					width = 31)
-			# return [rect, qID]
 		elif bar.q < 0:
 			x1, xmax = bar.x, bar.x + bar.L - qIndent
 			while x1 < xmax:
 				x2 = min(x1 + qLen, xmax)
-				qID = self.drawLine((x1, 0), (x2, 0), **qLineArgs)
-				retList.append(qID)
+				retList.append(self.drawLine((x1, 0), (x2, 0), **qLineArgs))
 				x1 += qLen + qSpace
-			return retList
-			
-			# qID = self.drawLine((bar.x, 0), (bar.x + bar.L, 0),
-			# 					fill = "green", dash = (10, 10), arrow = FIRST,
-			# 					width = 31)
-			# return [rect, qID]
-			return [rect]
-		else:
-			return [rect]
-		
+		return retList
+	
 	
 	def drawNode(self, node):
-		p0 = (node.x - float(node.F * self.maxFReal * self.virtWidth())
-					   / (self.maxF * self.realWidth()),
-			  0)
-		p1 = (node.x, 0)
+		VaxisArgs = { "fill": "green", "dash": (3, 3), "tags": "node" }
+		FlineArgs = { "fill": "red", "width": 11, "arrow": LAST, "arrowshape": (5, 12, 13),
+					  "tags": "nodeLoad" }
+		hatchArgs = { "tags": "nodeHatch" }
 		
-		return [self.drawLine(p0, p1, fill = "red", width = 11, arrow = LAST, arrowshape = (5, 12, 13), tags = "nodeLoad"),
-				self.drawVAxis(node.x, fill = "green", dash = (3, 3), tags = "node")]
+		# Отображаем узел в виде вертикальной оси
+		retList = [self.drawVAxis(node.x, **VaxisArgs)]
+		
+		# Отображаем штриховку, если узел фиксирован
+		if node.fixed:
+			hatch = (10, 10)	# Размеры штриха (в пикселях)
+			hatchNum = 4		# Количество штрихов в каждую сторону от горизонтальной оси
+			
+			virtToRealCoeff = self.virtWidth() / self.realWidth()
+			vHatch = (hatch[0] * virtToRealCoeff, hatch[1] * virtToRealCoeff)
+			
+			# Вычисляем координаты штрихов...
+			if node.x == 0:		# Узел самый левый -- штриховка слева
+				p1 = (node.x - vHatch[0], -vHatch[1] * hatchNum)
+				p2 = (node.x, -vHatch[1] * (hatchNum - 1))
+			else:				# Штриховка справа
+				p1 = (node.x, -vHatch[1] * hatchNum)
+				p2 = (node.x + vHatch[0], -vHatch[1] * (hatchNum - 1))
+			
+			# ...и рисуем их
+			for i in range(2 * hatchNum):
+				retList.append(self.drawLine(p1, p2, **hatchArgs))
+				
+				p1 = (p1[0], p1[1] + vHatch[1])
+				p2 = (p2[0], p2[1] + vHatch[1])
+		
+		# Отображаем нагрузку
+		if node.F != 0:
+			p0 = (node.x - float(node.F * self.maxFReal * self.virtWidth())
+						   / (self.maxF * self.realWidth()), 0)
+			p1 = (node.x, 0)
+			
+			retList.append(self.drawLine(p0, p1, **FlineArgs))
+		
+		return retList
 	
 	
 	def drawLineReal(self, p0, p1, **kwargs):
