@@ -17,7 +17,8 @@ class Construction:
 		
 		
 		# Максимальные нагрузки
-		self.maxF, self.maxq = 0, 0
+		self.maxF, self.specq = 0, 0
+		self.maxqOnL = 0			# Относительная распределённая нагрузка = q / L
 		
 		
 		if constructionFile is None:	# Пустая конструкция
@@ -62,15 +63,20 @@ class Construction:
 		# Вычисляем размеры конструкции, максимальные нагрузки и координаты элементов
 		x = 0
 		for element in self.elements:
-			# Нагрузки
-			(F, q) = element.loads()
-			self.maxF = max(abs(self.maxF), abs(F))
-			self.maxq = max(abs(self.maxq), abs(q))
-			
 			# Размеры
 			(elSizeX, elSizeY) = element.size()
 			self.sizeX += elSizeX
 			self.sizeY = max(self.sizeY, elSizeY)
+			
+			# Нагрузки
+			(F, q) = element.loads()
+			self.maxF = max(self.maxF, abs(F))
+			
+			# Относительная распределённая нагрузка
+			if elSizeX > 0:
+				qOnL = float(abs(q)) / elSizeX
+				if qOnL > self.maxqOnL:
+					self.maxqOnL, self.specq = qOnL, abs(q)
 			
 			# Координата элемента
 			element.x = copy.deepcopy(x)
@@ -96,4 +102,4 @@ class Construction:
 	
 	
 	def loads(self):
-		return (self.maxF, self.maxq)
+		return (self.maxF, self.specq, self.maxqOnL)

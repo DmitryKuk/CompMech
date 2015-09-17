@@ -31,9 +31,11 @@ class Graph(Frame):
 		self.virtualSize = (0, 0)	# В физических единицах от начала координат
 		
 		# Максимальные нагрузки
-		self.maxF, self.maxq = 0, 0	# Максимальные нагрузки (в физических единицах; для масштаба)
-		self.maxFReal = 0			# Максимальная длина стрелки силы в пикселях
-									# (чтобы оставалась в пределах графика)
+		self.maxF = 0		# Максимальные нагрузки (в физических единицах; для масштаба)
+		self.maxqOnL = 0	# Максимальная относительная распределённая нагрузка = q / L
+		self.specq = 0		# q, при котором q / L -> max
+		self.maxFReal = 0	# Максимальная длина стрелки силы в пикселях
+							# (чтобы оставалась в пределах графика)
 		
 		self.sizeStr = StringVar()
 		self.elementStr = StringVar()
@@ -157,8 +159,8 @@ class Graph(Frame):
 		self.updateLabels()
 	
 	
-	def setMaxLoads(self, F, q):
-		self.maxF, self.maxq = abs(F), abs(q)
+	def setMaxLoads(self, F, specq, maxqOnL):
+		self.maxF, self.specq, self.maxqOnL = abs(F), abs(specq), abs(maxqOnL)
 	
 	
 	# Размеры
@@ -266,16 +268,44 @@ class Graph(Frame):
 		rect = self.canvas.create_rectangle(leftTop[0],     leftTop[1],
 											rightBottom[0], rightBottom[1],
 											fill = "yellow", activefill = "orange", tags = "bar")
+		retList = [rect]	# Список идентификаторов нарисованных объектов
+		
+		virtToRealCoeff = self.virtWidth() / self.realWidth()
+		qSpace = 5 * virtToRealCoeff			# Пробелы 5 пикселей между стрелками
+		qIndent = 12 * virtToRealCoeff			# Отступы в 10 пикселей по границам стержней
+		
+		qLen = (bar.q ** 2) / (self.maxqOnL * self.specq)	# Длина стрелки q
+		
+		qLineArgs = { "fill": "green", "width": 5, "arrow": FIRST, "arrowshape": (5, 12, 13),
+					  "tags": "barLoad" }
+		
 		if bar.q > 0:
-			qID = self.drawLine((bar.x, 0), (bar.x + bar.L, 0),
-								fill = "green", dash = (10, 10), arrow = LAST,
-								width = 31)
-			return [rect, qID]
+			x1, xmin = bar.x + bar.L, bar.x + qIndent
+			while x1 > xmin:
+				x2 = max(x1 - qLen, xmin)
+				qID = self.drawLine((x1, 0), (x2, 0), **qLineArgs)
+				retList.append(qID)
+				x1 -= qLen + qSpace
+			return retList
+			
+			# qID = self.drawLine((bar.x, 0), (bar.x + bar.L, 0),
+			# 					fill = "green", dash = (10, 10), arrow = LAST,
+			# 					width = 31)
+			# return [rect, qID]
 		elif bar.q < 0:
-			qID = self.drawLine((bar.x, 0), (bar.x + bar.L, 0),
-								fill = "green", dash = (10, 10), arrow = FIRST,
-								width = 31)
-			return [rect, qID]
+			x1, xmax = bar.x, bar.x + bar.L - qIndent
+			while x1 < xmax:
+				x2 = min(x1 + qLen, xmax)
+				qID = self.drawLine((x1, 0), (x2, 0), **qLineArgs)
+				retList.append(qID)
+				x1 += qLen + qSpace
+			return retList
+			
+			# qID = self.drawLine((bar.x, 0), (bar.x + bar.L, 0),
+			# 					fill = "green", dash = (10, 10), arrow = FIRST,
+			# 					width = 31)
+			# return [rect, qID]
+			return [rect]
 		else:
 			return [rect]
 		
@@ -286,7 +316,7 @@ class Graph(Frame):
 			  0)
 		p1 = (node.x, 0)
 		
-		return [self.drawLine(p0, p1, fill = "red", arrow = LAST, width = 21, tags = "nodeLoad"),
+		return [self.drawLine(p0, p1, fill = "red", width = 11, arrow = LAST, arrowshape = (5, 12, 13), tags = "nodeLoad"),
 				self.drawVAxis(node.x, fill = "green", dash = (3, 3), tags = "node")]
 	
 	
