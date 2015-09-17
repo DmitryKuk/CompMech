@@ -20,6 +20,7 @@ class Graph(Frame):
 		# Frame
 		kwargs["borderwidth"] = 1
 		kwargs["relief"] = "ridge"
+		kwargs["bg"] = "#FFFFFF"
 		Frame.__init__(self, mainWindow, **kwargs)
 		
 		self.mainWindow = mainWindow
