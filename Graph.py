@@ -20,7 +20,6 @@ class Graph(Frame):
 		# Frame
 		kwargs["borderwidth"] = 1
 		kwargs["relief"] = "ridge"
-		kwargs["bg"] = "#FFFFFF"
 		Frame.__init__(self, mainWindow, **kwargs)
 		
 		self.mainWindow = mainWindow
@@ -58,11 +57,11 @@ class Graph(Frame):
 		
 		
 		# Холст
-		canvasKwargs = { "cursor": "crosshair" }
-		if "width" in kwargs:	canvasKwargs["width"] = kwargs["width"]
-		if "height" in kwargs:	canvasKwargs["height"] = kwargs["height"]
+		canvasArgs = { "cursor": "crosshair", "bg": "#FFFFFF" }
+		if "width" in kwargs:	canvasArgs["width"] = kwargs["width"]
+		if "height" in kwargs:	canvasArgs["height"] = kwargs["height"]
 		
-		self.canvas = Canvas(self, **canvasKwargs)
+		self.canvas = Canvas(self, **canvasArgs)
 		self.canvas.grid(column = 0, row = 0, sticky = N + E + S + W)
 		
 		self.canvas.bind("<Motion>", self.onMouseMotion)
