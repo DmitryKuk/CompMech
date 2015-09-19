@@ -97,7 +97,8 @@ class Graph(Frame):
 		self.menu.add_command(label = "Сохранить изображение",
 							  command = self.onMenuEntrySaveImageClicked)
 		
-		self.canvas.bind("<ButtonRelease-2>", self.onMenuRequested)
+		self.canvas.bind("<ButtonRelease-2>",
+						 lambda event: self.menu.post(event.x_root, event.y_root))
 	
 	
 	def onMouseMotion(self, event):
@@ -111,10 +112,6 @@ class Graph(Frame):
 	def onWindowConfigure(self, event):
 		self.updateOffset()
 		self.updateLabels()
-	
-	
-	def onMenuRequested(self, event):
-		self.menu.post(event.x_root, event.y_root)
 	
 	
 	def updateLabels(self, cursorX = None, cursorY = None):
