@@ -4,19 +4,22 @@
 
 import math
 
+from ConstructionElement import ConstructionElement
 
-class Bar:
+
+class Bar(ConstructionElement):
 	def __init__(self, json = None, default = None):
+		ConstructionElement.__init__(self, json, default)
+		
 		self.L = 0
 		self.A = 0
 		self.E = 0
 		self.Sigma = 0
 		self.q = 0
 		
-		self.x = None	# Будет рассчитано конструкцией
 		self.height = 0
 		
-		if not (json is None):
+		if json is not None:
 			if default is None:
 				self.L = json.get("L", 0)
 				self.A = json.get("A", 0)
@@ -29,15 +32,23 @@ class Bar:
 				self.E = json.get("E", default.E)
 				self.Sigma = json.get("Sigma", default.Sigma)
 				self.q = json.get("q", default.q)
+		elif default is not None:
+			self.L = default.L
+			self.A = default.A
+			self.E = default.E
+			self.Sigma = default.Sigma
+			self.q = default.q
 		
 		self.height = math.sqrt(self.A)		# Квадратное сечение
 	
 	
 	def __str__(self):
-		return "Стержень: x = %s; L = %s; A = %s; E = %s; σ = %s; q = %s" % (self.x,
-																			 self.L, self.A,
-																			 self.E, self.Sigma,
-																			 self.q)
+		if len(self.label) > 0:
+			return "Стержень \"%s\": x = %s; L = %s; A = %s; E = %s; σ = %s; q = %s" \
+				% (self.label, self.x, self.L, self.A, self.E, self.Sigma, self.q)
+		else:
+			return "Стержень: x = %s; L = %s; A = %s; E = %s; σ = %s; q = %s" \
+				% (self.x, self.L, self.A, self.E, self.Sigma, self.q)
 	
 	
 	def size(self):

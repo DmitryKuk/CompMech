@@ -3,6 +3,8 @@
 # Author: Dmitry Kukovinets (d1021976@gmail.com)
 
 from tkinter import *
+from PIL import Image
+from tempfile import NamedTemporaryFile
 
 
 def zeroOffsetFunc(self, realSize, virtSize):
@@ -89,6 +91,13 @@ class Graph(Frame):
 		self.cursorLabel.grid(column = 2, row = 0, sticky = E)
 		
 		self.onWindowConfigure(None)
+		
+		# Контекстное меню
+		self.menu = Menu(self, tearoff = 0)
+		self.menu.add_command(label = "Сохранить изображение",
+							  command = self.onMenuEntrySaveImageClicked)
+		
+		self.canvas.bind("<ButtonRelease-2>", self.onMenuRequested)
 	
 	
 	def onMouseMotion(self, event):
@@ -102,6 +111,10 @@ class Graph(Frame):
 	def onWindowConfigure(self, event):
 		self.updateOffset()
 		self.updateLabels()
+	
+	
+	def onMenuRequested(self, event):
+		self.menu.post(event.x_root, event.y_root)
 	
 	
 	def updateLabels(self, cursorX = None, cursorY = None):
@@ -302,7 +315,11 @@ class Graph(Frame):
 		hatchArgs = { "tags": "nodeHatch" }
 		
 		# Отображаем узел в виде вертикальной оси
-		retList = [self.drawVAxis(node.x, **VaxisArgs)]
+		retList = []
+		if node.x == 0:
+			retList.append(self.coordinateAxis[1])	# Используем ось Oy, если узел самый левый
+		else:
+			retList.append(self.drawVAxis(node.x, **VaxisArgs))	# Или рисуем новую
 		
 		# Отображаем штриховку, если узел фиксирован
 		if node.fixed:
@@ -388,3 +405,44 @@ class Graph(Frame):
 	def clear(self):
 		self.canvas.delete(*self.canvas.find_all())
 		self.coordinateAxis = (None, None)
+	
+	
+	def saveImage(self, filename):
+		# Рабочий вариант 1
+		# (width, height) = self.realSize()
+		# width, height = int(width), int(height)
+		
+		# image = Image.new("RGB", (width, height), "white")
+		# draw = ImageDraw.Draw(image)
+		
+		# for y in range(height):
+		# 	for x in range(width):
+		# 		ids = self.canvas.find_overlapping(x, y, x, y)
+		# 		if ids:
+		# 			draw.point((x, y), fill = self.canvas.itemcget(ids[-1], "fill"))
+		
+		# image.save("data/graph.jpg")
+		# del draw
+		
+		# Рабочий вариант 2
+		# ps = self.canvas.postscript()
+		# file = open("data/graph.ps", "w")
+		# file.write(ps)
+		# file.close()
+		# Image.open("data/graph.ps").save("data/graph.png")
+		
+		# Рабочий вариант 2 со временным файлом вместо обычного
+		ps = self.canvas.postscript()
+		file = NamedTemporaryFile()						# Создаём временный файл
+		file.write(bytes(ps, "UTF-8"))					# Сохраняем в него Postscript
+		image = Image.open(file.name).save(filename)	# Конвертируем в нужный формат
+		file.close()
+	
+	
+	def onMenuEntrySaveImageClicked(self):
+		filetypes = [("PNG", "*.png"), ("JPG", ".jpg"), ("BMP", "*.bmp")]
+		filename = filedialog.asksaveasfilename(parent = self,
+												defaultextension = ".png",
+												filetypes = filetypes)
+		if filename != "":
+			self.saveImage(filename)

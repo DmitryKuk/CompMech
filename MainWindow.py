@@ -50,9 +50,9 @@ class MainWindow(Tk):
 	def onButtonOpenFileClicked(self, event):
 		filename = tkinter.filedialog.askopenfilename(parent = self)
 		
-		if len(filename) != 0:
+		if filename != "":
 			try:
-				file = open(filename, 'r')
+				file = open(filename, "r")
 				self.application.logic.processConstructionFile(file)
 				file.close()
 			except IOError as e:
