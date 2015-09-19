@@ -49,6 +49,8 @@ class Logic:
 		
 		# Ось Ox рисуем после элементов, чтобы её было видно
 		self.application.mainWindow.graph.drawCoordinateAxisX()
+		
+		self.application.mainWindow.graph.setTitle("Конструкция")
 	
 	
 	def elementDescStr(self, elementID):

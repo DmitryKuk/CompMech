@@ -14,7 +14,7 @@ class MainWindow(Tk):
 		
 		self.application = application
 		
-		self.title("Компьютерная механика")
+		self.title("Стержни от Димыча")
 		
 		self.graph = Graph(self, width = 700, height = 300, **kwargs)
 		self.graph.grid(column = 0, row = 0, rowspan = 4, sticky = N + E + S + W)

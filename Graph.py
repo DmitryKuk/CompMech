@@ -4,7 +4,7 @@
 
 from tkinter import *
 from PIL import Image
-from tempfile import NamedTemporaryFile
+import os, subprocess, tempfile
 
 
 def zeroOffsetFunc(self, realSize, virtSize):
@@ -13,11 +13,11 @@ def zeroOffsetFunc(self, realSize, virtSize):
 
 class Graph(Frame):
 	def __init__(self, mainWindow,
+				 watchForElement = True,
 				 offsetWFunc = zeroOffsetFunc,
 				 offsetNFunc = zeroOffsetFunc,
 				 offsetEFunc = zeroOffsetFunc,
 				 offsetSFunc = zeroOffsetFunc,
-				 watchForElement = True,
 				 **kwargs):
 		# Frame
 		kwargs["borderwidth"] = 1
@@ -25,6 +25,7 @@ class Graph(Frame):
 		Frame.__init__(self, mainWindow, **kwargs)
 		
 		self.mainWindow = mainWindow
+		
 		
 		# Обновлять информацию об элементе под курсором
 		self.watchForElement = watchForElement
@@ -171,6 +172,10 @@ class Graph(Frame):
 	
 	def setMaxLoads(self, F, specq, maxqOnL):
 		self.maxF, self.specq, self.maxqOnL = abs(F), abs(specq), abs(maxqOnL)
+	
+	
+	def setTitle(self, text):
+		return self.canvas.create_text(self.realWidth() / 2, 10, text = text)
 	
 	
 	# Размеры
@@ -405,7 +410,7 @@ class Graph(Frame):
 	
 	
 	def saveImage(self, filename):
-		# Рабочий вариант 1
+		# Рабочий вариант 1 с пробегом по всем пикселям холста
 		# (width, height) = self.realSize()
 		# width, height = int(width), int(height)
 		
@@ -418,28 +423,52 @@ class Graph(Frame):
 		# 		if ids:
 		# 			draw.point((x, y), fill = self.canvas.itemcget(ids[-1], "fill"))
 		
-		# image.save("data/graph.jpg")
 		# del draw
+		# image.save(filename)
 		
-		# Рабочий вариант 2
-		# ps = self.canvas.postscript()
-		# file = open("data/graph.ps", "w")
-		# file.write(ps)
-		# file.close()
-		# Image.open("data/graph.ps").save("data/graph.png")
 		
 		# Рабочий вариант 2 со временным файлом вместо обычного
-		ps = self.canvas.postscript()
-		file = NamedTemporaryFile()						# Создаём временный файл
-		file.write(bytes(ps, "UTF-8"))					# Сохраняем в него Postscript
-		image = Image.open(file.name).save(filename)	# Конвертируем в нужный формат
-		file.close()
+		# ps = self.canvas.postscript()
+		# file = tempfile.NamedTemporaryFile()			# Создаём временный файл
+		# file.write(bytes(ps, "UTF-8"))					# Сохраняем в него Postscript
+		# image = Image.open(file.name).save(filename)	# Конвертируем в нужный формат
+		# file.close()
+		
+		# Рабочий вариант 3 со скриншотами
+		x1 = self.canvas.winfo_rootx()
+		y1 = self.canvas.winfo_rooty()
+		
+		x2, y2 = x1 + self.canvas.winfo_width(), y1 + self.canvas.winfo_height()
+		
+		grab((x1, y1, x2, y2)).save(filename)
 	
 	
 	def onMenuEntrySaveImageClicked(self):
-		filetypes = [("PNG", "*.png"), ("JPG", ".jpg"), ("BMP", "*.bmp")]
+		filetypes = [("PNG", "*.png"), ("JPG", ".jpg"), ("BMP", "*.bmp"), ("SVG", "*.svg")]
 		filename = filedialog.asksaveasfilename(parent = self,
 												defaultextension = ".png",
 												filetypes = filetypes)
 		if filename != "":
 			self.saveImage(filename)
+
+
+# Взято с https://github.com/python-pillow/Pillow/blob/master/PIL/ImageGrab.py
+# PIL.ImageGrab.grab() -- добавлена поддержка Mac OS X 2 месяца назад.
+def grab(bbox=None):
+	if sys.platform == "darwin":
+		f, file = tempfile.mkstemp('.png')
+		os.close(f)
+		subprocess.call(['screencapture', '-x', file])
+		im = Image.open(file)
+		im.load()
+		os.unlink(file)
+	else:
+		size, data = grabber()
+		im = Image.frombytes(
+			"RGB", size, data,
+			# RGB, 32-bit line padding, origo in lower left corner
+			"raw", "BGR", (size[0]*3 + 3) & -4, -1
+			)
+	if bbox:
+		im = im.crop(bbox)
+	return im
