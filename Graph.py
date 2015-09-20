@@ -145,8 +145,9 @@ class Graph(Frame):
 					
 					# Пытаемся получить информацию о ближайшем элементе...
 					ID = self.canvas.find_closest(cursorX, cursorY, halo = 10, start = ID)[0]
-					if not (ID in set(self.coordinateAxis)):	# ...не координатной оси
-						break
+					
+					# ...не координатной оси Ox (Oy соответсвует левому узлу)
+					if ID != self.coordinateAxis[0]: break
 				
 				elementDescStr = self.mainWindow.application.logic.elementDescStr(ID)
 			except KeyError:
