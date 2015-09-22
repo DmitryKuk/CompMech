@@ -155,8 +155,8 @@ class Graph(Frame):
 			except IndexError:
 				needDescStr = False
 			
-			if needDescStr: self.elementStr.set(elementDescStr)
-			else: self.elementStr.set("")
+			if needDescStr: self.setElementStr(elementDescStr)
+			else: self.setElementStr("")
 		
 		# Тест преобразований координат
 		# vC = self.realToVirtCoord((cursorX, cursorY))
@@ -177,6 +177,10 @@ class Graph(Frame):
 	
 	def setTitle(self, text):
 		return self.canvas.create_text(self.realWidth() / 2, 10, text = text)
+	
+	
+	def setElementStr(self, text):
+		self.elementStr.set(text)
 	
 	
 	# Размеры
