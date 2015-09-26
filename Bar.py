@@ -3,6 +3,7 @@
 # Author: Dmitry Kukovinets (d1021976@gmail.com)
 
 import math
+from sympy import *
 
 from ConstructionElement import ConstructionElement
 
@@ -40,6 +41,13 @@ class Bar(ConstructionElement):
 			self.q = default.q
 		
 		self.height = math.sqrt(self.A)		# Квадратное сечение
+		
+		# Матрица реакций
+		self.K = None if self.L == 0 else \
+				 float(self.E * self.A) / self.L * Matrix([[1, -1], [-1, 1]])
+		
+		# Вектор реакций
+		self.Q = float(self.q * self.L) / 2 * Matrix([[-1], [-1]])
 	
 	
 	def __str__(self):

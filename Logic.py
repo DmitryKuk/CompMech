@@ -3,6 +3,7 @@
 # Author: Dmitry Kukovinets (d1021976@gmail.com)
 
 import math
+from sympy import *
 
 from Construction import Construction
 from Bar import Bar
@@ -51,7 +52,17 @@ class Logic:
 		self.application.mainWindow.graph.drawCoordinateAxisX()
 		
 		self.application.mainWindow.graph.setTitle("Конструкция")
+		
+		self.calculate()
 	
 	
 	def elementDescStr(self, elementID):
 		return self.application.elements[elementID].__str__()
+	
+	
+	def calculate(self):
+		print("A =")
+		pprint(self.application.construction.A)
+		print("\nb =")
+		pprint(self.application.construction.b)
+		print()
