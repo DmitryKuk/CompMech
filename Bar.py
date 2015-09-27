@@ -20,6 +20,9 @@ class Bar(ConstructionElement):
 		
 		self.height = 0
 		
+		self.K = None	# Матрица реакций
+		self.Q = None	# Вектор реакций
+		
 		if json is not None:
 			if default is None:
 				self.L = json.get("L", 0)
@@ -40,13 +43,22 @@ class Bar(ConstructionElement):
 			self.Sigma = default.Sigma
 			self.q = default.q
 		
-		self.height = math.sqrt(self.A)		# Квадратное сечение
+		if json is not None or default is not None:
+			if self.L <= 0:
+				raise Exception("Некорректная длина стержня: L = %f " \
+								"(ожидается: L > 0; %s)" % (self.L, self))
+			
+			if self.A <= 0:
+				raise Exception("Некорректная площадь поперечного сечения стержня: A = %f " \
+								"(ожидается: A > 0; %s)" % (self.A, self))
 		
-		# Матрица реакций
+		self.height = math.sqrt(self.A)		# Квадратное сечение
+	
+	
+	def calculate(self):
 		self.K = None if self.L == 0 else \
 				 float(self.E * self.A) / self.L * Matrix([[1, -1], [-1, 1]])
 		
-		# Вектор реакций
 		self.Q = float(self.q * self.L) / 2 * Matrix([[-1], [-1]])
 	
 	

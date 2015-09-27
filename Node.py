@@ -25,8 +25,7 @@ class Node(ConstructionElement):
 	
 	
 	def __str__(self):
-		if self.fixed:	fixedStr = "зафиксирован"
-		else:			fixedStr = "свободен"
+		fixedStr = "зафиксирован" if self.fixed else "свободен"
 		
 		if len(self.label) > 0:
 			return "Узел \"%s\": x = %s; F = %s; %s" \

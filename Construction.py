@@ -88,8 +88,9 @@ class Construction:
 			# Координата элемента
 			element.x = copy.deepcopy(x)
 			x += elSizeX
-		
-		
+	
+	
+	def calculate(self):
 		bars = (len(self.elements) - 1) / 2
 		if bars > 0:
 			self.A = zeros(bars + 1)
@@ -98,6 +99,8 @@ class Construction:
 			
 			i = 0
 			for element in self.elements:
+				element.calculate()
+				
 				if type(element) == Bar:
 					self.A += diag(zeros(i), element.K, zeros(bars - i - 1))
 					

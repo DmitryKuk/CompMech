@@ -17,6 +17,10 @@ class ConstructionElement:
 			self.label = default.label
 	
 	
+	def calculate(self):
+		pass
+	
+	
 	def size(self):
 		return (0, 0)
 	

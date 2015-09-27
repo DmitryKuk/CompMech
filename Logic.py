@@ -52,8 +52,6 @@ class Logic:
 		self.application.mainWindow.graph.drawCoordinateAxisX()
 		
 		self.application.mainWindow.graph.setTitle("Конструкция")
-		
-		self.calculate()
 	
 	
 	def elementDescStr(self, elementID):
@@ -61,6 +59,8 @@ class Logic:
 	
 	
 	def calculate(self):
+		self.application.construction.calculate()
+		
 		print("A =")
 		pprint(self.application.construction.A)
 		print("\nb =")
