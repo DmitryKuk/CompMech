@@ -18,8 +18,12 @@ class Logic:
 		self.application.elements = {}
 	
 	
-	def processConstructionFile(self, constructionFile):
-		self.application.construction = Construction(constructionFile)
+	def processConstructionFile(self, constructionFile, showMessage = None, showError = None):
+		try:
+			self.application.construction = Construction(constructionFile, showMessage, showError)
+		except Exception as e:
+			if showError is not None:
+				showError(str(e))
 		self.drawConstruction()
 	
 	
@@ -55,7 +59,7 @@ class Logic:
 	
 	
 	def elementDescStr(self, elementID):
-		return self.application.elements[elementID].__str__()
+		return str(self.application.elements[elementID])
 	
 	
 	def calculate(self):

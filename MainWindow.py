@@ -3,7 +3,7 @@
 # Author: Dmitry Kukovinets (d1021976@gmail.com)
 
 from tkinter import *
-import tkinter.filedialog
+import tkinter.filedialog, tkinter.messagebox
 
 from Graph import Graph
 
@@ -44,7 +44,7 @@ class MainWindow(Tk):
 	
 	
 	def onButtonClicked(self, event):
-		print("Кнопка нажата!")
+		self.showMessage("Кнопка нажата!")
 	
 	
 	def onButtonOpenFileClicked(self, event):
@@ -53,10 +53,12 @@ class MainWindow(Tk):
 		if filename != "":
 			try:
 				file = open(filename, "r")
-				self.application.logic.processConstructionFile(file)
+				self.application.logic.processConstructionFile(file,
+															   showMessage = self.showMessage,
+															   showError = self.showError)
 				file.close()
 			except IOError as e:
-				print("Невозможно открыть файл: %s" % e)
+				self.showError("Невозможно открыть файл: %s" % e)
 			# except Exception as e:
 			# 	print("Неизвестная ошибка: %s" % e)
 	
@@ -65,3 +67,11 @@ class MainWindow(Tk):
 		if type(event.widget) != Label:	# Игнорируем события от меток (когда меняется надпись)
 			self.application.logic.drawConstruction()
 			# Кеширование размера окна не работает! Нужна принудительная перерисовка
+	
+	
+	def showMessage(self, message):
+		tkinter.messagebox.showinfo("Информация", message)
+	
+	
+	def showError(self, message):
+		tkinter.messagebox.showerror("Ошибка", message)
