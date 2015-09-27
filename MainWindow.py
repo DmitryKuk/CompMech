@@ -38,7 +38,7 @@ class MainWindow(Tk):
 		self.button3 = Button(self)
 		self.button3["text"] = "Нажми меня 3"
 		self.button3.bind("<ButtonRelease-1>", self.onButtonClicked)
-		self.button3.grid(column = 1, row = 3)
+		self.button3.grid(column = 1, row = 3, sticky = E + W)
 		
 		self.bind("<Configure>", self.onWindowConfigure)
 	
