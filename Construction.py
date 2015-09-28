@@ -22,14 +22,16 @@ class Construction:
 		self.maxqOnL = 0			# Относительная распределённая нагрузка = q / L
 		
 		
-		# [A] * {deltas} = {b}
+		# [A] * {Deltas} = {b}
 		self.A = None
 		self.b = None
-		self.deltas = None
+		self.Deltas = None
+		
+		self.calculated = False	# Конструкция была рассчитана
 		
 		
 		if constructionFile is None:	# Пустая конструкция
-			return None
+			return
 		
 		
 		try:
@@ -41,16 +43,12 @@ class Construction:
 		try:
 			self.defaultNode = Node(construction["default"]["node"])
 		except KeyError:
-			if showMessage is not None:
-				showMessage("Не заданы параметры узла по умолчанию. " \
-							"Не расстраивайтесь, это бывает.")
+			print("Не заданы параметры узла по умолчанию. Не расстраивайтесь, это бывает.")
 		
 		try:
 			self.defaultBar = Bar(construction["default"]["bar"])
 		except KeyError:
-			if showMessage is not None:
-				showMessage("Не заданы параметры стержня по умолчанию. " \
-							"Не расстраивайтесь, это бывает.")
+			print("Не заданы параметры стержня по умолчанию. Не расстраивайтесь, это бывает.")
 		
 		
 		try:
@@ -64,10 +62,12 @@ class Construction:
 						self.elements.append(copy.deepcopy(self.defaultNode))
 					lastWasBar = True
 				else:
+					if not lastWasBar:
+						self.elements.append(copy.deepcopy(self.defaultBar))
 					lastWasBar = False
 				
 				self.elements.append(element)
-				
+			
 			if lastWasBar:
 				self.elements.append(copy.deepcopy(self.defaultNode))
 		except KeyError:
@@ -78,8 +78,8 @@ class Construction:
 				showError(str(e))
 		
 		
-		# Вычисляем размеры конструкции, максимальные нагрузки и координаты элементов
-		x = 0
+		# Вычисляем размеры конструкции, максимальные нагрузки, координаты и номера элементов
+		x, i = 0, 0
 		for element in self.elements:
 			# Размеры
 			(elSizeX, elSizeY) = element.size()
@@ -99,6 +99,10 @@ class Construction:
 			# Координата элемента
 			element.x = copy.deepcopy(x)
 			x += elSizeX
+			
+			# Номер элемента
+			element.i = copy.deepcopy(i)
+			if type(element) == Bar: i += 1
 	
 	
 	def calculate(self):
@@ -106,39 +110,55 @@ class Construction:
 		if bars > 0:
 			self.A = zeros(bars + 1)
 			self.b = zeros(bars + 1, 1)
-			self.deltas = []
+			self.Deltas = []
 			
-			i = 0
 			for element in self.elements:
 				element.calculate()
 				
 				if type(element) == Bar:
-					self.A += diag(zeros(i), element.K, zeros(bars - i - 1))
+					self.A += diag(zeros(element.i), element.K, zeros(bars - element.i - 1))
 					
 					# Учитываем реакции стержня
-					self.b[    i, 0] -= element.Q[0, 0]
-					self.b[i + 1, 0] -= element.Q[1, 0]
-					
-					i += 1
+					self.b[element.i    , 0] -= element.Q[0, 0]
+					self.b[element.i + 1, 0] -= element.Q[1, 0]
 				else:
 					# Учитываем сосредоточенную нагрузку на узел
-					self.b[i] += element.F
+					self.b[element.i] += element.F
 					
-					self.deltas.append(Symbol("delta%s" % i))
+					self.Deltas.append(Symbol("Delta%s" % element.i))
 			
-			i = 0
 			for element in self.elements:
 				if type(element) == Node:
 					if element.fixed:
-						self.A.row_del(i)
-						self.A.col_del(i)
+						self.A.row_del(element.i)
+						self.A.col_del(element.i)
 						
 						self.A = self.A \
-							.col_insert(i, zeros(bars, 1)) \
-							.row_insert(i, zeros(1, i) \
-										   .row_join(Matrix([[1.0]])) \
-										   .row_join(zeros(1, bars - i)))
-					i += 1
+							.col_insert(element.i, zeros(bars, 1)) \
+							.row_insert(element.i, zeros(1, element.i) \
+												   .row_join(Matrix([[1.0]])) \
+												   .row_join(zeros(1, bars - element.i)))
+						
+						self.b[element.i, 0] = 0
+			
+			# Вычисляем перемещения узлов
+			res = solve_linear_system(self.A.row_join(self.b), *self.Deltas)
+			
+			for element in self.elements:
+				if type(element) == Bar:
+					element.U0 = res[self.Deltas[element.i    ]]
+					element.UL = res[self.Deltas[element.i + 1]]
+				else:
+					element.Delta = res[self.Deltas[element.i]]
+			
+			self.calculated = True
+		else:
+			if len(self.elements) == 1:	# Единственный узел неподвижен
+				self.element[0].Delta = 0.0
+				
+				self.calculated = True
+			else:
+				self.calculated = False
 	
 	
 	def elementFromJSON(self, item):

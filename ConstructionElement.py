@@ -7,6 +7,7 @@ class ConstructionElement:
 	def __init__(self, json = None, default = None):
 		self.label = ""
 		self.x = None	# Будет рассчитано конструкцией
+		self.i = None	# Номер узла; будет рассчитано конструкцией
 		
 		if json is not None:
 			if default is None:

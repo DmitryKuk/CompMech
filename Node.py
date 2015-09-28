@@ -12,6 +12,8 @@ class Node(ConstructionElement):
 		self.fixed = False
 		self.F = 0
 		
+		self.Delta = None	# Смещение узла; вычисляется конструкцией
+		
 		if json is not None:
 			if default is None:
 				self.fixed = json.get("fixed", False)
@@ -27,12 +29,10 @@ class Node(ConstructionElement):
 	def __str__(self):
 		fixedStr = "зафиксирован" if self.fixed else "свободен"
 		
-		if len(self.label) > 0:
-			return "Узел \"%s\": x = %s; F = %s; %s" \
-				% (self.label, self.x, self.F, fixedStr)
-		else:
-			return "Узел: x = %s; F = %s; %s" \
-				% (self.x, self.F, fixedStr)
+		return "Узел [%d]%s: x = %s; F = %s; %s; Δ%d = %s" \
+			   % (self.i,
+				  " \"" + self.label + "\"" if self.label != "" else "",
+				  self.x, self.F, fixedStr, self.i, self.Delta)
 	
 	
 	def size(self):

@@ -16,38 +16,32 @@ class MainWindow(Tk):
 		
 		self.title("Стержни от Димыча")
 		
-		self.graph = Graph(self, width = 700, height = 300, **kwargs)
+		self.graph = Graph(self, width = 1000, height = 400, **kwargs)
 		self.graph.grid(column = 0, row = 0, rowspan = 4, sticky = N + E + S + W)
 		
 		# Делаем колонку с виджетом с графиком растяжимой
 		self.columnconfigure(0, weight = 1)
 		
-		self.button1 = Button(self)
-		self.button1["text"] = "Открыть файл"
-		self.button1.bind("<ButtonRelease-1>", self.onButtonOpenFileClicked)
+		self.button1 = Button(self, text = "Открыть файл", command = self.onButtonOpenFileClicked)
 		self.button1.grid(column = 1, row = 0, sticky = E + W)
 		
-		self.button2 = Button(self)
-		self.button2["text"] = "Рассчитать"
-		self.button2.bind("<ButtonRelease-1>", lambda event: self.application.logic.calculate())
+		self.button2 = Button(self, text = "Рассчитать", command = self.onCalculateButtonClicked)
 		self.button2.grid(column = 1, row = 1, sticky = E + W)
 		
 		# Пустое пространство (растяжимое)
 		self.rowconfigure(2, weight = 1)
 		
-		self.button3 = Button(self)
-		self.button3["text"] = "Нажми меня 3"
-		self.button3.bind("<ButtonRelease-1>", self.onButtonClicked)
+		self.button3 = Button(self, text = "Нажми меня", command = self.onButtonClicked, state = DISABLED)
 		self.button3.grid(column = 1, row = 3, sticky = E + W)
 		
 		self.bind("<Configure>", self.onWindowConfigure)
 	
 	
-	def onButtonClicked(self, event):
+	def onButtonClicked(self):
 		self.showMessage("Кнопка нажата!")
 	
 	
-	def onButtonOpenFileClicked(self, event):
+	def onButtonOpenFileClicked(self):
 		filename = tkinter.filedialog.askopenfilename(parent = self)
 		
 		if filename != "":
@@ -61,6 +55,16 @@ class MainWindow(Tk):
 				self.showError("Невозможно открыть файл: %s" % e)
 			# except Exception as e:
 			# 	print("Неизвестная ошибка: %s" % e)
+		
+		if self.application.logic.calculated():
+			self.button3["state"] = NORMAL
+	
+	
+	def onCalculateButtonClicked(self):
+		self.application.logic.calculate()
+		
+		if self.application.logic.calculated():
+			self.button3["state"] = NORMAL
 	
 	
 	def onWindowConfigure(self, event):

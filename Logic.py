@@ -70,3 +70,7 @@ class Logic:
 		print("\nb =")
 		pprint(self.application.construction.b)
 		print()
+	
+	
+	def calculated(self):
+		return self.application.construction.calculated
