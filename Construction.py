@@ -48,12 +48,12 @@ class Construction:
 		try:
 			self.defaultNode = Node(construction["default"]["node"])
 		except KeyError:
-			print("Не заданы параметры узла по умолчанию. Не расстраивайтесь, это бывает.")
+			pass
 		
 		try:
 			self.defaultBar = Bar(construction["default"]["bar"])
 		except KeyError:
-			print("Не заданы параметры стержня по умолчанию. Не расстраивайтесь, это бывает.")
+			pass
 		
 		
 		try:
