@@ -25,6 +25,9 @@ class Construction:
 		self.maxu = 0
 		self.maxSigma = 0
 		
+		# Координаты узлов для бинарного поиска ближайшего узла и стержня
+		self.nodeXs = []
+		
 		
 		# [A] * {Deltas} = {b}
 		self.A = None
@@ -109,7 +112,12 @@ class Construction:
 			element.i = copy.deepcopy(i)
 			if type(element) == Bar: i += 1
 		
-		self.empty = False
+		# Предвычисляем список с координатами узлов (для бинарного поиска элементов)
+		for element in self.elements:
+			if type(element) == Node: self.nodeXs.append(element.x)
+		
+		if len(self.elements) != 0:
+			self.empty = False
 	
 	
 	def calculate(self):

@@ -79,7 +79,8 @@ class Graph(Frame):
 		self.sizeLabel = Label(self.labelArea, textvariable = self.sizeStr, anchor = W)
 		self.sizeLabel.grid(column = 0, row = 0, sticky = W)
 		
-		self.elementLabel = Label(self.labelArea, textvariable = self.elementStr, anchor = W)
+		self.elementLabel = Label(self.labelArea, textvariable = self.elementStr, anchor = W,
+								  justify = LEFT)
 		self.elementLabel.grid(column = 1, row = 0, sticky = W + E)
 		self.labelArea.columnconfigure(1, weight = 1)
 		
@@ -120,40 +121,53 @@ class Graph(Frame):
 	
 	
 	def updateCursorPos(self, cursorX = None, cursorY = None):
-		needDescStr = True
+		needDescStr1,    needDescStr2    = True, False
+		elementDescStr1, elementDescStr2 =   "",    ""
 		
 		if cursorX is None:
 			cursorX = self.mainScale.virtToRealX(0)
-			needDescStr = False
+			needDescStr1 = False
 		
 		if cursorY is None:
 			cursorY = self.mainScale.virtToRealY(0)
-			needDescStr = False
+			needDescStr1 = False
 		
-		self.cursorStr.set("(%.3f, %.3f)" % self.mainScale.realToVirtCoord((cursorX, cursorY)))
+		(vX, vY) = self.mainScale.realToVirtCoord((cursorX, cursorY))
 		
-		if self.watchForElement:
-			try:
-				ID = None
+		self.cursorStr.set("(%.3f, %.3f)" % (vX, vY))
+		
+		if needDescStr1 and self.watchForElement:
+			# Старый алгоритм поиска ближайшего элемента
+			# try:
+			# 	ID = None
 				
-				timesToRepeat = 3	# Чтобы избежать зацикливания
-				while timesToRepeat > 0:
-					timesToRepeat -= 1
+			# 	timesToRepeat = 3	# Чтобы избежать зацикливания
+			# 	while timesToRepeat > 0:
+			# 		timesToRepeat -= 1
 					
-					# Пытаемся получить информацию о ближайшем элементе...
-					ID = self.canvas.find_closest(cursorX, cursorY, halo = 10, start = ID)[0]
+			# 		# Пытаемся получить информацию о ближайшем элементе...
+			# 		ID = self.canvas.find_closest(cursorX, cursorY, halo = 10, start = ID)[0]
 					
-					# ...не координатной оси Ox (Oy соответсвует левому узлу)
-					if ID != self.coordinateAxis[0]: break
+			# 		# ...не координатной оси Ox (Oy соответсвует левому узлу)
+			# 		if ID != self.coordinateAxis[0]: break
 				
-				elementDescStr = self.mainWindow.application.logic.elementDescStr(ID)
-			except KeyError:
-				needDescStr = False
-			except IndexError:
-				needDescStr = False
+			# 	elementDescStr1 = self.mainWindow.application.logic.elementDescStr(ID)
+			# except KeyError:
+			# 	needDescStr1 = False
+			# except IndexError:
+			# 	needDescStr1 = False
 			
-			if needDescStr: self.setElementStr(elementDescStr)
-			else: self.setElementStr("")
+			# Новый алгоритм
+			logic = self.mainWindow.application.logic
+			(nearest, nearestBar) = logic.nearestData(vX, self.mainScale.realToVirtXLen)
+			
+			if nearest is not None:
+				elementDescStr1 = str(nearest)
+				
+				if nearestBar is not None:
+					elementDescStr2 = nearestBar.supportDescStr(vX)
+		
+		self.setElementStr(elementDescStr1, elementDescStr2)
 		
 		# Тест преобразований координат
 		# vC = self.realToVirtCoord((cursorX, cursorY))
@@ -191,8 +205,8 @@ class Graph(Frame):
 		return self.canvas.create_text(self.mainScale.rW / 2, 10, text = text)
 	
 	
-	def setElementStr(self, text):
-		self.elementStr.set(text)
+	def setElementStr(self, text1, text2):
+		self.elementStr.set(text1 + "\n" + text2)
 	
 	
 	def updateOffset(self):

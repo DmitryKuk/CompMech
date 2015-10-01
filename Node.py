@@ -29,10 +29,12 @@ class Node(ConstructionElement):
 	def __str__(self):
 		fixedStr = "зафиксирован" if self.fixed else "свободен"
 		
-		return "Узел [%d]%s: x = %s; F = %s; %s; Δ%d = %s" \
-			   % (self.i,
-				  " \"" + self.label + "\"" if self.label != "" else "",
-				  self.x, self.F, fixedStr, self.i, self.Delta)
+		return \
+			"Узел [%d]%s:  x = %.3f;  F = %.3f;  %s%s" \
+			% (self.i,
+			   "  \"" + self.label + "\"" if self.label != "" else "",
+			   self.x, self.F, fixedStr,
+			   "" if self.Delta is None else ";  Δ%d = %.3f" % ( self.i, self.Delta))
 	
 	
 	def size(self):

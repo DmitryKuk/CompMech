@@ -4,6 +4,7 @@
 
 import math
 from sympy import *
+from bisect import bisect_left
 
 from Construction import Construction
 from Bar import Bar
@@ -74,6 +75,36 @@ class Logic:
 	
 	def elementDescStr(self, elementID):
 		return str(self.application.elements[elementID])
+	
+	
+	def nearestData(self, x, realToVirtXLen):
+		if self.constructionEmpty(): return (None, None)
+		
+		construction = self.application.construction
+		elements = construction.elements
+		nodeXs = construction.nodeXs
+		
+		nearestNode, nearestBar = None, None
+		
+		i = bisect_left(nodeXs, x)
+		if i == 0:
+			nearestNode = elements[0]
+		else:
+			i -= 1
+			if 2 * i + 1 < len(elements):
+				nearestBar = elements[2 * i + 1]
+				
+				xl, xr = elements[2 * i].x, elements[2 * i + 2].x
+				if abs(x - xl) < abs(xr - x):
+					nearestNode = elements[2 * i]
+				else:
+					nearestNode = elements[2 * i + 2]
+			else:
+				nearestNode = elements[-1]
+		
+		# Узел в окрестностях 10 пикселей считаем ближе, чем стержень
+		nearest = nearestNode if abs(x - nearestNode.x) < realToVirtXLen(10) else nearestBar
+		return (nearest, nearestBar)
 	
 	
 	def calculate(self):

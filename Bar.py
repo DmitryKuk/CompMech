@@ -69,10 +69,18 @@ class Bar(ConstructionElement):
 	
 	
 	def __str__(self):
-		return "Стержень (%d)%s: x = %s; L = %s; A = %s; E = %s; σ = %s; q = %s; U0 = %s; UL = %s" \
-			   % (self.i,
-				  " \"" + self.label + "\"" if self.label != "" else "",
-				  self.x, self.L, self.A, self.E, self.Sigma, self.q, self.U0, self.UL)
+		return \
+			"Стержень (%d)%s:  x = %.3f;  L = %.3f;  A = %.3f;  E = %.3f;  σ = %.3f;  q = %.3f%s" \
+			% (self.i,
+			   "  \"" + self.label + "\"" if self.label != "" else "",
+			   self.x, self.L, self.A, self.E, self.Sigma, self.q,
+			   "" if self.U0 is None else ";  U0 = %.3f;  U1 = %.3f" % (self.U0, self.UL))
+	
+	
+	def supportDescStr(self, x):
+		return "" if self.U0 is None else \
+			"x(local) = %.3f;  N(x) = %.3f;  u(x) = %.3f;  σ(x) = %.3f" \
+			% (x - self.x, self.NGlobal(x), self.uGlobal(x), self.SigmaGlobal(x))
 	
 	
 	def size(self):
