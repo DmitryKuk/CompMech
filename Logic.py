@@ -25,13 +25,15 @@ class Logic:
 			if showError is not None:
 				showError(str(e))
 		self.drawConstruction()
+		self.application.mainWindow.onConstructionChanged()
 	
 	
 	def offsetFunc(self, realSize, virtSize):
 		return (40, 40, 40, 40)
 	
 	
-	def drawConstruction(self, drawN = False, drawu = False, drawSigma = False):
+	def drawConstruction(self, drawElements = True, drawLoads = True,
+						 drawN = False, drawu = False, drawSigma = False):
 		self.application.elements = {}
 		
 		graph = self.application.mainWindow.graph
@@ -48,13 +50,13 @@ class Logic:
 		# Сначала рисуем только стержни, чтобы нагрузки узлов отображались поверх них
 		for element in self.application.construction.elements:
 			if type(element) == Bar:
-				IDs = graph.drawBar(element)
+				IDs = graph.drawBar(element, drawElements, drawLoads)
 				for ID in IDs: self.application.elements[ID] = element
 		
 		# Рисуем узлы (с нагрузками)
 		for element in self.application.construction.elements:
 			if type(element) == Node:
-				IDs = graph.drawNode(element)
+				IDs = graph.drawNode(element, drawElements, drawLoads)
 				for ID in IDs: self.application.elements[ID] = element
 		
 		# Рисуем эпюры
@@ -89,3 +91,7 @@ class Logic:
 	
 	def calculated(self):
 		return self.application.construction.calculated
+	
+	
+	def constructionEmpty(self):
+		return self.application.construction.empty

@@ -204,36 +204,44 @@ class Graph(Frame):
 		self.maxFReal = min(oF[0], oF[2])	# W, E
 	
 	
-	def drawBar(self, bar):
+	def drawBar(self, bar, drawBar = True, drawLoads = True):
 		barArgs = { "fill": "yellow", "activefill": "orange", "tags": "bar" }
 		qLineArgs = { "fill": "green", "width": 5, "arrow": FIRST, "arrowshape": (5, 12, 13),
 					  "tags": "barLoad" }
 		
+		
 		leftTop     = self.mainScale.virtToRealCoord((        bar.x,  0.5 * bar.height))
 		rightBottom = self.mainScale.virtToRealCoord((bar.x + bar.L, -0.5 * bar.height))
 		
-		rect = self.canvas.create_rectangle(leftTop[0],     leftTop[1],
-											rightBottom[0], rightBottom[1],
-											**barArgs)
-		retList = [rect]	# Список идентификаторов нарисованных объектов
 		
-		qSpace = 5 * self.mainScale.kX		# Пробелы 5 пикселей между стрелками
-		qIndent = 12 * self.mainScale.kX	# Отступы в 10 пикселей по границам стержней
+		retList = []	# Список идентификаторов нарисованных объектов
 		
-		qLen = (bar.q ** 2) / (self.maxqOnL * self.specq)	# Длина стрелки q
 		
-		if bar.q > 0:
-			x1, xmin = bar.x + bar.L, bar.x + qIndent
-			while x1 > xmin:
-				x2 = max(x1 - qLen, xmin)
-				retList.append(self.drawLine((x1, 0), (x2, 0), **qLineArgs))
-				x1 -= qLen + qSpace
-		elif bar.q < 0:
-			x1, xmax = bar.x, bar.x + bar.L - qIndent
-			while x1 < xmax:
-				x2 = min(x1 + qLen, xmax)
-				retList.append(self.drawLine((x1, 0), (x2, 0), **qLineArgs))
-				x1 += qLen + qSpace
+		if drawBar:
+			retList.append(self.canvas.create_rectangle(leftTop[0],     leftTop[1],
+														rightBottom[0], rightBottom[1],
+														**barArgs))
+		
+		
+		if drawLoads and bar.q != 0 and self.maxqOnL != 0 and self.specq != 0:
+			qSpace = 5 * self.mainScale.kX		# Пробелы 5 пикселей между стрелками
+			qIndent = 12 * self.mainScale.kX	# Отступы в 10 пикселей по границам стержней
+			
+			qLen = (bar.q ** 2) / (self.maxqOnL * self.specq)	# Длина стрелки q
+			
+			if bar.q > 0:
+				x1, xmin = bar.x + bar.L, bar.x + qIndent
+				while x1 > xmin:
+					x2 = max(x1 - qLen, xmin)
+					retList.append(self.drawLine((x1, 0), (x2, 0), **qLineArgs))
+					x1 -= qLen + qSpace
+			elif bar.q < 0:
+				x1, xmax = bar.x, bar.x + bar.L - qIndent
+				while x1 < xmax:
+					x2 = min(x1 + qLen, xmax)
+					retList.append(self.drawLine((x1, 0), (x2, 0), **qLineArgs))
+					x1 += qLen + qSpace
+		
 		
 		return retList
 	
@@ -244,18 +252,18 @@ class Graph(Frame):
 		SigmaLineArgs = { "fill": "blue" }
 		SigmaMaxLineArgs = { "fill": "blue", "dash": (10, 10) }
 		
+		
 		retList = []	# Список идентификаторов нарисованных объектов
 		
-		# Рисуем эпюры N(x), u(x), Sigma(x)
-		# print("NSigmaScale = %s\nuScale = %s" % (self.NSigmaScale, self.uScale))
 		
+		# Рисуем эпюры N(x), u(x), Sigma(x)
 		if drawN:
 			retList.append(self.drawCurve(self.NSigmaScale, bar.NLineGlobal(), **NLineArgs))
-			# print("NLine       : %s" % bar.NLineGlobal())
+		
 		
 		if drawu:
 			retList.append(self.drawCurve(self.uScale, bar.uLineGlobal(), **uLineArgs))
-			# print("uLine       : %s" % bar.uLineGlobal())
+		
 		
 		if drawSigma:
 			# SigmaMax, -SigmaMax
@@ -264,58 +272,69 @@ class Graph(Frame):
 			
 			line = [(line[0][0], -line[0][1]), (line[1][0], -line[1][1])]
 			retList.append(self.drawCurve(self.NSigmaScale, line, **SigmaMaxLineArgs))
-			# print("SigmaMaxLine: %s" % bar.SigmaMaxLineGlobal())
 			
 			# Sigma(x)
 			retList.append(self.drawCurve(self.NSigmaScale, bar.SigmaLineGlobal(), **SigmaLineArgs))
-			# print("SigmaLine   : %s" % bar.SigmaLineGlobal())
-		# print()
+		
 		
 		return retList
 	
 	
-	def drawNode(self, node):
+	def drawNode(self, node, drawNode = True, drawLoads = True):
 		VaxisArgs = { "fill": "green", "dash": (3, 3), "tags": "node" }
 		FlineArgs = { "fill": "red", "width": 11, "arrow": LAST, "arrowshape": (5, 12, 13),
 					  "tags": "nodeLoad" }
 		hatchArgs = { "tags": "nodeHatch" }
 		
-		# Отображаем узел в виде вертикальной оси
+		
 		retList = []
+		
+		
+		# Отображаем узел в виде вертикальной оси
 		if node.x == 0:
 			retList.append(self.coordinateAxis[1])	# Используем ось Oy, если узел самый левый
 		else:
 			retList.append(self.drawVAxis(node.x, **VaxisArgs))	# Или рисуем новую
 		
+		
 		# Отображаем штриховку, если узел фиксирован
-		if node.fixed:
+		if drawNode and node.fixed:
 			hatch = (10, 10)	# Размеры штриха (в пикселях)
 			hatchNum = 4		# Количество штрихов в каждую сторону от горизонтальной оси
 			
-			vHatch = self.mainScale.realToVirtVector(hatch)
+			# vHatch = self.mainScale.realToVirtVector(hatch)
+			
+			(rX, rY) = self.mainScale.virtToRealCoord((node.x, 0))
 			
 			# Вычисляем координаты штрихов...
 			if node.x == 0:		# Узел самый левый -- штриховка слева
-				p1 = (node.x - vHatch[0], -vHatch[1] * hatchNum)
-				p2 = (node.x, -vHatch[1] * (hatchNum - 1))
+				# p1 = (node.x - vHatch[0], -vHatch[1] * hatchNum)
+				# p2 = (node.x, -vHatch[1] * (hatchNum - 1))
+				p1 = (rX - hatch[0], rY - hatch[1] * (hatchNum - 1))
+				p2 = (rX, rY - hatch[1] * hatchNum)
 			else:				# Штриховка справа
-				p1 = (node.x, -vHatch[1] * hatchNum)
-				p2 = (node.x + vHatch[0], -vHatch[1] * (hatchNum - 1))
+				# p1 = (node.x, -vHatch[1] * hatchNum)
+				# p2 = (node.x + vHatch[0], -vHatch[1] * (hatchNum - 1))
+				p1 = (rX, rY - hatch[1] * (hatchNum - 1))
+				p2 = (rX + hatch[0], rY - hatch[1] * hatchNum)
 			
 			# ...и рисуем их
 			for i in range(2 * hatchNum):
-				retList.append(self.drawLine(p1, p2, **hatchArgs))
+				# retList.append(self.drawLine(p1, p2, **hatchArgs))
+				retList.append(self.drawLineReal(p1, p2, **hatchArgs))
 				
-				p1 = (p1[0], p1[1] + vHatch[1])
-				p2 = (p2[0], p2[1] + vHatch[1])
+				p1 = (p1[0], p1[1] + hatch[1])
+				p2 = (p2[0], p2[1] + hatch[1])
 		
-		# Отображаем нагрузку
-		if node.F != 0:
-			p0 = (node.x - float(node.F * self.maxFReal * self.mainScale.vW)
-						   / (self.maxF * self.mainScale.rW), 0)
-			p1 = (node.x, 0)
-			
-			retList.append(self.drawLine(p0, p1, **FlineArgs))
+		
+		if drawLoads:
+			# Отображаем нагрузку
+			if node.F != 0:
+				p0 = (node.x - float(node.F * self.maxFReal * self.mainScale.vW)
+							   / (self.maxF * self.mainScale.rW), 0)
+				p1 = (node.x, 0)
+				
+				retList.append(self.drawLine(p0, p1, **FlineArgs))
 		
 		return retList
 	

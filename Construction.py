@@ -31,7 +31,8 @@ class Construction:
 		self.b = None
 		self.Deltas = None
 		
-		self.calculated = False	# Конструкция была рассчитана
+		self.calculated = False		# Конструкция была рассчитана
+		self.empty = True			# Конструкция задана
 		
 		
 		if constructionFile is None:	# Пустая конструкция
@@ -107,9 +108,13 @@ class Construction:
 			# Номер элемента
 			element.i = copy.deepcopy(i)
 			if type(element) == Bar: i += 1
+		
+		self.empty = False
 	
 	
 	def calculate(self):
+		if self.empty: return
+		
 		bars = (len(self.elements) - 1) / 2
 		if bars > 0:
 			self.A = zeros(bars + 1)
