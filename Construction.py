@@ -21,6 +21,10 @@ class Construction:
 		self.maxF, self.specq = 0, 0
 		self.maxqOnL = 0			# Относительная распределённая нагрузка = q / L
 		
+		self.maxN = 0
+		self.maxu = 0
+		self.maxSigma = 0
+		
 		
 		# [A] * {Deltas} = {b}
 		self.A = None
@@ -151,10 +155,30 @@ class Construction:
 				else:
 					element.Delta = res[self.Deltas[element.i]]
 			
+			self.maxN = 0
+			self.maxu = 0
+			self.maxSigma = 0
+			
+			for element in self.elements:
+				if type(element) == Bar:
+					elN = max(abs(element.NLocal(0)), abs(element.NLocal(element.L)))
+					self.maxN = max(self.maxN, elN)
+					
+					elu = max(abs(element.uLocal(0)), abs(element.uLocal(element.L)))
+					self.maxu = max(self.maxu, elu)
+					
+					elSigma = max(abs(element.SigmaLocal(0)), abs(element.SigmaLocal(element.L)),
+								  abs(element.Sigma))
+					self.maxSigma = max(self.maxSigma, elSigma)
+			
 			self.calculated = True
 		else:
 			if len(self.elements) == 1:	# Единственный узел неподвижен
 				self.element[0].Delta = 0.0
+				
+				self.maxN = 0
+				self.maxu = 0
+				self.maxSigma = 0
 				
 				self.calculated = True
 			else:
@@ -181,3 +205,7 @@ class Construction:
 	
 	def loads(self):
 		return (self.maxF, self.specq, self.maxqOnL)
+	
+	
+	def components(self):
+		return (self.maxN, self.maxu, self.maxSigma)

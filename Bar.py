@@ -53,6 +53,10 @@ class Bar(ConstructionElement):
 			if self.A <= 0:
 				raise Exception("Некорректная площадь поперечного сечения стержня: A = %f " \
 								"(ожидается: A > 0; %s)" % (self.A, self))
+			
+			if self.E <= 0:
+				raise Exception("Некорректный модель упругости стержня: E = %f " \
+								"(ожидается: E > 0; %s)" % (self.E, self))
 		
 		self.height = math.sqrt(self.A)		# Квадратное сечение
 	
@@ -77,6 +81,77 @@ class Bar(ConstructionElement):
 	
 	def loads(self):
 		return (0, self.q)
+	
+	
+	def uLocal(self, x):
+		return (1 - x / self.L) * self.U0 \
+			   + x / self.L * self.UL \
+			   + self.q * self.L / (2 * self.E * self.A) * x * (1 - x / self.L)
+	
+	
+	def uGlobal(self, x):
+		return self.uLocal(x - self.x)
+	
+	
+	def NLocal(self, x):
+		return self.E * self.A / self.L * (self.UL - self.U0) \
+			   + self.q * self.L / 2 * (1 - 2 * x / self.L)
+	
+	
+	def NGlobal(self, x):
+		return self.NLocal(x - self.x)
+	
+	
+	def SigmaLocal(self, x):
+		return self.NLocal(x) / self.A
+	
+	
+	def SigmaGlobal(self, x):
+		return self.NGlobal(x) / self.A
+	
+	
+	def NLineLocal(self):
+		return [(0, self.NLocal(0)), (self.L, self.NLocal(self.L))]
+	
+	
+	def NLineGlobal(self):
+		local = self.NLineLocal()
+		local[0] = (local[0][0] + self.x, local[0][1])
+		local[1] = (local[1][0] + self.x, local[1][1])
+		return local
+	
+	
+	def uLineLocal(self):
+		return [(0, self.uLocal(0)), (self.L, self.uLocal(self.L))]
+	
+	
+	def uLineGlobal(self):
+		local = self.uLineLocal()
+		local[0] = (local[0][0] + self.x, local[0][1])
+		local[1] = (local[1][0] + self.x, local[1][1])
+		return local
+	
+	
+	def SigmaLineLocal(self):
+		return [(0, self.SigmaLocal(0)), (self.L, self.SigmaLocal(self.L))]
+	
+	
+	def SigmaLineGlobal(self):
+		local = self.SigmaLineLocal()
+		local[0] = (local[0][0] + self.x, local[0][1])
+		local[1] = (local[1][0] + self.x, local[1][1])
+		return local
+	
+	
+	def SigmaMaxLineLocal(self):
+		return [(0, self.Sigma), (self.L, self.Sigma)]
+	
+	
+	def SigmaMaxLineGlobal(self):
+		local = self.SigmaMaxLineLocal()
+		local[0] = (local[0][0] + self.x, local[0][1])
+		local[1] = (local[1][0] + self.x, local[1][1])
+		return local
 
 
 def similarToBar(json):

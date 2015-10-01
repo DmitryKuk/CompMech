@@ -55,22 +55,26 @@ class MainWindow(Tk):
 				self.showError("Невозможно открыть файл: %s" % e)
 			# except Exception as e:
 			# 	print("Неизвестная ошибка: %s" % e)
-		
-		if self.application.logic.calculated():
-			self.button3["state"] = NORMAL
 	
 	
 	def onCalculateButtonClicked(self):
 		self.application.logic.calculate()
-		
-		if self.application.logic.calculated():
-			self.button3["state"] = NORMAL
 	
 	
 	def onWindowConfigure(self, event):
 		if type(event.widget) != Label:	# Игнорируем события от меток (когда меняется надпись)
-			self.application.logic.drawConstruction()
+			self.drawConstruction()
 			# Кеширование размера окна не работает! Нужна принудительная перерисовка
+	
+	
+	def onConstructionChanged(self):
+		self.button3["state"] = NORMAL if self.application.logic.calculated() else DISABLED
+		self.drawConstruction()
+	
+	
+	def drawConstruction(self):
+		drawCurve = self.application.logic.calculated()
+		self.application.logic.drawConstruction(drawCurve, drawCurve, drawCurve)
 	
 	
 	def showMessage(self, message):

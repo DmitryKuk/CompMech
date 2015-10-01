@@ -6,18 +6,14 @@ from tkinter import *
 from PIL import Image
 import os, subprocess, tempfile
 
-
-def zeroOffsetFunc(self, realSize, virtSize):
-	return 0
+import GraphScale
+from GraphScale import GraphScale, zeroOffsetFunc
 
 
 class Graph(Frame):
 	def __init__(self, mainWindow,
 				 watchForElement = True,
-				 offsetWFunc = zeroOffsetFunc,
-				 offsetNFunc = zeroOffsetFunc,
-				 offsetEFunc = zeroOffsetFunc,
-				 offsetSFunc = zeroOffsetFunc,
+				 offsetFunc = zeroOffsetFunc,
 				 **kwargs):
 		# Frame
 		kwargs["borderwidth"] = 1
@@ -30,8 +26,12 @@ class Graph(Frame):
 		# Обновлять информацию об элементе под курсором
 		self.watchForElement = watchForElement
 		
-		# Размер графика
-		self.virtualSize = (0, 0)	# В физических единицах от начала координат
+		
+		# Калькуляторы масштаба (для вычисления координат)
+		self.mainScale = GraphScale(offsetFunc)
+		self.NSigmaScale = GraphScale(offsetFunc)
+		self.uScale = GraphScale(offsetFunc)
+		
 		
 		# Максимальные нагрузки
 		self.maxF = 0		# Максимальные нагрузки (в физических единицах; для масштаба)
@@ -40,18 +40,13 @@ class Graph(Frame):
 		self.maxFReal = 0	# Максимальная длина стрелки силы в пикселях
 							# (чтобы оставалась в пределах графика)
 		
+		
+		self.maxNSigma, self.maxu = 0, 0
+		
 		self.sizeStr = StringVar()
 		self.elementStr = StringVar()
 		self.cursorStr = StringVar()
 		
-		# Смещения
-		self.offset = (0, 0, 0, 0)	# W, N, E, S
-		
-		# Функции смещения
-		self.offsetWFunc = offsetWFunc
-		self.offsetNFunc = offsetNFunc
-		self.offsetEFunc = offsetEFunc
-		self.offsetSFunc = offsetSFunc
 		
 		# Линии осей (идентификаторы холста)
 		self.coordinateAxis = (None, None)
@@ -93,6 +88,7 @@ class Graph(Frame):
 		
 		self.onWindowConfigure(None)
 		
+		
 		# Контекстное меню
 		self.menu = Menu(self, tearoff = 0)
 		self.menu.add_command(label = "Сохранить изображение",
@@ -111,12 +107,15 @@ class Graph(Frame):
 	
 	
 	def onWindowConfigure(self, event):
+		size = (self.canvas.winfo_width(), self.canvas.winfo_height())
+		for scale in self.mainScale, self.NSigmaScale, self.uScale:
+			scale.setRealSize(size)
 		self.updateOffset()
 		self.updateLabels()
 	
 	
 	def updateLabels(self, cursorX = None, cursorY = None):
-		self.sizeStr.set("Размер: (%.3f, %.3f)" % self.virtSize())
+		self.sizeStr.set("Размер: (%.3f, %.3f)" % self.mainScale.virtSize())
 		self.updateCursorPos(cursorX, cursorY)
 	
 	
@@ -124,16 +123,14 @@ class Graph(Frame):
 		needDescStr = True
 		
 		if cursorX is None:
-			cursorX = self.realOffset()[0]				# => vX = 0
+			cursorX = self.mainScale.virtToRealX(0)
 			needDescStr = False
 		
 		if cursorY is None:
-			rH = self.realHeight()
-			(oW, oE, oN, oS) = self.realOffset()
-			cursorY = 0.5 * (rH - oS + oN)				# => vY = 0
+			cursorY = self.mainScale.virtToRealY(0)
 			needDescStr = False
 		
-		self.cursorStr.set("(%.3f, %.3f)" % self.realToVirtCoord((cursorX, cursorY)))
+		self.cursorStr.set("(%.3f, %.3f)" % self.mainScale.realToVirtCoord((cursorX, cursorY)))
 		
 		if self.watchForElement:
 			try:
@@ -160,125 +157,51 @@ class Graph(Frame):
 		
 		# Тест преобразований координат
 		# vC = self.realToVirtCoord((cursorX, cursorY))
-		# rC = self.virtToRealCoord(vC)
+		# rC = self.mainScale.virtToRealCoord(vC)
 		
 		# if rC[0] != cursorX or rC[1] != cursorY:
 		# 	print("Точки не совпадают:\n(%f, %f)\n(%f, %f)\n" % (cursorX, cursorY, rC[0], rC[1]))
 	
 	
-	def setVirtualSize(self, size):
-		self.virtualSize = size
+	def setVirtSize(self, size):
+		self.mainScale.setVirtSize(size)
+		for scale in self.NSigmaScale, self.uScale:
+			scale.setVirtSize((size[0], scale.vH))
+		
+		self.updateOffset()
 		self.updateLabels()
 	
 	
 	def setMaxLoads(self, F, specq, maxqOnL):
 		self.maxF, self.specq, self.maxqOnL = abs(F), abs(specq), abs(maxqOnL)
+		self.updateOffset()
+	
+	
+	def setMaxComponents(self, maxN, maxu, maxSigma):
+		self.maxNSigma, self.maxu = max(abs(maxN), abs(maxSigma)), maxu
+		vW = self.mainScale.vW
+		
+		self.NSigmaScale.setVirtSize((vW, self.maxNSigma * 2.0 / 0.7))
+		self.uScale.setVirtSize((vW, self.maxu * 2.0 / 0.25))
+		
+		self.updateOffset()
 	
 	
 	def setTitle(self, text):
-		return self.canvas.create_text(self.realWidth() / 2, 10, text = text)
+		return self.canvas.create_text(self.mainScale.rW / 2, 10, text = text)
 	
 	
 	def setElementStr(self, text):
 		self.elementStr.set(text)
 	
 	
-	# Размеры
-	def realWidth(self):
-		return float(self.canvas.winfo_width())
-	
-	
-	def realHeight(self):
-		return float(self.canvas.winfo_height())
-	
-	
-	def realSize(self):
-		return (self.realWidth(), self.realHeight())
-	
-	
-	def virtWidth(self):
-		return float(self.virtualSize[0])
-	
-	
-	def virtHeight(self):
-		return float(self.virtualSize[1])
-	
-	
-	def virtSize(self):
-		return (self.virtWidth(), self.virtHeight())
-	
-	
 	def updateOffset(self):
-		rS, vS = self.realSize(), self.virtSize()
-		self.offset = (self.offsetWFunc(rS, vS),
-					   self.offsetNFunc(rS, vS),
-					   self.offsetEFunc(rS, vS),
-					   self.offsetSFunc(rS, vS))
+		for scale in self.mainScale, self.NSigmaScale, self.uScale:
+			scale.update()
 		
 		# Обновляем максимальные нагрузки
-		self.maxFReal = min(self.offset[0], self.offset[2])	# W, E
-	
-	
-	def realOffset(self):
-		return self.offset
-	
-	
-	def virtOffset(self):
-		(oW, oE, oN, oS) = self.realOffset()
-		
-		# Масштабные коэффициенты
-		sX = self.virtWidth()  / (self.realWidth()  - oW - oE)
-		sY = self.virtHeight() / (self.realHeight() - oN - oS)
-		
-		return (oW * sX, oN * sY, oE * sX, oS * sY)
-	
-	
-	# Преобразования координат
-	def realToVirtCoord(self, realCoord):
-		(rX, rY) = realCoord
-		(rW, rH) = self.realSize()
-		(vW, vH) = self.virtSize()
-		
-		(oW, oE, oN, oS) = self.realOffset()
-		
-		if rW - oW - oE <= 0:	vX = 0
-		else:					vX = (rX - oW) / (rW - oW - oE) * vW
-		
-		if rH - oN - oS <= 0:	vY = 0
-		else:					vY = (0.5 + (oN - rY) / (rH - oN - oS)) * vH
-		
-		# Отладочный вывод
-		# print("(rX, rY) = (%f, %f)" % (rX, rY))
-		# print("(rW, rH) = (%f, %f)" % (rW, rH))
-		# print("(vW, vH) = (%f, %f)" % (vW, vH))
-		# print("(vX, vY) = (%f, %f)" % (vX, vY))
-		# print()
-		
-		return (vX, vY)
-	
-	
-	def virtToRealX(self, vX):
-		rW, vW = self.realWidth(), self.virtWidth()
-		(oW, oE, oN, oS) = self.realOffset()
-		
-		if vW <= 0:	rX = 0
-		else:		rX = vX * (rW - oW - oE) / vW + oW
-		
-		return rX
-	
-	
-	def virtToRealY(self, vY):
-		rH, vH = self.realHeight(), self.virtHeight()
-		(oW, oE, oN, oS) = self.realOffset()
-		
-		if vH <= 0:	rY = 0
-		else:		rY = (0.5 - vY / vH) * (rH - oN - oS) + oN
-		
-		return rY
-	
-	
-	def virtToRealCoord(self, virtCoord):
-		return (self.virtToRealX(virtCoord[0]), self.virtToRealY(virtCoord[1]))
+		oF = self.mainScale.realOffset()
+		self.maxFReal = min(oF[0], oF[2])	# W, E
 	
 	
 	def drawBar(self, bar):
@@ -286,17 +209,16 @@ class Graph(Frame):
 		qLineArgs = { "fill": "green", "width": 5, "arrow": FIRST, "arrowshape": (5, 12, 13),
 					  "tags": "barLoad" }
 		
-		leftTop     = self.virtToRealCoord((        bar.x,  0.5 * bar.height))
-		rightBottom = self.virtToRealCoord((bar.x + bar.L, -0.5 * bar.height))
+		leftTop     = self.mainScale.virtToRealCoord((        bar.x,  0.5 * bar.height))
+		rightBottom = self.mainScale.virtToRealCoord((bar.x + bar.L, -0.5 * bar.height))
 		
 		rect = self.canvas.create_rectangle(leftTop[0],     leftTop[1],
 											rightBottom[0], rightBottom[1],
 											**barArgs)
 		retList = [rect]	# Список идентификаторов нарисованных объектов
 		
-		virtToRealCoeff = self.virtWidth() / self.realWidth()
-		qSpace = 5 * virtToRealCoeff			# Пробелы 5 пикселей между стрелками
-		qIndent = 12 * virtToRealCoeff			# Отступы в 10 пикселей по границам стержней
+		qSpace = 5 * self.mainScale.kX		# Пробелы 5 пикселей между стрелками
+		qIndent = 12 * self.mainScale.kX	# Отступы в 10 пикселей по границам стержней
 		
 		qLen = (bar.q ** 2) / (self.maxqOnL * self.specq)	# Длина стрелки q
 		
@@ -312,6 +234,43 @@ class Graph(Frame):
 				x2 = min(x1 + qLen, xmax)
 				retList.append(self.drawLine((x1, 0), (x2, 0), **qLineArgs))
 				x1 += qLen + qSpace
+		
+		return retList
+	
+	
+	def drawBarCurves(self, bar, drawN = False, drawu = False, drawSigma = False):
+		NLineArgs = { "fill": "red" }
+		uLineArgs = { "fill": "green" }
+		SigmaLineArgs = { "fill": "blue" }
+		SigmaMaxLineArgs = { "fill": "blue", "dash": (10, 10) }
+		
+		retList = []	# Список идентификаторов нарисованных объектов
+		
+		# Рисуем эпюры N(x), u(x), Sigma(x)
+		# print("NSigmaScale = %s\nuScale = %s" % (self.NSigmaScale, self.uScale))
+		
+		if drawN:
+			retList.append(self.drawCurve(self.NSigmaScale, bar.NLineGlobal(), **NLineArgs))
+			# print("NLine       : %s" % bar.NLineGlobal())
+		
+		if drawu:
+			retList.append(self.drawCurve(self.uScale, bar.uLineGlobal(), **uLineArgs))
+			# print("uLine       : %s" % bar.uLineGlobal())
+		
+		if drawSigma:
+			# SigmaMax, -SigmaMax
+			line = bar.SigmaMaxLineGlobal()
+			retList.append(self.drawCurve(self.NSigmaScale, line, **SigmaMaxLineArgs))
+			
+			line = [(line[0][0], -line[0][1]), (line[1][0], -line[1][1])]
+			retList.append(self.drawCurve(self.NSigmaScale, line, **SigmaMaxLineArgs))
+			# print("SigmaMaxLine: %s" % bar.SigmaMaxLineGlobal())
+			
+			# Sigma(x)
+			retList.append(self.drawCurve(self.NSigmaScale, bar.SigmaLineGlobal(), **SigmaLineArgs))
+			# print("SigmaLine   : %s" % bar.SigmaLineGlobal())
+		# print()
+		
 		return retList
 	
 	
@@ -333,8 +292,7 @@ class Graph(Frame):
 			hatch = (10, 10)	# Размеры штриха (в пикселях)
 			hatchNum = 4		# Количество штрихов в каждую сторону от горизонтальной оси
 			
-			virtToRealCoeff = self.virtWidth() / self.realWidth()
-			vHatch = (hatch[0] * virtToRealCoeff, hatch[1] * virtToRealCoeff)
+			vHatch = self.mainScale.realToVirtVector(hatch)
 			
 			# Вычисляем координаты штрихов...
 			if node.x == 0:		# Узел самый левый -- штриховка слева
@@ -353,8 +311,8 @@ class Graph(Frame):
 		
 		# Отображаем нагрузку
 		if node.F != 0:
-			p0 = (node.x - float(node.F * self.maxFReal * self.virtWidth())
-						   / (self.maxF * self.realWidth()), 0)
+			p0 = (node.x - float(node.F * self.maxFReal * self.mainScale.vW)
+						   / (self.maxF * self.mainScale.rW), 0)
 			p1 = (node.x, 0)
 			
 			retList.append(self.drawLine(p0, p1, **FlineArgs))
@@ -367,20 +325,25 @@ class Graph(Frame):
 	
 	
 	def drawLine(self, point0, point1, **kwargs):
-		p0, p1 = self.virtToRealCoord(point0), self.virtToRealCoord(point1)
+		p0, p1 = self.mainScale.virtToRealCoord(point0), self.mainScale.virtToRealCoord(point1)
+		return self.drawLineReal(p0, p1, **kwargs)
+	
+	
+	def drawCurve(self, scale, line, **kwargs):
+		p0, p1 = scale.virtToRealCoord(line[0]), scale.virtToRealCoord(line[1])
 		return self.drawLineReal(p0, p1, **kwargs)
 	
 	
 	def drawHAxis(self, vY = 0, **kwargs):
-		rW = self.realWidth()
-		rY = self.virtToRealY(vY)
+		rW = self.mainScale.rW
+		rY = self.mainScale.virtToRealY(vY)
 		
 		return self.drawLineReal((0, rY), (rW - 5, rY), **kwargs)
 	
 	
 	def drawVAxis(self, vX = 0, **kwargs):
-		rH = self.realHeight()
-		rX = self.virtToRealX(vX)
+		rH = self.mainScale.rH
+		rX = self.mainScale.virtToRealX(vX)
 		
 		return self.drawLineReal((rX, rH), (rX, 5), **kwargs)
 	
@@ -392,13 +355,15 @@ class Graph(Frame):
 	
 	
 	def drawCoordinateAxisX(self):
-		if self.virtualSize[0] != 0 and self.virtualSize[1] != 0:
+		(vW, vH) = self.mainScale.virtSize()
+		if vW != 0 and vH != 0:
 			self.coordinateAxis = (self.drawHAxis(0, **self.axisArgs), self.coordinateAxis[1])
 		return self.coordinateAxis[0]
 	
 	
 	def drawCoordinateAxisY(self):
-		if self.virtualSize[0] != 0 and self.virtualSize[1] != 0:
+		(vW, vH) = self.mainScale.virtSize()
+		if vW != 0 and vH != 0:
 			self.coordinateAxis = (self.coordinateAxis[0], self.drawVAxis(0, **self.axisArgs))
 		return self.coordinateAxis[1]
 	

@@ -12,11 +12,7 @@ class Application:
 		self.elements = None
 		
 		self.logic = Logic(self)
-		self.mainWindow = MainWindow(self,
-									 offsetWFunc = self.logic.offsetFunc,
-									 offsetNFunc = self.logic.offsetFunc,
-									 offsetEFunc = self.logic.offsetFunc,
-									 offsetSFunc = self.logic.offsetFunc)
+		self.mainWindow = MainWindow(self, offsetFunc = self.logic.offsetFunc)
 	
 	
 	def run(self):

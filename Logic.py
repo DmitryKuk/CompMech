@@ -28,34 +28,46 @@ class Logic:
 	
 	
 	def offsetFunc(self, realSize, virtSize):
-		return 40
+		return (40, 40, 40, 40)
 	
 	
-	def drawConstruction(self):
+	def drawConstruction(self, drawN = False, drawu = False, drawSigma = False):
 		self.application.elements = {}
-		self.application.mainWindow.graph.clear()
-		self.application.mainWindow.graph.setVirtualSize(self.application.construction.size())
-		self.application.mainWindow.graph.setMaxLoads(*self.application.construction.loads())
+		
+		graph = self.application.mainWindow.graph
+		graph.clear()
+		
+		# Устанавливаем максимальные нагрузки
+		graph.setVirtSize(self.application.construction.size())
+		graph.setMaxLoads(*self.application.construction.loads())
+		graph.setMaxComponents(*self.application.construction.components())
 		
 		# Ось Oy рисуем до элементов, чтобы поверх неё отобразилась ось узла (x = 0)
-		self.application.mainWindow.graph.drawCoordinateAxisY()
+		graph.drawCoordinateAxisY()
 		
 		# Сначала рисуем только стержни, чтобы нагрузки узлов отображались поверх них
 		for element in self.application.construction.elements:
 			if type(element) == Bar:
-				IDs = self.application.mainWindow.graph.drawBar(element)
+				IDs = graph.drawBar(element)
 				for ID in IDs: self.application.elements[ID] = element
 		
 		# Рисуем узлы (с нагрузками)
 		for element in self.application.construction.elements:
 			if type(element) == Node:
-				IDs = self.application.mainWindow.graph.drawNode(element)
+				IDs = graph.drawNode(element)
 				for ID in IDs: self.application.elements[ID] = element
 		
-		# Ось Ox рисуем после элементов, чтобы её было видно
-		self.application.mainWindow.graph.drawCoordinateAxisX()
+		# Рисуем эпюры
+		if (drawN or drawu or drawSigma) and self.calculated():
+			for element in self.application.construction.elements:
+				if type(element) == Bar:
+					IDs = graph.drawBarCurves(element, drawN, drawu, drawSigma)
+					for ID in IDs: self.application.elements[ID] = element
 		
-		self.application.mainWindow.graph.setTitle("Конструкция")
+		# Ось Ox рисуем после элементов, чтобы её было видно
+		graph.drawCoordinateAxisX()
+		
+		graph.setTitle("Конструкция")
 	
 	
 	def elementDescStr(self, elementID):
@@ -70,6 +82,9 @@ class Logic:
 		print("\nb =")
 		pprint(self.application.construction.b)
 		print()
+		
+		# Уведомляем главное окно о том, что конструкция рассчитана
+		self.application.mainWindow.onConstructionChanged()
 	
 	
 	def calculated(self):
