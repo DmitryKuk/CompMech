@@ -70,17 +70,16 @@ class Bar(ConstructionElement):
 	
 	def __str__(self):
 		return \
-			"Стержень (%d)%s:  x = %.3f;  L = %.3f;  A = %.3f;  E = %.3f;  σ = %.3f;  q = %.3f%s" \
+			"Стержень (%d)%s:  x = %.3f;  L = %.3f;  A = %.3f;  E = %.3f;  σ = %.3f;  q = %.3f" \
 			% (self.i,
-			   "  \"" + self.label + "\"" if self.label != "" else "",
-			   self.x, self.L, self.A, self.E, self.Sigma, self.q,
-			   "" if self.U0 is None else ";  U0 = %.3f;  U1 = %.3f" % (self.U0, self.UL))
+			   "" if self.label == "" else "  \"" + self.label + "\"",
+			   self.x, self.L, self.A, self.E, self.Sigma, self.q)
 	
 	
 	def supportDescStr(self, x):
 		return "" if self.U0 is None else \
-			"x(local) = %.3f;  N(x) = %.3f;  u(x) = %.3f;  σ(x) = %.3f" \
-			% (x - self.x, self.NGlobal(x), self.uGlobal(x), self.SigmaGlobal(x))
+			"x(local) = %.3f;  Nx(x) = %.3f;  U(x) = %.3f;  σ(x) = %.3f;  U0 = %.3f;  U1 = %.3f" \
+			% (x - self.x, self.NGlobal(x), self.UGlobal(x), self.SigmaGlobal(x), self.U0, self.UL)
 	
 	
 	def size(self):
@@ -91,14 +90,14 @@ class Bar(ConstructionElement):
 		return (0, self.q)
 	
 	
-	def uLocal(self, x):
+	def ULocal(self, x):
 		return (1 - x / self.L) * self.U0 \
 			   + x / self.L * self.UL \
 			   + self.q * self.L / (2 * self.E * self.A) * x * (1 - x / self.L)
 	
 	
-	def uGlobal(self, x):
-		return self.uLocal(x - self.x)
+	def UGlobal(self, x):
+		return self.ULocal(x - self.x)
 	
 	
 	def NLocal(self, x):
@@ -129,12 +128,12 @@ class Bar(ConstructionElement):
 		return local
 	
 	
-	def uLineLocal(self):
-		return [(0, self.uLocal(0)), (self.L, self.uLocal(self.L))]
+	def ULineLocal(self):
+		return [(0, self.ULocal(0)), (self.L, self.ULocal(self.L))]
 	
 	
-	def uLineGlobal(self):
-		local = self.uLineLocal()
+	def ULineGlobal(self):
+		local = self.ULineLocal()
 		local[0] = (local[0][0] + self.x, local[0][1])
 		local[1] = (local[1][0] + self.x, local[1][1])
 		return local

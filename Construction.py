@@ -22,7 +22,7 @@ class Construction:
 		self.maxqOnL = 0			# Относительная распределённая нагрузка = q / L
 		
 		self.maxN = 0
-		self.maxu = 0
+		self.maxU = 0
 		self.maxSigma = 0
 		
 		# Координаты узлов для бинарного поиска ближайшего узла и стержня
@@ -169,7 +169,7 @@ class Construction:
 					element.Delta = res[self.Deltas[element.i]]
 			
 			self.maxN = 0
-			self.maxu = 0
+			self.maxU = 0
 			self.maxSigma = 0
 			
 			for element in self.elements:
@@ -177,8 +177,8 @@ class Construction:
 					elN = max(abs(element.NLocal(0)), abs(element.NLocal(element.L)))
 					self.maxN = max(self.maxN, elN)
 					
-					elu = max(abs(element.uLocal(0)), abs(element.uLocal(element.L)))
-					self.maxu = max(self.maxu, elu)
+					elementU = max(abs(element.ULocal(0)), abs(element.ULocal(element.L)))
+					self.maxU = max(self.maxU, elementU)
 					
 					elSigma = max(abs(element.SigmaLocal(0)), abs(element.SigmaLocal(element.L)),
 								  abs(element.Sigma))
@@ -190,7 +190,7 @@ class Construction:
 				self.element[0].Delta = 0.0
 				
 				self.maxN = 0
-				self.maxu = 0
+				self.maxU = 0
 				self.maxSigma = 0
 				
 				self.calculated = True
@@ -221,4 +221,4 @@ class Construction:
 	
 	
 	def components(self):
-		return (self.maxN, self.maxu, self.maxSigma)
+		return (self.maxN, self.maxU, self.maxSigma)

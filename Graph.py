@@ -30,7 +30,7 @@ class Graph(Frame):
 		# Калькуляторы масштаба (для вычисления координат)
 		self.mainScale = GraphScale(offsetFunc)
 		self.NSigmaScale = GraphScale(offsetFunc)
-		self.uScale = GraphScale(offsetFunc)
+		self.UScale = GraphScale(offsetFunc)
 		
 		
 		# Максимальные нагрузки
@@ -41,7 +41,7 @@ class Graph(Frame):
 							# (чтобы оставалась в пределах графика)
 		
 		
-		self.maxNSigma, self.maxu = 0, 0
+		self.maxNSigma, self.maxU = 0, 0
 		
 		self.sizeStr = StringVar()
 		self.elementStr = StringVar()
@@ -109,7 +109,7 @@ class Graph(Frame):
 	
 	def onWindowConfigure(self, event):
 		size = (self.canvas.winfo_width(), self.canvas.winfo_height())
-		for scale in self.mainScale, self.NSigmaScale, self.uScale:
+		for scale in self.mainScale, self.NSigmaScale, self.UScale:
 			scale.setRealSize(size)
 		self.updateOffset()
 		self.updateLabels()
@@ -179,7 +179,7 @@ class Graph(Frame):
 	
 	def setVirtSize(self, size):
 		self.mainScale.setVirtSize(size)
-		for scale in self.NSigmaScale, self.uScale:
+		for scale in self.NSigmaScale, self.UScale:
 			scale.setVirtSize((size[0], scale.vH))
 		
 		self.updateOffset()
@@ -191,12 +191,12 @@ class Graph(Frame):
 		self.updateOffset()
 	
 	
-	def setMaxComponents(self, maxN, maxu, maxSigma):
-		self.maxNSigma, self.maxu = max(abs(maxN), abs(maxSigma)), maxu
+	def setMaxComponents(self, maxN, maxU, maxSigma):
+		self.maxNSigma, self.maxU = max(abs(maxN), abs(maxSigma)), maxU
 		vW = self.mainScale.vW
 		
 		self.NSigmaScale.setVirtSize((vW, self.maxNSigma * 2.0 / 0.7))
-		self.uScale.setVirtSize((vW, self.maxu * 2.0 / 0.25))
+		self.UScale.setVirtSize((vW, self.maxU * 2.0 / 0.25))
 		
 		self.updateOffset()
 	
@@ -210,7 +210,7 @@ class Graph(Frame):
 	
 	
 	def updateOffset(self):
-		for scale in self.mainScale, self.NSigmaScale, self.uScale:
+		for scale in self.mainScale, self.NSigmaScale, self.UScale:
 			scale.update()
 		
 		# Обновляем максимальные нагрузки
@@ -260,9 +260,9 @@ class Graph(Frame):
 		return retList
 	
 	
-	def drawBarCurves(self, bar, drawN = False, drawu = False, drawSigma = False):
+	def drawBarCurves(self, bar, drawN = False, drawU = False, drawSigma = False):
 		NLineArgs = { "fill": "red" }
-		uLineArgs = { "fill": "green" }
+		ULineArgs = { "fill": "green" }
 		SigmaLineArgs = { "fill": "blue" }
 		SigmaMaxLineArgs = { "fill": "blue", "dash": (10, 10) }
 		
@@ -275,8 +275,8 @@ class Graph(Frame):
 			retList.append(self.drawCurve(self.NSigmaScale, bar.NLineGlobal(), **NLineArgs))
 		
 		
-		if drawu:
-			retList.append(self.drawCurve(self.uScale, bar.uLineGlobal(), **uLineArgs))
+		if drawU:
+			retList.append(self.drawCurve(self.UScale, bar.ULineGlobal(), **ULineArgs))
 		
 		
 		if drawSigma:

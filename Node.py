@@ -32,7 +32,7 @@ class Node(ConstructionElement):
 		return \
 			"Узел [%d]%s:  x = %.3f;  F = %.3f;  %s%s" \
 			% (self.i,
-			   "  \"" + self.label + "\"" if self.label != "" else "",
+			   "" if self.label == "" else "  \"" + self.label + "\"",
 			   self.x, self.F, fixedStr,
 			   "" if self.Delta is None else ";  Δ%d = %.3f" % ( self.i, self.Delta))
 	

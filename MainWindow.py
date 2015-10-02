@@ -55,10 +55,10 @@ class MainWindow(Tk):
 		self.displayNCB.grid(column = 1, row = 6, sticky = E + W)
 		
 		
-		self.displayu = IntVar()
-		self.displayuCB = Checkbutton(self, text = "Эпюра u", command = self.onCBClicked,
-									  variable = self.displayu, state = DISABLED)
-		self.displayuCB.grid(column = 1, row = 7, sticky = E + W)
+		self.displayU = IntVar()
+		self.displayUCB = Checkbutton(self, text = "Эпюра U", command = self.onCBClicked,
+									  variable = self.displayU, state = DISABLED)
+		self.displayUCB.grid(column = 1, row = 7, sticky = E + W)
 		
 		
 		self.displaySigma = IntVar()
@@ -124,12 +124,12 @@ class MainWindow(Tk):
 		
 		
 		if self.application.logic.calculated():
-			for cb in self.displayNCB, self.displayuCB, self.displaySigmaCB:
+			for cb in self.displayNCB, self.displayUCB, self.displaySigmaCB:
 				cb["state"] = NORMAL
 			
 			self.button3["state"] = NORMAL
 		else:
-			for cb in self.displayNCB, self.displayuCB, self.displaySigmaCB:
+			for cb in self.displayNCB, self.displayUCB, self.displaySigmaCB:
 				cb["state"] = DISABLED
 			
 			self.button3["state"] = DISABLED
@@ -143,7 +143,7 @@ class MainWindow(Tk):
 			drawElements = True if self.displayElements.get() == 1 else False,
 			drawLoads	 = True if self.displayLoads.get()	  == 1 else False,
 			drawN		 = True if self.displayN.get()		  == 1 else False,
-			drawu		 = True if self.displayu.get()		  == 1 else False,
+			drawu		 = True if self.displayU.get()		  == 1 else False,
 			drawSigma	 = True if self.displaySigma.get()	  == 1 else False
 		)
 	
