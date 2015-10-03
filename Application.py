@@ -13,6 +13,7 @@ class Application:
 		
 		self.logic = Logic(self)
 		self.mainWindow = MainWindow(self, offsetFunc = self.logic.offsetFunc)
+		self.detailWindows = []
 	
 	
 	def run(self):

@@ -33,8 +33,8 @@ class Logic:
 		return (40, 40, 40, 40)
 	
 	
-	def drawConstruction(self, drawElements = True, drawLoads = True,
-						 drawN = False, drawu = False, drawSigma = False):
+	def drawConstruction(self, drawConstruction = True, drawLoads = True,
+						 drawN = False, drawU = False, drawSigma = False):
 		self.application.elements = {}
 		
 		graph = self.application.mainWindow.graph
@@ -51,20 +51,20 @@ class Logic:
 		# Сначала рисуем только стержни, чтобы нагрузки узлов отображались поверх них
 		for element in self.application.construction.elements:
 			if type(element) == Bar:
-				IDs = graph.drawBar(element, drawElements, drawLoads)
+				IDs = graph.drawBar(element, drawBar = drawConstruction, drawLoads = drawLoads)
 				for ID in IDs: self.application.elements[ID] = element
 		
 		# Рисуем узлы (с нагрузками)
 		for element in self.application.construction.elements:
 			if type(element) == Node:
-				IDs = graph.drawNode(element, drawElements, drawLoads)
+				IDs = graph.drawNode(element, drawNode = drawConstruction, drawLoads = drawLoads)
 				for ID in IDs: self.application.elements[ID] = element
 		
 		# Рисуем эпюры
-		if (drawN or drawu or drawSigma) and self.calculated():
+		if (drawN or drawU or drawSigma) and self.calculated():
 			for element in self.application.construction.elements:
 				if type(element) == Bar:
-					IDs = graph.drawBarCurves(element, drawN, drawu, drawSigma)
+					IDs = graph.drawBarCurves(element, drawN, drawU, drawSigma)
 					for ID in IDs: self.application.elements[ID] = element
 		
 		# Ось Ox рисуем после элементов, чтобы её было видно
