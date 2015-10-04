@@ -81,7 +81,9 @@ class Logic:
 						graph.drawBarCurves(element,
 											drawN = drawN, drawU = drawU, drawSigma = drawSigma)
 		else:	# Указан номер стержня => рисуем его и 2 ближайших узла
-			title = "Стержень (%d)" % barNumber
+			barLabel = elements[2 * barNumber + 1].label
+			if barLabel != "": barLabel = " \"" + barLabel + "\""
+			title = "Стержень (%d)%s" % (barNumber, barLabel)
 			
 			# Рисуем стержень
 			bar = elements[2 * barNumber + 1]

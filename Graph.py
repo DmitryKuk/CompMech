@@ -127,10 +127,13 @@ class Graph(Frame):
 			cursorY = self.canvas.canvasy(cursorY)
 			vY = self.mainScale.realToVirtY(cursorY)
 		
-		self.cursorStr.set("(%.3f, %.3f)" % (vX, vY))
+		globCoord = self.localToGlobal((vX, vY))
+		# s = ("(%.3f, %.3f)\n" % globCoord) + ("(%.3f, %.3f)" % self.globalToLocal(globCoord))
+		# self.cursorStr.set(s)
+		self.cursorStr.set("(%.3f, %.3f)" % globCoord)
 		
 		if self.onCursorMovement is not None:
-			self.onCursorMovement(self, (cursorX, cursorY), (vX, vY), self.mainScale)
+			self.onCursorMovement(self, (cursorX, cursorY), globCoord, self.mainScale)
 	
 	
 	def setVirtSize(self, size):
@@ -368,7 +371,7 @@ class Graph(Frame):
 		return vX - self.xOffset
 	
 	
-	def locatToGlobalX(self, vX):
+	def localToGlobalX(self, vX):
 		return vX + self.xOffset
 	
 	
@@ -376,7 +379,7 @@ class Graph(Frame):
 		return vY
 	
 	
-	def locatToGlobalY(self, vY):
+	def localToGlobalY(self, vY):
 		return vY
 	
 	
@@ -384,7 +387,7 @@ class Graph(Frame):
 		return (self.globalToLocalX(virtCoord[0]), self.globalToLocalY(virtCoord[1]))
 	
 	
-	def locatToGlobal(self, virtCoord):
+	def localToGlobal(self, virtCoord):
 		return (self.localToGlobalX(virtCoord[0]), self.localToGlobalY(virtCoord[1]))
 	
 	
