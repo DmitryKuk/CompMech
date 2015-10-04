@@ -36,12 +36,17 @@ class MainWindow(Tk):
 		
 		
 		# Настройки отображения содержимого
-		self.graphOptions = GraphOptionsWidget(self, command = self.drawConstruction)
-		self.graphOptions.set(drawConstruction = (True,  DISABLED),
-							  drawLoads        = (True,  DISABLED),
-							  drawN            = (False, DISABLED),
-							  drawU            = (False, DISABLED),
-							  drawSigma        = (False, DISABLED))
+		self.graphOptions = GraphOptionsWidget(
+			self,
+			command = self.drawConstruction,
+			optionsDesc = [
+				("drawConstruction", "Конструкция", True,  DISABLED),
+				("drawLoads",        "Нагрузки",    True,  DISABLED),
+				("drawN",            "Эпюра Nx",    False, DISABLED),
+				("drawU",            "Эпюра U",     False, DISABLED),
+				("drawSigma",        "Эпюра σ",     False, DISABLED)
+			]
+		)
 		self.graphOptions.grid(column = 1, row = 3, sticky = E + W)
 		
 		
