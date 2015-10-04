@@ -15,10 +15,10 @@ class MainWindow(Tk):
 		
 		self.application = application
 		
-		self.title("Стержни от Димыча — Конструкция")
+		self.title("%s%sКонструкция" % (self.application.name, self.application.nameDelim))
 		
 		self.graph = Graph(self, width = 1000, height = 400, **kwargs)
-		self.graph.grid(column = 0, row = 0, rowspan = 5, sticky = N + E + S + W)
+		self.graph.grid(column = 0, row = 0, rowspan = 8, sticky = N + E + S + W)
 		
 		# Делаем колонку с виджетом с графиком растяжимой
 		self.columnconfigure(0, weight = 1)
@@ -31,9 +31,8 @@ class MainWindow(Tk):
 									  command = self.onCalculateButtonClicked, state = DISABLED)
 		self.buttonCalculate.grid(column = 1, row = 1, sticky = E + W)
 		
-		
-		self.rowconfigure(2, weight = 1)	# Пустое пространство (растяжимое)
-		
+		# Пустое пространство (растяжимое)
+		self.rowconfigure(2, weight = 1)
 		
 		# Настройки отображения содержимого
 		self.graphOptions = GraphOptionsWidget(
@@ -49,15 +48,19 @@ class MainWindow(Tk):
 		)
 		self.graphOptions.grid(column = 1, row = 3, sticky = E + W)
 		
+		# Пустое пространство (растяжимое)
+		self.rowconfigure(4, weight = 1)
 		
-		self.rowconfigure(4, weight = 1)	# Пустое пространство (растяжимое)
+		self.buttonDetails = Button(self, text = "Детали", command = self.onDetailButtonClicked)
+		self.buttonDetails.grid(column = 1, row = 5, sticky = E + W)
 		
+		self.buttonAbout = Button(self, text = "О программе", command = self.onAboutButtonClicked)
+		self.buttonAbout.grid(column = 1, row = 6, sticky = E + W)
+		
+		# Пустое пространство (нерастяжимое)
+		self.rowconfigure(7, weight = 0, minsize = 20)
 		
 		self.bind("<Configure>", self.onWindowConfigure)
-	
-	
-	def onButtonClicked(self):
-		self.showMessage("Кнопка нажата!")
 	
 	
 	def onButtonOpenFileClicked(self):
@@ -78,6 +81,17 @@ class MainWindow(Tk):
 	
 	def onCalculateButtonClicked(self):
 		self.application.logic.calculate()
+	
+	
+	def onDetailButtonClicked(self):
+		print("Here!")
+	
+	
+	def onAboutButtonClicked(self):
+		tkinter.messagebox.showinfo(
+			"%s%sО программе" % (self.application.name, self.application.nameDelim),
+			self.application.about()
+		)
 	
 	
 	def onWindowConfigure(self, event):

@@ -14,7 +14,7 @@ class DetailWindow(Toplevel):
 		
 		self.application = application
 		
-		self.title("Стержни от Димыча — Детали")
+		self.title("%s%sДетали" % (self.application.name, self.application.nameDelim))
 		
 		self.graph = Graph(self, width = 1000, height = 400, **kwargs)
 		self.graph.grid(column = 0, row = 0, rowspan = 11, sticky = N + E + S + W)
@@ -33,36 +33,18 @@ class DetailWindow(Toplevel):
 		
 		
 		# Настройки отображения содержимого
-		self.displayElements = IntVar()
-		self.displayElements.set(1)
-		self.displayElementsCB = Checkbutton(self, text = "Конструкция", command = self.onCBClicked,
-											 variable = self.displayElements, state = DISABLED)
-		self.displayElementsCB.grid(column = 1, row = 3, sticky = E + W)
-		
-		
-		self.displayLoads = IntVar()
-		self.displayLoads.set(1)
-		self.displayLoadsCB = Checkbutton(self, text = "Нагрузки", command = self.onCBClicked,
-										  variable = self.displayLoads, state = DISABLED)
-		self.displayLoadsCB.grid(column = 1, row = 4, sticky = E + W)
-		
-		
-		self.displayN = IntVar()
-		self.displayNCB = Checkbutton(self, text = "Эпюра Nx", command = self.onCBClicked,
-									  variable = self.displayN, state = DISABLED)
-		self.displayNCB.grid(column = 1, row = 6, sticky = E + W)
-		
-		
-		self.displayU = IntVar()
-		self.displayUCB = Checkbutton(self, text = "Эпюра U", command = self.onCBClicked,
-									  variable = self.displayU, state = DISABLED)
-		self.displayUCB.grid(column = 1, row = 7, sticky = E + W)
-		
-		
-		self.displaySigma = IntVar()
-		self.displaySigmaCB = Checkbutton(self, text = "Эпюра σ", command = self.onCBClicked,
-										  variable = self.displaySigma, state = DISABLED)
-		self.displaySigmaCB.grid(column = 1, row = 8, sticky = E + W)
+		self.graphOptions = GraphOptionsWidget(
+			self,
+			command = self.drawConstruction,
+			optionsDesc = [
+				("drawConstruction", "Конструкция", True,  DISABLED),
+				("drawLoads",        "Нагрузки",    True,  DISABLED),
+				("drawN",            "Эпюра Nx",    False, DISABLED),
+				("drawU",            "Эпюра U",     False, DISABLED),
+				("drawSigma",        "Эпюра σ",     False, DISABLED)
+			]
+		)
+		self.graphOptions.grid(column = 1, row = 3, sticky = E + W)
 		
 		
 		self.rowconfigure(9, weight = 1)	# Пустое пространство (растяжимое)

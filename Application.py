@@ -8,6 +8,12 @@ from Logic import *
 
 class Application:
 	def __init__(self):
+		self.name = "Стержни от Димыча"
+		self.nameDelim = " — "
+		
+		self.version = "1.0"
+		self.timestamp = "Октябрь 2015"
+		
 		self.construction = None
 		self.elements = None
 		
@@ -18,3 +24,10 @@ class Application:
 	
 	def run(self):
 		self.mainWindow.mainloop()
+	
+	
+	def about(self):
+		return "Версия: %s, %s\n\n" \
+			   "Куковинец Дмитрий Валерьевич\nd1021976@gmail.com\n\n" \
+			   "ФГБОУ ВО \"МГТУ \"СТАНКИН\"\nКафедра УИТС" \
+			   % (self.version, self.timestamp)
