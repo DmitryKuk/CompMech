@@ -58,7 +58,7 @@ class MainWindow(Tk):
 		self.buttonAbout.grid(column = 1, row = 6, sticky = E + W)
 		
 		# Пустое пространство (нерастяжимое)
-		self.rowconfigure(7, weight = 0, minsize = 20)
+		self.rowconfigure(7, weight = 0, minsize = 17)
 		
 		self.bind("<Configure>", self.onWindowConfigure)
 	
