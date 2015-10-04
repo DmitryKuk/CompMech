@@ -25,56 +25,84 @@ class Logic:
 		except Exception as e:
 			if showError is not None:
 				showError(str(e))
-		self.drawConstruction()
-		self.application.mainWindow.onConstructionChanged()
+		self.draw()
+		self.application.onConstructionChanged()
 	
 	
 	def offsetFunc(self, realSize, virtSize):
 		return (40, 40, 40, 40)
 	
 	
-	def drawConstruction(self, drawConstruction = True, drawLoads = True,
-						 drawN = False, drawU = False, drawSigma = False):
-		self.application.elements = {}
-		
-		graph = self.application.mainWindow.graph
+	def draw(self, graph = None, barNumber = None,
+			 drawConstruction = True, drawLoads = True,
+			 drawN = False, drawU = False, drawSigma = False):
+		if graph is None:
+			graph = self.application.mainWindow.graph
 		graph.clear()
 		
-		# Устанавливаем максимальные нагрузки
-		graph.setVirtSize(self.application.construction.size())
-		graph.setMaxLoads(*self.application.construction.loads())
-		graph.setMaxComponents(*self.application.construction.components())
+		if barNumber is not None and barNumber >= self.barsCount():
+			return
 		
-		# Ось Oy рисуем до элементов, чтобы поверх неё отобразилась ось узла (x = 0)
-		graph.drawCoordinateAxisY()
 		
-		# Сначала рисуем только стержни, чтобы нагрузки узлов отображались поверх них
-		for element in self.application.construction.elements:
-			if type(element) == Bar:
-				IDs = graph.drawBar(element, drawBar = drawConstruction, drawLoads = drawLoads)
-				for ID in IDs: self.application.elements[ID] = element
+		# Устанавливаем размеры конструкции, максимальные нагрузки и проч.
+		if not self.constructionEmpty():
+			graph.setVirtSize(self.application.construction.size(barNumber))
+			
+			# Масштабируем нагрузки по конструкции
+			graph.setMaxLoads(*self.application.construction.maxLoads(barNumber = None))
 		
-		# Рисуем узлы (с нагрузками)
-		for element in self.application.construction.elements:
-			if type(element) == Node:
-				IDs = graph.drawNode(element, drawNode = drawConstruction, drawLoads = drawLoads)
-				for ID in IDs: self.application.elements[ID] = element
+		if self.constructionCalculated():
+			graph.setMaxComponents(*self.application.construction.maxComponents(barNumber))
 		
-		# Рисуем эпюры
-		if (drawN or drawU or drawSigma) and self.calculated():
-			for element in self.application.construction.elements:
+		# Ось Oy рисуем до элементов
+		if not self.constructionEmpty():
+			graph.drawCoordinateAxisY()
+		
+		elements = self.application.construction.elements
+		
+		
+		if barNumber == None:	# Номер стержня не указан => рисуем всю конструкцию
+			title = "Конструкция"
+			
+			# Сначала рисуем только стержни, чтобы нагрузки узлов отображались поверх них
+			for element in elements:
 				if type(element) == Bar:
-					IDs = graph.drawBarCurves(element, drawN, drawU, drawSigma)
-					for ID in IDs: self.application.elements[ID] = element
+					graph.drawBar(element, drawBar = drawConstruction, drawLoads = drawLoads)
+			
+			# Рисуем узлы (с нагрузками)
+			for element in elements:
+				if type(element) == Node:
+					graph.drawNode(element, drawNode = drawConstruction, drawLoads = drawLoads)
+			
+			# Рисуем эпюры
+			if (drawN or drawU or drawSigma) and self.constructionCalculated():
+				for element in elements:
+					if type(element) == Bar:
+						graph.drawBarCurves(element,
+											drawN = drawN, drawU = drawU, drawSigma = drawSigma)
+		else:	# Указан номер стержня => рисуем его и 2 ближайших узла
+			title = "Стержень (%d)" % barNumber
+			
+			# Рисуем стержень
+			bar = elements[2 * barNumber + 1]
+			graph.setLocalCoordinate(bar.x)
+			
+			graph.drawBar(bar, drawBar = drawConstruction, drawLoads = drawLoads)
+			
+			# Рисуем соседние узлы
+			for element in elements[2 * barNumber], elements[2 * barNumber + 2]:
+				graph.drawNode(element, drawNode = drawConstruction, drawLoads = drawLoads)
+			
+			# Рисуем эпюры
+			graph.drawBarCurves(bar, drawN = drawN, drawU = drawU, drawSigma = drawSigma)
+		
 		
 		# Ось Ox рисуем после элементов, чтобы её было видно
-		graph.drawCoordinateAxisX()
+		if not self.constructionEmpty():
+			graph.drawCoordinateAxisX()
 		
-		graph.setTitle("Конструкция")
-	
-	
-	def elementDescStr(self, elementID):
-		return str(self.application.elements[elementID])
+		# Надпись на графике
+		graph.setTitle(title)
 	
 	
 	def nearestData(self, x, realToVirtXLen):
@@ -91,7 +119,7 @@ class Logic:
 			nearestNode = elements[0]
 		else:
 			i -= 1
-			if 2 * i + 1 < len(elements):
+			if 2 * i + 1 < self.elementsCount():
 				nearestBar = elements[2 * i + 1]
 				
 				xl, xr = elements[2 * i].x, elements[2 * i + 2].x
@@ -107,6 +135,19 @@ class Logic:
 		return (nearest, nearestBar)
 	
 	
+	def onCursorMovement(self, graph, realCoord, virtCoord, mainScale):
+		if realCoord[0] == None:
+			elementDescStr = "\n"
+		else:
+			(nearest, nearestBar) = self.nearestData(virtCoord[0], mainScale.realToVirtXLen)
+			
+			elementDescStr  = "" if nearest is None else str(nearest)
+			elementDescStr += "\n"
+			elementDescStr += "" if nearestBar is None else nearestBar.supportDescStr(virtCoord[0])
+		
+		graph.setElementStr(elementDescStr)
+	
+	
 	def calculate(self):
 		self.application.construction.calculate()
 		
@@ -117,12 +158,24 @@ class Logic:
 		print()
 		
 		# Уведомляем главное окно о том, что конструкция рассчитана
-		self.application.mainWindow.onConstructionChanged()
+		self.application.onConstructionChanged()
 	
 	
-	def calculated(self):
-		return self.application.construction.calculated
+	def elementsCount(self):
+		return len(self.application.construction.elements)
+	
+	
+	def barsCount(self):
+		return self.elementsCount() // 2
+	
+	
+	def nodesCount(self):
+		return self.elementsCount() // 2 + 1
 	
 	
 	def constructionEmpty(self):
 		return self.application.construction.empty
+	
+	
+	def constructionCalculated(self):
+		return self.application.construction.calculated

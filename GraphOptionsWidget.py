@@ -9,14 +9,14 @@ class GraphOptionsWidget(Frame):
 	def __init__(self, parent, optionsDesc = [], command = None, **kwargs):
 		Frame.__init__(self, parent, **kwargs)
 		
-		self.options = { name: self.newElement(text, value, cbState) \
+		self.options = { name: self.createElement(text, value, cbState) \
 						 for name, text, value, cbState in optionsDesc }
 		
 		# Будет вызвано при изменении состояния пользователем
 		self.command = command
 	
 	
-	def newElement(self, text, value, cbState):
+	def createElement(self, text, value, cbState):
 		var = IntVar()
 		if value is not None and bool(value): var.set(1)
 		

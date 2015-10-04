@@ -6,84 +6,97 @@ from tkinter import *
 from tkinter.ttk import Notebook
 
 from Graph import Graph
+from GraphOptionsWidget import GraphOptionsWidget
 
 
 class DetailWindow(Toplevel):
-	def __init__(self, application, barNumber = 0):
+	def __init__(self, application, barNumber = 0, **kwargs):
 		Toplevel.__init__(self)
 		
 		self.application = application
 		
+		self.barNumber = barNumber
+		
 		self.title("%s%sДетали" % (self.application.name, self.application.nameDelim))
 		
 		self.graph = Graph(self, width = 1000, height = 400, **kwargs)
-		self.graph.grid(column = 0, row = 0, rowspan = 11, sticky = N + E + S + W)
+		self.graph.grid(column = 0, row = 0, rowspan = 4, sticky = N + E + S + W)
 		
 		# Делаем колонку с виджетом с графиком растяжимой
 		self.columnconfigure(0, weight = 1)
 		
-		self.buttonOpenFile = Button(self, text = "Test 1")
-		self.buttonOpenFile.grid(column = 1, row = 0, sticky = E + W)
+		self.buttonPrev = Button(self, text = "<-", command = self.onButtonPrevClicked)
+		self.buttonPrev.grid(column = 1, row = 0, sticky = E + W)
 		
-		self.buttonCalculate = Button(self, text = "Test 2")
-		self.buttonCalculate.grid(column = 1, row = 1, sticky = E + W)
+		self.buttonNext = Button(self, text = "->", command = self.onButtonNextClicked)
+		self.buttonNext.grid(column = 2, row = 0, sticky = E + W)
 		
-		
-		self.rowconfigure(2, weight = 1)	# Пустое пространство (растяжимое)
-		
+		# Пустое пространство (растяжимое)
+		self.rowconfigure(1, weight = 1)
 		
 		# Настройки отображения содержимого
 		self.graphOptions = GraphOptionsWidget(
 			self,
-			command = self.drawConstruction,
+			command = self.draw,
 			optionsDesc = [
 				("drawConstruction", "Конструкция", True,  DISABLED),
 				("drawLoads",        "Нагрузки",    True,  DISABLED),
-				("drawN",            "Эпюра Nx",    False, DISABLED),
-				("drawU",            "Эпюра U",     False, DISABLED),
-				("drawSigma",        "Эпюра σ",     False, DISABLED)
+				("drawN",            "График Nx",   False, DISABLED),
+				("drawU",            "График U",    False, DISABLED),
+				("drawSigma",        "График σ",    False, DISABLED)
 			]
 		)
-		self.graphOptions.grid(column = 1, row = 3, sticky = E + W)
+		self.graphOptions.grid(column = 1, row = 2, columnspan = 2, sticky = E + W)
 		
-		
-		self.rowconfigure(9, weight = 1)	# Пустое пространство (растяжимое)
-		
-		
-		self.button3 = Button(self, text = "Нажми меня", command = self.onButtonClicked, state = DISABLED)
-		self.button3.grid(column = 1, row = 10, sticky = E + W)
+		# Пустое пространство (растяжимое)
+		self.rowconfigure(3, weight = 1)
 		
 		self.bind("<Configure>", self.onWindowConfigure)
+		self.bind("<Destroy>", self.onWindowDestroy)
+		
+		self.onConstructionChanged()
 	
 	
-	def onButtonClicked(self):
-		self.showMessage("Кнопка нажата!")
+	def onButtonPrevClicked(self):
+		self.barNumber = (self.barNumber - 1) % self.application.logic.barsCount()
+		self.draw()
+	
+	
+	def onButtonNextClicked(self):
+		self.barNumber = (self.barNumber + 1) % self.application.logic.barsCount()
+		self.draw()
 	
 	
 	def onWindowConfigure(self, event):
 		if type(event.widget) != Label:	# Игнорируем события от меток (когда меняется надпись)
-			# self.drawConstructionDetail()
-			print("drawConstructionDetail()")
+			self.draw()
 			# Кеширование размера окна не работает! Нужна принудительная перерисовка
 	
 	
-	def onCBClicked(self):
-		# self.drawConstructionDetail()
-		print("onCBClicked()")
+	def onWindowDestroy(self, event):
+		self.application.onDetailWindowDestroy(self)
 	
 	
 	def onConstructionChanged(self):
-		self.drawConstruction()
+		if self.barNumber not in range(0, self.application.logic.barsCount()):
+			self.barNumber = 0
+		
+		state1 = NORMAL if not self.application.logic.constructionEmpty()  else DISABLED
+		state2 = NORMAL if self.application.logic.constructionCalculated() else DISABLED
+		
+		self.graphOptions.set(drawConstruction = (None, state1),
+							  drawLoads        = (None, state1),
+							  drawN            = (None, state2),
+							  drawU            = (None, state2),
+							  drawSigma        = (None, state2))
+		
+		self.draw()
 	
 	
-	def drawConstruction(self):
-		self.application.logic.drawConstruction(
-			drawElements = True if self.displayElements.get() == 1 else False,
-			drawLoads	 = True if self.displayLoads.get()	  == 1 else False,
-			drawN		 = True if self.displayN.get()		  == 1 else False,
-			drawu		 = True if self.displayU.get()		  == 1 else False,
-			drawSigma	 = True if self.displaySigma.get()	  == 1 else False
-		)
+	def draw(self):
+		self.update()
+		self.application.logic.draw(self.graph, barNumber = self.barNumber,
+									**self.graphOptions.get())
 	
 	
 	def showMessage(self, message):

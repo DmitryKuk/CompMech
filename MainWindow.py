@@ -17,7 +17,8 @@ class MainWindow(Tk):
 		
 		self.title("%s%sКонструкция" % (self.application.name, self.application.nameDelim))
 		
-		self.graph = Graph(self, width = 1000, height = 400, **kwargs)
+		self.graph = Graph(self, onCursorMovement = self.application.logic.onCursorMovement,
+						   width = 1000, height = 400, **kwargs)
 		self.graph.grid(column = 0, row = 0, rowspan = 8, sticky = N + E + S + W)
 		
 		# Делаем колонку с виджетом с графиком растяжимой
@@ -37,7 +38,7 @@ class MainWindow(Tk):
 		# Настройки отображения содержимого
 		self.graphOptions = GraphOptionsWidget(
 			self,
-			command = self.drawConstruction,
+			command = self.draw,
 			optionsDesc = [
 				("drawConstruction", "Конструкция", True,  DISABLED),
 				("drawLoads",        "Нагрузки",    True,  DISABLED),
@@ -61,6 +62,8 @@ class MainWindow(Tk):
 		self.rowconfigure(7, weight = 0, minsize = 17)
 		
 		self.bind("<Configure>", self.onWindowConfigure)
+		
+		self.onConstructionChanged()
 	
 	
 	def onButtonOpenFileClicked(self):
@@ -84,7 +87,7 @@ class MainWindow(Tk):
 	
 	
 	def onDetailButtonClicked(self):
-		print("Here!")
+		self.application.createDetailWindow()
 	
 	
 	def onAboutButtonClicked(self):
@@ -96,17 +99,13 @@ class MainWindow(Tk):
 	
 	def onWindowConfigure(self, event):
 		if type(event.widget) != Label:	# Игнорируем события от меток (когда меняется надпись)
-			self.drawConstruction()
+			self.draw()
 			# Кеширование размера окна не работает! Нужна принудительная перерисовка
 	
 	
 	def onConstructionChanged(self):
-		# Обновляем окна с деталями конструкции
-		# for window in self.application.detailWindows:
-		# 	window.onConstructionChanged()
-		
-		state1 = NORMAL if not self.application.logic.constructionEmpty() else DISABLED
-		state2 = NORMAL if self.application.logic.calculated()            else DISABLED
+		state1 = NORMAL if not self.application.logic.constructionEmpty()  else DISABLED
+		state2 = NORMAL if self.application.logic.constructionCalculated() else DISABLED
 		
 		self.buttonCalculate["state"] = state1
 		self.graphOptions.set(drawConstruction = (None, state1),
@@ -115,11 +114,12 @@ class MainWindow(Tk):
 							  drawU            = (None, state2),
 							  drawSigma        = (None, state2))
 		
-		self.drawConstruction()
+		self.draw()
 	
 	
-	def drawConstruction(self):
-		self.application.logic.drawConstruction(**self.graphOptions.get())
+	def draw(self):
+		self.update()
+		self.application.logic.draw(self.graph, **self.graphOptions.get())
 	
 	
 	def showMessage(self, message):

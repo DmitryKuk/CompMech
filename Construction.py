@@ -174,15 +174,11 @@ class Construction:
 			
 			for element in self.elements:
 				if type(element) == Bar:
-					elN = max(abs(element.NLocal(0)), abs(element.NLocal(element.L)))
-					self.maxN = max(self.maxN, elN)
+					c = element.maxComponents()
 					
-					elementU = max(abs(element.ULocal(0)), abs(element.ULocal(element.L)))
-					self.maxU = max(self.maxU, elementU)
-					
-					elSigma = max(abs(element.SigmaLocal(0)), abs(element.SigmaLocal(element.L)),
-								  abs(element.Sigma))
-					self.maxSigma = max(self.maxSigma, elSigma)
+					self.maxN     = max(self.maxN,     c[0])
+					self.maxU     = max(self.maxU,     c[1])
+					self.maxSigma = max(self.maxSigma, c[2])
 			
 			self.calculated = True
 		else:
@@ -212,13 +208,20 @@ class Construction:
 			raise Exception("Элемент конструкции не похож на стержень или узел: %s" % item)
 	
 	
-	def size(self):
-		return (self.sizeX, self.sizeY)
+	def size(self, barNumber = None):
+		return (self.sizeX, self.sizeY) if barNumber is None \
+			   else self.elements[2 * barNumber + 1].size()
 	
 	
-	def loads(self):
-		return (self.maxF, self.specq, self.maxqOnL)
+	def maxLoads(self, barNumber = None):
+		if barNumber is None:
+			return (self.maxF, self.specq, self.maxqOnL)
+		else:
+			bar = self.elements[2 * barNumber + 1]
+			node1, node2 = self.elements[2 * barNumber], self.elements[2 * barNumber + 2]
+			return (max(abs(node1.F), abs(node2.F)), abs(bar.q), abs(float(bar.q) / bar.L))
 	
 	
-	def components(self):
-		return (self.maxN, self.maxU, self.maxSigma)
+	def maxComponents(self, barNumber = None):
+		return (self.maxN, self.maxU, self.maxSigma) if barNumber is None \
+			   else self.elements[2 * barNumber + 1].maxComponents()

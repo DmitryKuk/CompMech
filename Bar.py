@@ -90,6 +90,15 @@ class Bar(ConstructionElement):
 		return (0, self.q)
 	
 	
+	def maxComponents(self):
+		return ( \
+			max(abs(self.NLocal(0)), abs(self.NLocal(self.L))), \
+			max(abs(self.ULocal(0)), abs(self.ULocal(self.L))), \
+			max(abs(self.SigmaLocal(0)), abs(self.SigmaLocal(self.L)), \
+				abs(self.Sigma)) \
+		)
+	
+	
 	def ULocal(self, x):
 		return (1 - x / self.L) * self.U0 \
 			   + x / self.L * self.UL \
