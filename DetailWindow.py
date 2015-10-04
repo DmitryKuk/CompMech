@@ -26,10 +26,10 @@ class DetailWindow(Toplevel):
 		# Делаем колонку с виджетом с графиком растяжимой
 		self.columnconfigure(0, weight = 1)
 		
-		self.buttonPrev = Button(self, text = "<-", command = self.onButtonPrevClicked)
+		self.buttonPrev = Button(self, text = "←", command = self.onButtonPrevClicked)
 		self.buttonPrev.grid(column = 1, row = 0, sticky = E + W)
 		
-		self.buttonNext = Button(self, text = "->", command = self.onButtonNextClicked)
+		self.buttonNext = Button(self, text = "→", command = self.onButtonNextClicked)
 		self.buttonNext.grid(column = 2, row = 0, sticky = E + W)
 		
 		# Пустое пространство (растяжимое)
@@ -59,12 +59,14 @@ class DetailWindow(Toplevel):
 	
 	
 	def onButtonPrevClicked(self):
-		self.barNumber = (self.barNumber - 1) % self.application.logic.barsCount()
+		barsCount = self.application.logic.barsCount()
+		if barsCount > 0: self.barNumber = (self.barNumber - 1) % barsCount
 		self.draw()
 	
 	
 	def onButtonNextClicked(self):
-		self.barNumber = (self.barNumber + 1) % self.application.logic.barsCount()
+		barsCount = self.application.logic.barsCount()
+		if barsCount > 0: self.barNumber = (self.barNumber + 1) % barsCount
 		self.draw()
 	
 	
