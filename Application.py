@@ -28,10 +28,7 @@ class Application:
 	
 	
 	def onDetailWindowDestroy(self, window):
-		try:
-			self.detailWindows.remove(window)
-		except KeyError:
-			pass
+		self.detailWindows.discard(window)
 	
 	
 	def onConstructionChanged(self):
