@@ -102,11 +102,3 @@ class DetailWindow(Toplevel):
 		self.update()
 		self.application.logic.draw(self.graph, barNumber = self.barNumber,
 									**self.graphOptions.get())
-	
-	
-	def showMessage(self, message):
-		tkinter.messagebox.showinfo("Информация", message)
-	
-	
-	def showError(self, message):
-		tkinter.messagebox.showerror("Ошибка", message)
