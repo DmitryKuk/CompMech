@@ -187,3 +187,15 @@ class Logic:
 	
 	def constructionCalculated(self):
 		return self.application.construction.calculated
+	
+	
+	def matrices(self):
+		if not self.constructionCalculated():
+			return None
+		
+		c = self.application.construction
+		Deltas = []
+		for element in self.application.construction.elements:
+			if type(element) == Node:
+				Deltas.append(element.Delta)
+		return [c.A, c.b, Matrix(self.nodesCount(), 1, Deltas)]

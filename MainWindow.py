@@ -22,7 +22,7 @@ class MainWindow(Tk):
 						   onCursorMovement = self.application.logic.onCursorMovement,
 						   onMouse1Clicked = self.application.logic.onMouse1Clicked,
 						   **kwargs)
-		self.graph.grid(column = 0, row = 0, rowspan = 8, sticky = N + E + S + W)
+		self.graph.grid(column = 0, row = 0, rowspan = 9, sticky = N + E + S + W)
 		
 		# Делаем колонку с виджетом с графиком растяжимой
 		self.columnconfigure(0, weight = 1)
@@ -55,14 +55,18 @@ class MainWindow(Tk):
 		# Пустое пространство (растяжимое)
 		self.rowconfigure(4, weight = 1)
 		
+		self.buttonMatrices = Button(self, text = "Матрицы", command = self.onMatricesButtonClicked,
+									 state = DISABLED)
+		self.buttonMatrices.grid(column = 1, row = 5, sticky = E + W)
+		
 		self.buttonDetails = Button(self, text = "Детали", command = self.onDetailButtonClicked)
-		self.buttonDetails.grid(column = 1, row = 5, sticky = E + W)
+		self.buttonDetails.grid(column = 1, row = 6, sticky = E + W)
 		
 		self.buttonAbout = Button(self, text = "О программе", command = self.onAboutButtonClicked)
-		self.buttonAbout.grid(column = 1, row = 6, sticky = E + W)
+		self.buttonAbout.grid(column = 1, row = 7, sticky = E + W)
 		
 		# Пустое пространство (нерастяжимое)
-		self.rowconfigure(7, weight = 0, minsize = 17)
+		self.rowconfigure(8, weight = 0, minsize = 17)
 		
 		self.bind("<Configure>", self.onWindowConfigure)
 		
@@ -87,6 +91,10 @@ class MainWindow(Tk):
 	
 	def onCalculateButtonClicked(self):
 		self.application.logic.calculate()
+	
+	
+	def onMatricesButtonClicked(self):
+		self.application.createMatricesWindow()
 	
 	
 	def onDetailButtonClicked(self):
@@ -116,6 +124,8 @@ class MainWindow(Tk):
 							  drawN            = (None, state2),
 							  drawU            = (None, state2),
 							  drawSigma        = (None, state2))
+		
+		self.buttonMatrices["state"] = state2
 		
 		self.draw()
 	

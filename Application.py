@@ -4,6 +4,7 @@
 
 from MainWindow import MainWindow
 from DetailWindow import DetailWindow
+from MatricesWindow import MatricesWindow
 from Logic import *
 
 
@@ -21,19 +22,30 @@ class Application:
 		
 		self.mainWindow = MainWindow(self)
 		self.detailWindows = set()
+		self.matricesWindows = set()
 	
 	
 	def createDetailWindow(self, barNumber = 0):
 		self.detailWindows.add(DetailWindow(self, barNumber = barNumber))
 	
 	
+	def createMatricesWindow(self):
+		self.matricesWindows.add(MatricesWindow(self))
+	
+	
 	def onDetailWindowDestroy(self, window):
 		self.detailWindows.discard(window)
+	
+	
+	def onMatricesWindowDestroy(self, window):
+		self.matricesWindows.discard(window)
 	
 	
 	def onConstructionChanged(self):
 		self.mainWindow.onConstructionChanged()
 		for window in self.detailWindows:
+			window.onConstructionChanged()
+		for window in self.matricesWindows:
 			window.onConstructionChanged()
 	
 	
