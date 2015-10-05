@@ -12,9 +12,12 @@ from GraphScale import GraphScale, zeroOffsetFunc
 
 class Graph(Frame):
 	def __init__(self, mainWindow,
-				 onCursorMovement = None,
 				 offsetFunc = zeroOffsetFunc,
 				 xOffset = 0,
+				 
+				 onCursorMovement = None,
+				 onMouse1Clicked = None,
+				 
 				 **kwargs):
 		# Frame
 		kwargs["borderwidth"] = 1
@@ -24,17 +27,18 @@ class Graph(Frame):
 		self.mainWindow = mainWindow
 		
 		
-		# Обновлять информацию об элементе под курсором
-		self.onCursorMovement = onCursorMovement
-		
 		# Смещение начала координат
 		self.xOffset = xOffset
-		
 		
 		# Калькуляторы масштаба (для вычисления координат)
 		self.mainScale = GraphScale(offsetFunc)
 		self.NSigmaScale = GraphScale(offsetFunc)
 		self.UScale = GraphScale(offsetFunc)
+		
+		
+		# События
+		self.onCursorMovementCallback = onCursorMovement
+		self.onMouse1ClickedCallback = onMouse1Clicked
 		
 		
 		# Максимальные нагрузки
@@ -101,6 +105,7 @@ class Graph(Frame):
 		
 		self.canvas.bind("<ButtonRelease-2>",
 						 lambda event: self.menu.post(event.x_root, event.y_root))
+		self.canvas.bind("<ButtonRelease-1>", self.onMouse1Clicked)
 	
 	
 	def onWindowConfigure(self, event):
@@ -109,6 +114,14 @@ class Graph(Frame):
 			scale.setRealSize(size)
 		self.updateOffset()
 		self.updateLabels()
+	
+	
+	def onMouse1Clicked(self, event):
+		if self.onMouse1ClickedCallback is not None:
+			cursorRealCoord = (self.canvas.canvasx(event.x), self.canvas.canvasy(event.y))
+			cursorVirtCoord = self.localToGlobal(self.mainScale.realToVirtCoord(cursorRealCoord))
+			
+			self.onMouse1ClickedCallback(self, cursorRealCoord, cursorVirtCoord, self.mainScale)
 	
 	
 	def updateLabels(self, cursorX = None, cursorY = None):
@@ -128,12 +141,10 @@ class Graph(Frame):
 			vY = self.mainScale.realToVirtY(cursorY)
 		
 		globCoord = self.localToGlobal((vX, vY))
-		# s = ("(%.3f, %.3f)\n" % globCoord) + ("(%.3f, %.3f)" % self.globalToLocal(globCoord))
-		# self.cursorStr.set(s)
 		self.cursorStr.set("(%.3f, %.3f)" % globCoord)
 		
-		if self.onCursorMovement is not None:
-			self.onCursorMovement(self, (cursorX, cursorY), globCoord, self.mainScale)
+		if self.onCursorMovementCallback is not None:
+			self.onCursorMovementCallback(self, (cursorX, cursorY), globCoord, self.mainScale)
 	
 	
 	def setVirtSize(self, size):

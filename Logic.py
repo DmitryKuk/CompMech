@@ -137,17 +137,23 @@ class Logic:
 		return (nearest, nearestBar)
 	
 	
-	def onCursorMovement(self, graph, realCoord, virtCoord, mainScale):
+	def onCursorMovement(self, graph, realCoord, virtCoord, scale):
 		if realCoord[0] == None:
 			elementDescStr = "\n"
 		else:
-			(nearest, nearestBar) = self.nearestData(virtCoord[0], mainScale.realToVirtXLen)
+			(nearest, nearestBar) = self.nearestData(virtCoord[0], scale.realToVirtXLen)
 			
 			elementDescStr  = "" if nearest is None else str(nearest)
 			elementDescStr += "\n"
 			elementDescStr += "" if nearestBar is None else nearestBar.supportDescStr(virtCoord[0])
 		
 		graph.setElementStr(elementDescStr)
+	
+	
+	def onMouse1Clicked(self, graph, realCoord, virtCoord, scale):
+		(nearest, nearestBar) = self.nearestData(virtCoord[0], scale.realToVirtXLen)
+		if nearestBar is not None:
+			self.application.createDetailWindow(barNumber = nearestBar.i)
 	
 	
 	def calculate(self):

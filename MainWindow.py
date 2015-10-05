@@ -17,8 +17,11 @@ class MainWindow(Tk):
 		
 		self.title("%s%sКонструкция" % (self.application.name, self.application.nameDelim))
 		
-		self.graph = Graph(self, onCursorMovement = self.application.logic.onCursorMovement,
-						   width = 1000, height = 400, **kwargs)
+		self.graph = Graph(self, width = 1000, height = 400,
+						   offsetFunc = self.application.logic.offsetFunc,
+						   onCursorMovement = self.application.logic.onCursorMovement,
+						   onMouse1Clicked = self.application.logic.onMouse1Clicked,
+						   **kwargs)
 		self.graph.grid(column = 0, row = 0, rowspan = 8, sticky = N + E + S + W)
 		
 		# Делаем колонку с виджетом с графиком растяжимой

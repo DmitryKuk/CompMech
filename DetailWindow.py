@@ -19,8 +19,10 @@ class DetailWindow(Toplevel):
 		
 		self.title("%s%sДетали" % (self.application.name, self.application.nameDelim))
 		
-		self.graph = Graph(self, onCursorMovement = self.application.logic.onCursorMovement,
-						   width = 1000, height = 400, **kwargs)
+		self.graph = Graph(self, width = 1000, height = 400,
+						   offsetFunc = self.application.logic.offsetFunc,
+						   onCursorMovement = self.application.logic.onCursorMovement,
+						   **kwargs)
 		self.graph.grid(column = 0, row = 0, rowspan = 4, sticky = N + E + S + W)
 		
 		# Делаем колонку с виджетом с графиком растяжимой

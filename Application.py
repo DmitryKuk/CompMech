@@ -18,13 +18,13 @@ class Application:
 		self.construction = None
 		
 		self.logic = Logic(self)
-		self.mainWindow = MainWindow(self, offsetFunc = self.logic.offsetFunc)
+		
+		self.mainWindow = MainWindow(self)
 		self.detailWindows = set()
 	
 	
 	def createDetailWindow(self, barNumber = 0):
-		self.detailWindows.add(DetailWindow(self, barNumber = barNumber,
-											offsetFunc = self.logic.offsetFunc))
+		self.detailWindows.add(DetailWindow(self, barNumber = barNumber))
 	
 	
 	def onDetailWindowDestroy(self, window):
