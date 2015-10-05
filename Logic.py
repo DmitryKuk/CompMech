@@ -156,6 +156,11 @@ class Logic:
 			self.application.createDetailWindow(barNumber = nearestBar.i)
 	
 	
+	def barInfo(self, barNumber):
+		return "" if barNumber not in range(0, self.barsCount()) \
+				  else str(self.application.construction.elements[2 * barNumber + 1])
+	
+	
 	def calculate(self):
 		self.application.construction.calculate()
 		

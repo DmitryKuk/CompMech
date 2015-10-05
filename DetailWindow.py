@@ -19,27 +19,37 @@ class DetailWindow(Toplevel):
 		
 		self.title("%s%sДетали" % (self.application.name, self.application.nameDelim))
 		
-		self.graph = Graph(self, width = 1000, height = 400,
+		self.panedWindow = PanedWindow(self, orient = VERTICAL, sashwidth = 5, sashrelief = "sunken")
+		self.panedWindow.pack(fill = BOTH, expand = 1)
+		
+		self.mainWidget = Frame(self.panedWindow)
+		self.panedWindow.add(self.mainWidget, sticky = W + N+ E + S)
+		
+		# Делаем колонку с виджетом с графиком растяжимой
+		self.mainWidget.columnconfigure(0, weight = 1)
+		# Пустое пространство (растяжимое)
+		self.mainWidget.rowconfigure(1, weight = 1)
+		# Пустое пространство (растяжимое)
+		self.mainWidget.rowconfigure(3, weight = 1)
+		
+		
+		self.graph = Graph(self.mainWidget, width = 1000, height = 400,
 						   offsetFunc = self.application.logic.offsetFunc,
 						   onCursorMovement = self.application.logic.onCursorMovement,
 						   **kwargs)
 		self.graph.grid(column = 0, row = 0, rowspan = 4, sticky = N + E + S + W)
 		
-		# Делаем колонку с виджетом с графиком растяжимой
-		self.columnconfigure(0, weight = 1)
 		
-		self.buttonPrev = Button(self, text = "←", command = self.onButtonPrevClicked)
+		self.buttonPrev = Button(self.mainWidget, text = "←", command = self.onButtonPrevClicked)
 		self.buttonPrev.grid(column = 1, row = 0, sticky = E + W)
 		
-		self.buttonNext = Button(self, text = "→", command = self.onButtonNextClicked)
+		self.buttonNext = Button(self.mainWidget, text = "→", command = self.onButtonNextClicked)
 		self.buttonNext.grid(column = 2, row = 0, sticky = E + W)
 		
-		# Пустое пространство (растяжимое)
-		self.rowconfigure(1, weight = 1)
 		
 		# Настройки отображения содержимого
 		self.graphOptions = GraphOptionsWidget(
-			self,
+			self.mainWidget,
 			command = self.draw,
 			optionsDesc = [
 				("drawConstruction", "Конструкция", True,  DISABLED),
@@ -51,8 +61,15 @@ class DetailWindow(Toplevel):
 		)
 		self.graphOptions.grid(column = 1, row = 2, columnspan = 2, sticky = E + W)
 		
-		# Пустое пространство (растяжимое)
-		self.rowconfigure(3, weight = 1)
+		
+		self.infoWidget = Notebook(self.panedWindow)
+		self.panedWindow.add(self.infoWidget, sticky = W + N+ E + S)
+		
+		self.barInfoVar = StringVar()
+		self.updateBarInfo()
+		self.barInfoTab = Label(self.infoWidget, textvariable = self.barInfoVar)
+		self.infoWidget.add(self.barInfoTab, text = "Стержень", sticky = W + N + E + S)
+		
 		
 		self.bind("<Configure>", self.onWindowConfigure)
 		self.bind("<Destroy>", self.onWindowDestroy)
@@ -96,6 +113,10 @@ class DetailWindow(Toplevel):
 							  drawSigma        = (None, state2))
 		
 		self.draw()
+	
+	
+	def updateBarInfo(self):
+		self.barInfoVar.set(self.application.logic.barInfo(self.barNumber))
 	
 	
 	def draw(self):
