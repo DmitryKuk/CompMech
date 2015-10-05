@@ -159,12 +159,6 @@ class Logic:
 	def calculate(self):
 		self.application.construction.calculate()
 		
-		print("A =")
-		pprint(self.application.construction.A)
-		print("\nb =")
-		pprint(self.application.construction.b)
-		print()
-		
 		# Уведомляем главное окно о том, что конструкция рассчитана
 		self.application.onConstructionChanged()
 	
@@ -191,11 +185,12 @@ class Logic:
 	
 	def matrices(self):
 		if not self.constructionCalculated():
-			return None
+			return [ "<Не рассчитано>", "<Не рассчитано>", "<Не рассчитано>" ]
 		
 		c = self.application.construction
 		Deltas = []
 		for element in self.application.construction.elements:
 			if type(element) == Node:
 				Deltas.append(element.Delta)
-		return [c.A, c.b, Matrix(self.nodesCount(), 1, Deltas)]
+		
+		return [ pretty(c.A), pretty(c.b), pretty(Matrix(self.nodesCount(), 1, Deltas)) ]

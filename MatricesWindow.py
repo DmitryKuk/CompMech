@@ -4,7 +4,6 @@
 
 from tkinter import *
 import tkinter.font
-from sympy import pretty
 
 
 class MatricesWindow(Toplevel):
@@ -74,11 +73,6 @@ class MatricesWindow(Toplevel):
 	
 	def onConstructionChanged(self):
 		m = self.application.logic.matrices()
-		if m is None:
-			self.A.set("<Не рассчитано>")
-			self.b.set("<Не рассчитано>")
-			self.Deltas.set("<Не рассчитано>")
-		
-		self.A.set(pretty(m[0]))
-		self.b.set(pretty(m[1]))
-		self.Deltas.set(pretty(m[2]))
+		self.A.set(m[0])
+		self.b.set(m[1])
+		self.Deltas.set(m[2])
