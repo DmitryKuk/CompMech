@@ -172,7 +172,7 @@ class Logic:
 	
 	
 	def nodesCount(self):
-		return self.elementsCount() // 2 + 1
+		return self.elementsCount() // 2 + 1 if self.elementsCount() > 0 else 0
 	
 	
 	def constructionEmpty(self):
@@ -185,7 +185,8 @@ class Logic:
 	
 	def matrices(self):
 		if not self.constructionCalculated():
-			return [ "<Не рассчитано>", "<Не рассчитано>", "<Не рассчитано>" ]
+			s = "<Не рассчитано>"
+			return [ s, s, s ]
 		
 		c = self.application.construction
 		Deltas = []
@@ -193,4 +194,4 @@ class Logic:
 			if type(element) == Node:
 				Deltas.append(element.Delta)
 		
-		return [ pretty(c.A), pretty(c.b), pretty(Matrix(self.nodesCount(), 1, Deltas)) ]
+		return [ pretty(x) for x in (c.A, c.b, Matrix(self.nodesCount(), 1, Deltas)) ]

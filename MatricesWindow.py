@@ -33,34 +33,34 @@ class MatricesWindow(Toplevel):
 		
 		
 		# A
-		self.ATitleLabel = Label(self, text = "[A] = ", **labelArgs)
+		self.ATitleLabel = Label(self, text = "[A] =", **labelArgs)
 		self.ATitleLabel.grid(column = 1, row = 0, sticky = N + S)
 		
 		self.ALabel = Label(self, textvariable = self.A, **labelArgs)
 		self.ALabel.grid(column = 2, row = 0, sticky = N + S)
 		
-		self.columnconfigure(3, weight = 1)
+		self.columnconfigure(3, weight = 1, minsize = 20)
 		
 		
 		# b
-		self.bTitleLabel = Label(self, text = "{b} = ", **labelArgs)
+		self.bTitleLabel = Label(self, text = "{b} =", **labelArgs)
 		self.bTitleLabel.grid(column = 4, row = 0, sticky = N + S)
 		
 		self.bLabel = Label(self, textvariable = self.b, **labelArgs)
 		self.bLabel.grid(column = 5, row = 0, sticky = N + S)
 		
-		self.columnconfigure(6, weight = 1)
+		self.columnconfigure(6, weight = 1, minsize = 20)
 		
 		
 		# Deltas
-		self.DeltasTitleLabel = Label(self, text = "{Δ} = ", **labelArgs)
+		self.DeltasTitleLabel = Label(self, text = "{Δ} =", **labelArgs)
 		self.DeltasTitleLabel.grid(column = 7, row = 0, sticky = N + S)
 		
 		self.DeltasLabel = Label(self, textvariable = self.Deltas, **labelArgs)
 		self.DeltasLabel.grid(column = 8, row = 0, sticky = N + S)
 		
 		
-		self.columnconfigure(9, weight = 1)
+		self.columnconfigure(9, weight = 1, minsize = 20)
 		self.rowconfigure(0, weight = 1)
 		
 		
