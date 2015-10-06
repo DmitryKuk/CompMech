@@ -95,10 +95,11 @@ class ComponentsDumpWindow(Toplevel):
 		
 		self.tree = Treeview(self, columns = columns, displaycolumns = columns)
 		self.tree.grid(column = 0, row = 1, columnspan = 7, sticky = W + N + E + S)
-		self.tree.column("#0", width = 0)
+		self.tree.column("#0", width = 0, stretch = 0)
 		
 		for x in columns:
 			self.tree.column(x, anchor = E)
+			self.tree.heading(x, text = x, anchor = E)
 	
 	
 	def clear(self):
@@ -110,7 +111,10 @@ class ComponentsDumpWindow(Toplevel):
 		self.clear()
 		
 		for var in [ self.fromVar, self.toVar, self.stepVar ]:
-			if var.get() == "": var.set("0")
+			try:
+				float(var.get())
+			except ValueError:
+				var.set("0")
 		
 		xFrom = float(self.fromVar.get())
 		xTo = float(self.toVar.get())
