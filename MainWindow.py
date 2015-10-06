@@ -64,7 +64,8 @@ class MainWindow(Tk):
 									 state = DISABLED)
 		self.buttonMatrices.grid(column = 1, row = 6, sticky = E + W)
 		
-		self.buttonDetails = Button(self, text = "Детали", command = self.onDetailButtonClicked)
+		self.buttonDetails = Button(self, text = "Детали", command = self.onDetailButtonClicked,
+									state = DISABLED)
 		self.buttonDetails.grid(column = 1, row = 7, sticky = E + W)
 		
 		self.buttonAbout = Button(self, text = "О программе", command = self.onAboutButtonClicked)
@@ -128,6 +129,8 @@ class MainWindow(Tk):
 		state2 = NORMAL if self.application.logic.constructionCalculated() else DISABLED
 		
 		self.buttonCalculate["state"] = state1
+		self.buttonDetails["state"]   = state1
+		
 		self.graphOptions.set(drawConstruction = (None, state1),
 							  drawLoads        = (None, state1),
 							  drawN            = (None, state2),
@@ -135,7 +138,7 @@ class MainWindow(Tk):
 							  drawSigma        = (None, state2))
 		
 		self.buttonComponents["state"] = state2
-		self.buttonMatrices["state"] = state2
+		self.buttonMatrices["state"]   = state2
 		
 		self.draw()
 	
