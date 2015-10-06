@@ -14,16 +14,17 @@ class DetailWindow(Toplevel):
 		Toplevel.__init__(self)
 		
 		self.application = application
-		
 		self.barNumber = barNumber
 		
 		self.title("%s%sДетали" % (self.application.name, self.application.nameDelim))
+		
 		
 		self.graph = Graph(self, width = 1000, height = 400,
 						   offsetFunc = self.application.logic.offsetFunc,
 						   onCursorMovement = self.application.logic.onCursorMovement,
 						   **kwargs)
 		self.graph.grid(column = 0, row = 0, rowspan = 4, sticky = N + E + S + W)
+		
 		
 		# Делаем колонку с виджетом с графиком растяжимой
 		self.columnconfigure(0, weight = 1)
@@ -54,8 +55,10 @@ class DetailWindow(Toplevel):
 		# Пустое пространство (растяжимое)
 		self.rowconfigure(3, weight = 1)
 		
+		
 		self.bind("<Configure>", self.onWindowConfigure)
 		self.bind("<Destroy>", self.onWindowDestroy)
+		
 		
 		self.onConstructionChanged()
 	

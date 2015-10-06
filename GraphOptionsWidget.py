@@ -33,20 +33,19 @@ class GraphOptionsWidget(Frame):
 	
 	
 	def get(self):
-		def check(text, var, cb):
+		def toBool(text, var, cb):
 			return True if var.get() == 1 and cb["state"] != DISABLED else False
 		
-		return { name: True if check(*self.options[name]) else False \
-				 for name in self.options }
+		return { name: toBool(*self.options[name]) for name in self.options }
 	
 	
 	def set(self, **state):
 		for name in state:
-			(var, ch) = state[name]
+			(var, cb) = state[name]
 			
 			if var is not None:
 				self.options[name][1].set(1 if var == True else 0)
 			
-			if ch is not None:
-				self.options[name][2]["state"] = ch if ch in (NORMAL, DISABLED, ACTIVE) \
+			if cb is not None:
+				self.options[name][2]["state"] = cb if cb in (NORMAL, DISABLED, ACTIVE) \
 													else DISABLED
