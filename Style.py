@@ -37,9 +37,10 @@ hatchStyle				= {}
 coordinateAxisStyle		= { "fill": coordinateAxisColor, "dash": (7, 7),
 							"arrow": LAST}
 
-NAxisStyle				= { "fill": NColor,		"dash": (3, 5) }
-UAxisStyle				= { "fill": UColor,		"dash": (3, 5) }
-SigmaAxisStyle			= { "fill": SigmaColor,	"dash": (3, 5) }
+XAxisStyle				= { "fill": coordinateAxisColor,	"dash": (3, 5) }
+NAxisStyle				= { "fill": NColor,					"dash": (3, 5) }
+UAxisStyle				= { "fill": UColor,					"dash": (3, 5) }
+SigmaAxisStyle			= { "fill": SigmaColor,				"dash": (3, 5) }
 
 
 # Макс. компонента / высоту конструкции (макс. нагрузка <=> 70% высоты конструкции)

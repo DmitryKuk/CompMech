@@ -46,8 +46,8 @@ class Logic:
 		
 		
 		# Устанавливаем размеры конструкции, максимальные нагрузки и проч.
-		virtSize = (0.0, 0.0)	# Ещё понадобится для отрисовки вспомогательных осей
 		if not self.constructionEmpty():
+			# Ещё понадобится для отрисовки вспомогательных осей
 			virtSize = self.application.construction.size(barNumber)
 			graph.setVirtSize(virtSize)
 			
@@ -105,13 +105,21 @@ class Logic:
 			# Координатные оси
 			graph.drawCoordinateAxis()
 			
-			# Вспомогательные оси
-			if not self.constructionEmpty() and divsX > 0:	# Вертикальные
-				pass
 			
+			# Вспомогательные оси (вертикальные, по Ox)
+			if not self.constructionEmpty() and divsX > 0:	# Вертикальные
+				maxX = virtSize[0]
+				dx = float(maxX) / divsX
+				x = 0.0
+				while x < maxX:
+					x += dx
+					graph.drawXVAxis(vX = x)
+			
+			
+			# Вспомогательные оси (горизонтальные, по Oy)
 			if self.constructionCalculated():	# Горизонтальные
 				def drawHAxis(drawer, divs, maxY):
-					if divs == 0: return
+					if divs <= 0: return
 					
 					dy = float(maxY) / divs
 					y = 0.0

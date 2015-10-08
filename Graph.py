@@ -364,7 +364,7 @@ class Graph(Frame):
 	
 	# Вспомогательные оси
 	def drawXVAxis(self, vX):
-		return
+		return self.drawVAxis(vX, scale = self.mainScale, **XAxisStyle)
 	
 	
 	def drawNHAxis(self, vY):
