@@ -345,7 +345,11 @@ class Graph(Frame):
 		if vW != 0 and vH != 0:
 			self.coordinateAxis = (self.drawHAxis(**coordinateAxisStyle),
 								   self.coordinateAxis[1])
-		return self.coordinateAxis[0]
+		return [
+			self.coordinateAxis[0],
+			self.drawText((0, -self.mainScale.vH / 2), realOffset = xLabelOffset,
+						  text = (labelFormat % 0), **coordinateLabelStyle)
+		]
 	
 	
 	def drawCoordinateAxisY(self):
@@ -353,18 +357,20 @@ class Graph(Frame):
 		if vW != 0 and vH != 0:
 			self.coordinateAxis = (self.coordinateAxis[0],
 								   self.drawVAxis(**coordinateAxisStyle))
-		return self.coordinateAxis[1]
+		return [ self.coordinateAxis[1] ]
 	
 	
 	def drawCoordinateAxis(self):
-		self.drawCoordinateAxisX()
-		self.drawCoordinateAxisY()
-		return self.coordinateAxis
+		return self.drawCoordinateAxisX() + self.drawCoordinateAxisY()	# Списки идентификаторов
 	
 	
 	# Вспомогательные оси
 	def drawXVAxis(self, vX):
-		return self.drawVAxis(vX, scale = self.mainScale, **XAxisStyle)
+		return [
+			self.drawVAxis(vX, scale = self.mainScale, **XAxisStyle),
+			self.drawText((vX, -self.mainScale.vH / 2), realOffset = xLabelOffset,
+						  text = (labelFormat % vX), **coordinateLabelStyle)
+		]
 	
 	
 	def drawNHAxis(self, vY):
@@ -377,6 +383,16 @@ class Graph(Frame):
 	
 	def drawSigmaHAxis(self, vY):
 		return self.drawHAxis(vY, scale = self.NSigmaScale, **SigmaAxisStyle)
+	
+	
+	def drawText(self, virtCoord, text, scale = None, realOffset = (0, 0), **kwargs):
+		if scale is None: scale = self.mainScale
+		
+		def textOffset(realCoord):
+			return (realCoord[0] + realOffset[0], realCoord[1] + realOffset[1])
+		
+		return self.canvas.create_text(*textOffset(scale.virtToRealCoord(virtCoord)),
+									   text = text, **kwargs)
 	
 	
 	# Смещение координатной системы
