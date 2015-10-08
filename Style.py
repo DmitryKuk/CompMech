@@ -45,13 +45,17 @@ UAxisStyle				= { "fill": UColor,		"dash": (3, 5) }
 SigmaAxisStyle			= { "fill": SigmaColor,	"dash": (3, 5) }
 
 # Подписи к основным и вспомогательным осям
-coordinateLabelStyle	= { "fill": XColor }
+labelFormat				= "%.3f"
+
+XLabelStyle				= { "fill": XColor }
 NLabelStyle				= { "fill": NColor }
 ULabelStyle				= { "fill": UColor }
 SigmaLabelStyle			= { "fill": SigmaColor }
 
-labelFormat				= "%.3f"
-xLabelOffset			= (20, 20)
+XLabelOffset			= ( 20, 20)
+NLabelOffset			= (-25, 10)
+ULabelOffset			= ( 20, 10)
+SigmaLabelOffset		= ( 65, 10)
 
 
 # Макс. компонента / высоту конструкции (макс. нагрузка <=> 80% высоты конструкции)

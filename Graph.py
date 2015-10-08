@@ -347,8 +347,8 @@ class Graph(Frame):
 								   self.coordinateAxis[1])
 		return [
 			self.coordinateAxis[0],
-			self.drawText((0, -self.mainScale.vH / 2), realOffset = xLabelOffset,
-						  text = (labelFormat % 0), **coordinateLabelStyle)
+			self.drawText((0, -self.mainScale.vH / 2), realOffset = XLabelOffset,
+						  text = (labelFormat % 0), **XLabelStyle)
 		]
 	
 	
@@ -368,21 +368,33 @@ class Graph(Frame):
 	def drawXVAxis(self, vX):
 		return [
 			self.drawVAxis(vX, scale = self.mainScale, **XAxisStyle),
-			self.drawText((vX, -self.mainScale.vH / 2), realOffset = xLabelOffset,
-						  text = (labelFormat % vX), **coordinateLabelStyle)
+			self.drawText((vX, -self.mainScale.vH / 2), realOffset = XLabelOffset,
+						  text = (labelFormat % vX), **XLabelStyle)
 		]
 	
 	
 	def drawNHAxis(self, vY):
-		return self.drawHAxis(vY, scale = self.NSigmaScale, **NAxisStyle)
+		return [
+			self.drawHAxis(vY, scale = self.NSigmaScale, **NAxisStyle),
+			self.drawText((0, vY), realOffset = NLabelOffset, scale = self.NSigmaScale,
+						  text = (labelFormat % vY), **NLabelStyle)
+		]
 	
 	
 	def drawUHAxis(self, vY):
-		return self.drawHAxis(vY, scale = self.UScale, **UAxisStyle)
+		return [
+			self.drawHAxis(vY, scale = self.UScale, **UAxisStyle),
+			self.drawText((0, vY), realOffset = ULabelOffset, scale = self.UScale,
+						  text = (labelFormat % vY), **ULabelStyle)
+		]
 	
 	
 	def drawSigmaHAxis(self, vY):
-		return self.drawHAxis(vY, scale = self.NSigmaScale, **SigmaAxisStyle)
+		return [
+			self.drawHAxis(vY, scale = self.NSigmaScale, **SigmaAxisStyle),
+			self.drawText((0, vY), realOffset = SigmaLabelOffset, scale = self.NSigmaScale,
+						  text = (labelFormat % vY), **SigmaLabelStyle)
+		]
 	
 	
 	def drawText(self, virtCoord, text, scale = None, realOffset = (0, 0), **kwargs):

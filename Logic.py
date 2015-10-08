@@ -30,7 +30,7 @@ class Logic:
 	
 	
 	def offsetFunc(self, realSize, virtSize):
-		return (40, 40, 40, 40)
+		return (60, 40, 60, 40)
 	
 	
 	def draw(self, graph = None, barNumber = None,
