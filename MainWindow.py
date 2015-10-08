@@ -7,6 +7,7 @@ import tkinter.filedialog, tkinter.messagebox
 
 from Graph import Graph
 from GraphOptionsWidget import GraphOptionsWidget
+from AxisOptionsWidget import AxisOptionsWidget
 
 
 class MainWindow(Tk):
@@ -17,16 +18,20 @@ class MainWindow(Tk):
 		
 		self.title("%s%sКонструкция" % (self.application.name, self.application.nameDelim))
 		
+		
+		# График
 		self.graph = Graph(self, width = 1000, height = 400,
 						   offsetFunc = self.application.logic.offsetFunc,
 						   onCursorMovement = self.application.logic.onCursorMovement,
 						   onMouse1Clicked = self.application.logic.onMouse1Clicked,
 						   **kwargs)
-		self.graph.grid(column = 0, row = 0, rowspan = 10, sticky = N + E + S + W)
+		self.graph.grid(column = 0, row = 0, rowspan = 9, sticky = N + E + S + W)
 		
 		# Делаем колонку с виджетом с графиком растяжимой
 		self.columnconfigure(0, weight = 1)
 		
+		
+		# Панель справа
 		self.buttonOpenFile = Button(self, text = "Открыть файл",
 									 command = self.onButtonOpenFileClicked)
 		self.buttonOpenFile.grid(column = 1, row = 0, sticky = E + W)
@@ -71,11 +76,26 @@ class MainWindow(Tk):
 		self.buttonAbout = Button(self, text = "О программе", command = self.onAboutButtonClicked)
 		self.buttonAbout.grid(column = 1, row = 8, sticky = E + W)
 		
-		# Пустое пространство (нерастяжимое)
-		self.rowconfigure(9, weight = 0, minsize = 17)
+		
+		# Панель под графиком
+		self.axisOptions = AxisOptionsWidget(
+			self,
+			label = "Деления:",
+			command = self.draw,
+			optionsDesc = [
+				("divsX",     "Ось X:",  0, NORMAL),
+				("divsN",     "Ось Nx:", 0, DISABLED),
+				("divsU",     "Ось U:",  0, DISABLED),
+				("divsSigma", "Ось σ:",  0, DISABLED),
+			]
+		)
+		self.axisOptions.grid(column = 0, row = 9, sticky = E + W)
+		
 		
 		self.bind("<Configure>", self.onWindowConfigure)
 		
+		
+		self.update()
 		self.onConstructionChanged()
 	
 	
@@ -128,6 +148,7 @@ class MainWindow(Tk):
 		state1 = NORMAL if not self.application.logic.constructionEmpty()  else DISABLED
 		state2 = NORMAL if self.application.logic.constructionCalculated() else DISABLED
 		
+		# Панель справа
 		self.buttonCalculate["state"] = state1
 		self.buttonDetails["state"]   = state1
 		
@@ -140,11 +161,16 @@ class MainWindow(Tk):
 		self.buttonComponents["state"] = state2
 		self.buttonMatrices["state"]   = state2
 		
+		# Панель под графиком
+		self.axisOptions.set(divsX     = (None, NORMAL),
+							 divsN     = (None, state2),
+							 divsU     = (None, state2),
+							 divsSigma = (None, state2))
+		
 		self.draw()
 	
 	
 	def draw(self):
-		self.update()
 		self.application.logic.draw(self.graph, **self.graphOptions.get())
 	
 	

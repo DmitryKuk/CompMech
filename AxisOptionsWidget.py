@@ -6,29 +6,41 @@ from tkinter import *
 
 
 class AxisOptionsWidget(Frame):
-	def __init__(self, parent, optionsDesc = [], command = None, **kwargs):
+	def __init__(self, parent, label = None, optionsDesc = [], command = None, **kwargs):
 		Frame.__init__(self, parent, **kwargs)
+		
+		if label is not None:
+			self.label = Label(self, text = label)
+			self.label.pack(side = LEFT)
 		
 		self.options = { name: self.createElement(text, value, state) \
 						 for name, text, value, state in optionsDesc }
+		
+		self.emptySpace = Label(self)
+		self.emptySpace.pack(side = LEFT, fill = X, expand = 1)
+		
+		self.buttonDraw = Button(self, text = "Построить оси", command = self.onSBChanged)
+		self.buttonDraw.pack(side = LEFT)
 		
 		# Будет вызвано при изменении состояния пользователем
 		self.command = command
 	
 	
 	def createElement(self, text, value, state):
-		var = StrVar()
+		var = StringVar()
 		var.set("0" if value is None else str(int(value)))
 		
-		lb = Label(self, text = text)
-		sb = Spinbox(self, textvariable = var, command = self.onSBChanged)
+		lb = Label(self, text = text, anchor = E)
+		sb = Spinbox(self, textvariable = var, command = self.onSBChanged,
+					 justify = RIGHT, width = 3,
+					 from_ = 0, to = 999, increment = 1)
 		if state in (NORMAL, DISABLED, ACTIVE):
 			lb["state"] = state
 			sb["state"] = state
-		lb.pack(fill = X, expand = 1)
-		sb.pack(fill = X, expand = 1)
+		lb.pack(side = LEFT, fill = X, expand = 1)
+		sb.pack(side = LEFT, fill = X)
 		
-		return (text, var, sb)
+		return (text, var, sb, lb)
 	
 	
 	def onSBChanged(self):
@@ -37,7 +49,7 @@ class AxisOptionsWidget(Frame):
 	
 	
 	def get(self):
-		def toInt(text, var, sb):
+		def toInt(text, var, sb, lb):
 			try:
 				v = int(var.get())
 			except:
@@ -59,5 +71,7 @@ class AxisOptionsWidget(Frame):
 				self.options[name][1].set(v)
 			
 			if sb is not None:
-				self.options[name][2]["state"] = sb if sb in (NORMAL, DISABLED, ACTIVE) \
-													else DISABLED
+				st = sb if sb in (NORMAL, DISABLED, ACTIVE) else DISABLED
+				
+				for x in self.options[name][2], self.options[name][3]:
+					x["state"] = st
