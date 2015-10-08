@@ -20,7 +20,7 @@ class GraphOptionsWidget(Frame):
 		var = IntVar()
 		if value is not None and bool(value): var.set(1)
 		
-		cb = Checkbutton(self, text = text, variable = var, command = self.onCBClicked)
+		cb = Checkbutton(self, text = text, variable = var, command = self.onCBClicked, fg = "red")
 		if cbState in (NORMAL, DISABLED, ACTIVE): cb["state"] = cbState
 		cb.pack(fill = X)
 		
