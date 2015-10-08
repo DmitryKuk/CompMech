@@ -50,9 +50,9 @@ class MainWindow(Tk):
 			optionsDesc = [
 				("drawConstruction", "Конструкция", True,  DISABLED),
 				("drawLoads",        "Нагрузки",    True,  DISABLED),
-				("drawN",            "Эпюра Nx",    False, DISABLED),
-				("drawU",            "Эпюра U",     False, DISABLED),
-				("drawSigma",        "Эпюра σ",     False, DISABLED)
+				("drawN",            "График Nx",    False, DISABLED),
+				("drawU",            "График U",     False, DISABLED),
+				("drawSigma",        "График σ",     False, DISABLED)
 			]
 		)
 		self.graphOptions.grid(column = 1, row = 3, sticky = E + W)
