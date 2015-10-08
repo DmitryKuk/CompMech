@@ -25,7 +25,7 @@ class DetailWindow(Toplevel):
 						   offsetFunc = self.application.logic.offsetFunc,
 						   onCursorMovement = self.application.logic.onCursorMovement,
 						   **kwargs)
-		self.graph.grid(column = 0, row = 0, rowspan = 3, sticky = N + E + S + W)
+		self.graph.grid(column = 0, row = 0, rowspan = 4, sticky = N + E + S + W)
 		
 		# Делаем колонку с виджетом с графиком растяжимой
 		self.columnconfigure(0, weight = 1)
@@ -55,6 +55,8 @@ class DetailWindow(Toplevel):
 		)
 		self.graphOptions.grid(column = 1, row = 2, columnspan = 2, sticky = E + W)
 		
+		# Пустое пространство (растяжимое)
+		self.rowconfigure(3, weight = 1)
 		
 		# Панель под графиком
 		self.axisOptions = AxisOptionsWidget(
@@ -68,7 +70,7 @@ class DetailWindow(Toplevel):
 				("divsSigma", "Ось σ:",  0, DISABLED),
 			]
 		)
-		self.axisOptions.grid(column = 0, row = 9, sticky = E + W)
+		self.axisOptions.grid(column = 0, row = 4, sticky = E + W)
 		
 		
 		self.bind("<Configure>", self.onWindowConfigure)

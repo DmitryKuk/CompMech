@@ -345,11 +345,7 @@ class Graph(Frame):
 		if vW != 0 and vH != 0:
 			self.coordinateAxis = (self.drawHAxis(**coordinateAxisStyle),
 								   self.coordinateAxis[1])
-		return [
-			self.coordinateAxis[0],
-			self.drawText((0, -self.mainScale.vH / 2), realOffset = XLabelOffset,
-						  text = (labelFormat % 0), **XLabelStyle)
-		]
+		return [ self.coordinateAxis[0] ]
 	
 	
 	def drawCoordinateAxisY(self):
@@ -357,7 +353,13 @@ class Graph(Frame):
 		if vW != 0 and vH != 0:
 			self.coordinateAxis = (self.coordinateAxis[0],
 								   self.drawVAxis(**coordinateAxisStyle))
-		return [ self.coordinateAxis[1] ]
+		return [
+			self.coordinateAxis[1],
+			self.drawText(self.localToGlobal((0, -self.mainScale.vH / 2)),
+											 realOffset = XLabelOffset,
+											 text = (labelFormat % self.localToGlobalX(0)),
+											 **XLabelStyle)
+		]
 	
 	
 	def drawCoordinateAxis(self):
@@ -376,24 +378,24 @@ class Graph(Frame):
 	def drawNHAxis(self, vY):
 		return [
 			self.drawHAxis(vY, scale = self.NSigmaScale, **NAxisStyle),
-			self.drawText((0, vY), realOffset = NLabelOffset, scale = self.NSigmaScale,
-						  text = (labelFormat % vY), **NLabelStyle)
+			self.drawText(self.localToGlobal((0, vY)), realOffset = NLabelOffset,
+						  scale = self.NSigmaScale, text = (labelFormat % vY), **NLabelStyle)
 		]
 	
 	
 	def drawUHAxis(self, vY):
 		return [
 			self.drawHAxis(vY, scale = self.UScale, **UAxisStyle),
-			self.drawText((0, vY), realOffset = ULabelOffset, scale = self.UScale,
-						  text = (labelFormat % vY), **ULabelStyle)
+			self.drawText(self.localToGlobal((0, vY)), realOffset = ULabelOffset,
+						  scale = self.UScale, text = (labelFormat % vY), **ULabelStyle)
 		]
 	
 	
 	def drawSigmaHAxis(self, vY):
 		return [
 			self.drawHAxis(vY, scale = self.NSigmaScale, **SigmaAxisStyle),
-			self.drawText((0, vY), realOffset = SigmaLabelOffset, scale = self.NSigmaScale,
-						  text = (labelFormat % vY), **SigmaLabelStyle)
+			self.drawText(self.localToGlobal((0, vY)), realOffset = SigmaLabelOffset,
+						  scale = self.NSigmaScale, text = (labelFormat % vY), **SigmaLabelStyle)
 		]
 	
 	
@@ -403,8 +405,8 @@ class Graph(Frame):
 		def textOffset(realCoord):
 			return (realCoord[0] + realOffset[0], realCoord[1] + realOffset[1])
 		
-		return self.canvas.create_text(*textOffset(scale.virtToRealCoord(virtCoord)),
-									   text = text, **kwargs)
+		realCoord = textOffset(scale.virtToRealCoord(self.globalToLocal(virtCoord)))
+		return self.canvas.create_text(*realCoord, text = text, **kwargs)
 	
 	
 	# Смещение координатной системы

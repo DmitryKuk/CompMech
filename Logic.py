@@ -60,6 +60,7 @@ class Logic:
 			graph.setMaxComponents(*maxComponents)
 		
 		elements = self.application.construction.elements
+		xOffset = 0
 		
 		
 		if barNumber == None:	# Номер стержня не указан => рисуем всю конструкцию
@@ -82,14 +83,14 @@ class Logic:
 						graph.drawBarCurves(element,
 											drawN = drawN, drawU = drawU, drawSigma = drawSigma)
 		else:	# Указан номер стержня => рисуем его и 2 ближайших узла
-			barLabel = elements[2 * barNumber + 1].label
-			if barLabel != "": barLabel = " \"" + barLabel + "\""
-			title = "Стержень (%d)%s" % (barNumber, barLabel)
+			bar = elements[2 * barNumber + 1]
+			if bar.label != "": bar.label = " \"" + bar.label + "\""
+			title = "Стержень (%d)%s" % (barNumber, bar.label)
+			
+			xOffset = bar.x
 			
 			# Рисуем стержень
-			bar = elements[2 * barNumber + 1]
 			graph.setLocalCoordinate(bar.x)
-			
 			graph.drawBar(bar, drawBar = drawConstruction, drawLoads = drawLoads)
 			
 			# Рисуем соседние узлы
@@ -110,8 +111,8 @@ class Logic:
 			if not self.constructionEmpty() and divsX > 0:	# Вертикальные
 				maxX = virtSize[0]
 				dx = float(maxX) / divsX
-				x = 0.0
-				while x < maxX:
+				x = xOffset
+				while x < maxX + xOffset:
 					x += dx
 					graph.drawXVAxis(vX = x)
 			
