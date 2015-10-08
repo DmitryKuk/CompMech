@@ -34,8 +34,9 @@ class Logic:
 	
 	
 	def draw(self, graph = None, barNumber = None,
-			 drawConstruction = True, drawLoads = True,
-			 drawN = False, drawU = False, drawSigma = False):
+			 drawConstruction = True, drawLoads = True,			# Элементы для отрисовки
+			 drawN = False, drawU = False, drawSigma = False,	# Эпюры/графики
+			 divsX = 0, divsN = 0, divsU = 0, divsSigma = 0):	# Деления на осях
 		if graph is None:
 			graph = self.application.mainWindow.graph
 		graph.clear()
@@ -45,18 +46,18 @@ class Logic:
 		
 		
 		# Устанавливаем размеры конструкции, максимальные нагрузки и проч.
+		virtSize = (0.0, 0.0)	# Ещё понадобится для отрисовки вспомогательных осей
 		if not self.constructionEmpty():
-			graph.setVirtSize(self.application.construction.size(barNumber))
+			virtSize = self.application.construction.size(barNumber)
+			graph.setVirtSize(virtSize)
 			
 			# Масштабируем нагрузки по конструкции
 			graph.setMaxLoads(*self.application.construction.maxLoads(barNumber = None))
 		
 		if self.constructionCalculated():
-			graph.setMaxComponents(*self.application.construction.maxComponents(barNumber))
-		
-		# Ось Oy рисуем до элементов
-		if not self.constructionEmpty():
-			graph.drawCoordinateAxisY()
+			# Понадобится при отрисовке вспомогательных осей
+			maxComponents = self.application.construction.maxComponents(barNumber)
+			graph.setMaxComponents(*maxComponents)
 		
 		elements = self.application.construction.elements
 		
@@ -99,9 +100,31 @@ class Logic:
 			graph.drawBarCurves(bar, drawN = drawN, drawU = drawU, drawSigma = drawSigma)
 		
 		
-		# Ось Ox рисуем после элементов, чтобы её было видно
+		# Рисуем оси
 		if not self.constructionEmpty():
-			graph.drawCoordinateAxisX()
+			# Координатные оси
+			graph.drawCoordinateAxis()
+			
+			# Вспомогательные оси
+			if not self.constructionEmpty() and divsX > 0:	# Вертикальные
+				pass
+			
+			if self.constructionCalculated():	# Горизонтальные
+				def drawHAxis(drawer, divs, maxY):
+					if divs == 0: return
+					
+					dy = float(maxY) / divs
+					y = 0.0
+					while y < maxY:
+						y += dy
+						drawer(vY =  y)
+						drawer(vY = -y)
+				
+				
+				drawHAxis(graph.drawNHAxis,     divsN,     maxComponents[0])
+				drawHAxis(graph.drawUHAxis,     divsU,     maxComponents[1])
+				drawHAxis(graph.drawSigmaHAxis, divsSigma, maxComponents[2])
+		
 		
 		# Надпись на графике
 		graph.setTitle(title)

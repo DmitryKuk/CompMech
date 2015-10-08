@@ -8,6 +8,7 @@ import os, subprocess, tempfile
 
 import GraphScale
 from GraphScale import GraphScale, zeroOffsetFunc
+from Style import *
 
 
 class Graph(Frame):
@@ -58,16 +59,14 @@ class Graph(Frame):
 		
 		# Линии осей (идентификаторы холста)
 		self.coordinateAxis = (None, None)
-		self.axisArgs = { "fill": "blue", "arrow": LAST, "dash": (5, 5),
-						  "state": DISABLED, "tags": "coordinateAxis" }
 		
 		
 		# Холст
-		canvasArgs = { "cursor": "crosshair", "bg": "#FFFFFF" }
-		if "width" in kwargs:	canvasArgs["width"] = kwargs["width"]
-		if "height" in kwargs:	canvasArgs["height"] = kwargs["height"]
+		canvasStyle = { "cursor": "crosshair", "bg": "#FFFFFF" }
+		if "width" in kwargs:	canvasStyle["width"] = kwargs["width"]
+		if "height" in kwargs:	canvasStyle["height"] = kwargs["height"]
 		
-		self.canvas = Canvas(self, **canvasArgs)
+		self.canvas = Canvas(self, **canvasStyle)
 		self.canvas.grid(column = 0, row = 0, sticky = N + E + S + W)
 		
 		self.canvas.bind("<Motion>", lambda event: self.updateCursorPos(event.x, event.y))
@@ -165,8 +164,8 @@ class Graph(Frame):
 		self.maxNSigma, self.maxU = max(abs(maxN), abs(maxSigma)), maxU
 		vW = self.mainScale.vW
 		
-		self.NSigmaScale.setVirtSize((vW, self.maxNSigma * 2.0 / 0.7))
-		self.UScale.setVirtSize((vW, self.maxU * 2.0 / 0.25))
+		self.NSigmaScale.setVirtSize((vW, self.maxNSigma * 2.0 / componentOnHeight))
+		self.UScale.setVirtSize((vW, self.maxU * 2.0 / componentOnHeight))
 		
 		self.updateOffset()
 	
@@ -189,11 +188,6 @@ class Graph(Frame):
 	
 	
 	def drawBar(self, bar, drawBar = True, drawLoads = True):
-		barArgs = { "fill": "yellow", "activefill": "orange", "tags": "bar" }
-		qLineArgs = { "fill": "green", "width": 5, "arrow": FIRST, "arrowshape": (5, 12, 13),
-					  "tags": "barLoad" }
-		
-		
 		leftTop     = self.mainScale.virtToRealCoord(self.globalToLocal((bar.x,
 																		 0.5 * bar.height)))
 		rightBottom = self.mainScale.virtToRealCoord(self.globalToLocal((bar.x + bar.L,
@@ -206,7 +200,7 @@ class Graph(Frame):
 		if drawBar:
 			retList.append(self.canvas.create_rectangle(leftTop[0],     leftTop[1],
 														rightBottom[0], rightBottom[1],
-														**barArgs))
+														**barStyle))
 		
 		
 		if drawLoads and bar.q != 0 and self.maxqOnL != 0 and self.specq != 0:
@@ -219,13 +213,13 @@ class Graph(Frame):
 				x1, xmin = bar.x + bar.L, bar.x + qIndent
 				while x1 > xmin:
 					x2 = max(x1 - qLen, xmin)
-					retList.append(self.drawLine((x1, 0), (x2, 0), **qLineArgs))
+					retList.append(self.drawLine((x1, 0), (x2, 0), **qLineStyle))
 					x1 -= qLen + qSpace
 			elif bar.q < 0:
 				x1, xmax = bar.x, bar.x + bar.L - qIndent
 				while x1 < xmax:
 					x2 = min(x1 + qLen, xmax)
-					retList.append(self.drawLine((x1, 0), (x2, 0), **qLineArgs))
+					retList.append(self.drawLine((x1, 0), (x2, 0), **qLineStyle))
 					x1 += qLen + qSpace
 		
 		
@@ -233,46 +227,35 @@ class Graph(Frame):
 	
 	
 	def drawBarCurves(self, bar, drawN = False, drawU = False, drawSigma = False):
-		NLineArgs = { "fill": "red" }
-		ULineArgs = { "fill": "green" }
-		SigmaLineArgs = { "fill": "blue" }
-		SigmaMaxLineArgs = { "fill": "blue", "dash": (10, 10) }
-		
-		
 		retList = []	# Список идентификаторов нарисованных объектов
 		
 		
 		# Рисуем эпюры N(x), u(x), Sigma(x)
 		if drawN:
-			retList.append(self.drawCurve(self.NSigmaScale, bar.NLineGlobal(), **NLineArgs))
+			retList.append(self.drawCurve(self.NSigmaScale, bar.NLineGlobal(), **NLineStyle))
 		
 		
 		if drawU:
-			retList.append(self.drawCurve(self.UScale, bar.ULineGlobal(), **ULineArgs))
+			retList.append(self.drawCurve(self.UScale, bar.ULineGlobal(), **ULineStyle))
 		
 		
 		if drawSigma:
 			# SigmaMax, -SigmaMax
 			line = bar.SigmaMaxLineGlobal()
-			retList.append(self.drawCurve(self.NSigmaScale, line, **SigmaMaxLineArgs))
+			retList.append(self.drawCurve(self.NSigmaScale, line, **SigmaMaxLineStyle))
 			
 			line = [(line[0][0], -line[0][1]), (line[1][0], -line[1][1])]
-			retList.append(self.drawCurve(self.NSigmaScale, line, **SigmaMaxLineArgs))
+			retList.append(self.drawCurve(self.NSigmaScale, line, **SigmaMaxLineStyle))
 			
 			# Sigma(x)
-			retList.append(self.drawCurve(self.NSigmaScale, bar.SigmaLineGlobal(), **SigmaLineArgs))
+			retList.append(self.drawCurve(self.NSigmaScale, bar.SigmaLineGlobal(),
+										  **SigmaLineStyle))
 		
 		
 		return retList
 	
 	
 	def drawNode(self, node, drawNode = True, drawLoads = True):
-		VaxisArgs = { "fill": "green", "dash": (3, 3), "tags": "node" }
-		FlineArgs = { "fill": "red", "width": 11, "arrow": LAST, "arrowshape": (5, 12, 13),
-					  "tags": "nodeLoad" }
-		hatchArgs = { "tags": "nodeHatch" }
-		
-		
 		retList = []
 		
 		
@@ -280,7 +263,7 @@ class Graph(Frame):
 		if node.x == self.xOffset:
 			retList.append(self.coordinateAxis[1])	# Используем ось Oy, если узел самый левый
 		else:
-			retList.append(self.drawVAxis(node.x, **VaxisArgs))	# Или рисуем новую
+			retList.append(self.drawVAxis(node.x, **nodeAxisStyle))	# Или рисуем новую
 		
 		
 		# Отображаем штриховку, если узел фиксирован
@@ -300,7 +283,7 @@ class Graph(Frame):
 			
 			# ...и рисуем их
 			for i in range(2 * hatchNum):
-				retList.append(self.drawLineReal(p1, p2, **hatchArgs))
+				retList.append(self.drawLineReal(p1, p2, **hatchStyle))
 				
 				p1 = (p1[0], p1[1] + hatch[1])
 				p2 = (p2[0], p2[1] + hatch[1])
@@ -313,7 +296,7 @@ class Graph(Frame):
 							   / (self.maxF * self.mainScale.rW), 0)
 				p1 = (node.x, 0)
 				
-				retList.append(self.drawLine(p0, p1, **FlineArgs))
+				retList.append(self.drawLine(p0, p1, **FLineStyle))
 		
 		return retList
 	
@@ -332,17 +315,21 @@ class Graph(Frame):
 		return self.drawLineReal(p0, p1, **kwargs)
 	
 	
-	def drawHAxis(self, vY = 0, **kwargs):
-		rW = self.mainScale.rW
-		rY = self.mainScale.virtToRealY(self.globalToLocalY(vY))
+	def drawHAxis(self, vY = 0, scale = None, **kwargs):
+		if scale is None: scale = self.mainScale
+		
+		rW = scale.rW
+		rY = scale.virtToRealY(self.globalToLocalY(vY))
 		
 		return self.drawLineReal((0, rY), (rW - 5, rY), **kwargs)
 	
 	
-	def drawVAxis(self, vX = None, **kwargs):
+	def drawVAxis(self, vX = None, scale = None, **kwargs):
+		if scale is None: scale = self.mainScale
 		if vX == None: vX = self.xOffset
-		rH = self.mainScale.rH
-		rX = self.mainScale.virtToRealX(self.globalToLocalX(vX))
+		
+		rH = scale.rH
+		rX = scale.virtToRealX(self.globalToLocalX(vX))
 		
 		return self.drawLineReal((rX, rH), (rX, 5), **kwargs)
 	
@@ -356,14 +343,16 @@ class Graph(Frame):
 	def drawCoordinateAxisX(self):
 		(vW, vH) = self.mainScale.virtSize()
 		if vW != 0 and vH != 0:
-			self.coordinateAxis = (self.drawHAxis(**self.axisArgs), self.coordinateAxis[1])
+			self.coordinateAxis = (self.drawHAxis(**coordinateAxisStyle),
+								   self.coordinateAxis[1])
 		return self.coordinateAxis[0]
 	
 	
 	def drawCoordinateAxisY(self):
 		(vW, vH) = self.mainScale.virtSize()
 		if vW != 0 and vH != 0:
-			self.coordinateAxis = (self.coordinateAxis[0], self.drawVAxis(**self.axisArgs))
+			self.coordinateAxis = (self.coordinateAxis[0],
+								   self.drawVAxis(**coordinateAxisStyle))
 		return self.coordinateAxis[1]
 	
 	
@@ -371,6 +360,23 @@ class Graph(Frame):
 		self.drawCoordinateAxisX()
 		self.drawCoordinateAxisY()
 		return self.coordinateAxis
+	
+	
+	# Вспомогательные оси
+	def drawXVAxis(self, vX):
+		return
+	
+	
+	def drawNHAxis(self, vY):
+		return self.drawHAxis(vY, scale = self.NSigmaScale, **NAxisStyle)
+	
+	
+	def drawUHAxis(self, vY):
+		return self.drawHAxis(vY, scale = self.UScale, **UAxisStyle)
+	
+	
+	def drawSigmaHAxis(self, vY):
+		return self.drawHAxis(vY, scale = self.NSigmaScale, **SigmaAxisStyle)
 	
 	
 	# Смещение координатной системы

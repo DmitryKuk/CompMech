@@ -125,5 +125,7 @@ class DetailWindow(Toplevel):
 	
 	
 	def draw(self):
-		self.application.logic.draw(self.graph, barNumber = self.barNumber,
-									**self.graphOptions.get())
+		options = self.graphOptions.get()
+		options.update(self.axisOptions.get())
+		
+		self.application.logic.draw(self.graph, barNumber = self.barNumber, **options)

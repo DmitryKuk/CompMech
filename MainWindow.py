@@ -171,7 +171,10 @@ class MainWindow(Tk):
 	
 	
 	def draw(self):
-		self.application.logic.draw(self.graph, **self.graphOptions.get())
+		options = self.graphOptions.get()
+		options.update(self.axisOptions.get())
+		
+		self.application.logic.draw(self.graph, **options)
 	
 	
 	def showMessage(self, message):
