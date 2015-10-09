@@ -14,16 +14,16 @@ class Construction:
 		self.defaultBar = Bar()
 		self.defaultNode = Node()
 		self.elements = []
-		self.sizeX, self.sizeY = 0, 0
+		self.sizeX, self.sizeY = 0.0, 0.0
 		
 		
 		# Максимальные нагрузки
-		self.maxF, self.specq = 0, 0
-		self.maxqOnL = 0			# Относительная распределённая нагрузка = q / L
+		self.maxF, self.specq = 0.0, 0.0
+		self.maxqOnL = 0.0			# Относительная распределённая нагрузка = q / L
 		
-		self.maxN = 0
-		self.maxU = 0
-		self.maxSigma = 0
+		self.maxN = 0.0
+		self.maxU = 0.0
+		self.maxSigma = 0.0
 		
 		# Координаты узлов для бинарного поиска ближайшего узла и стержня
 		self.nodeXs = []
@@ -35,7 +35,7 @@ class Construction:
 		self.Deltas = None
 		
 		self.calculated = False		# Конструкция была рассчитана
-		self.empty = True			# Конструкция задана
+		self.empty = True			# Конструкция пуста
 		
 		
 		if constructionFile is None:	# Пустая конструкция
@@ -57,6 +57,18 @@ class Construction:
 			self.defaultBar = Bar(construction["default"]["bar"])
 		except KeyError:
 			pass
+		
+		
+		try:
+			self.A = eval(construction["A"])
+			self.b = eval(construction["b"])
+			
+			self.calculated = True
+		except KeyError:
+			self.A = None
+			self.b = None
+			
+			self.calculated = False
 		
 		
 		try:
@@ -89,6 +101,8 @@ class Construction:
 		# Вычисляем размеры конструкции, максимальные нагрузки, координаты и номера элементов
 		x, i = 0, 0
 		for element in self.elements:
+			self.calculated = self.calculated and element.calculated()
+			
 			# Размеры
 			(elSizeX, elSizeY) = element.size()
 			self.sizeX += elSizeX
@@ -116,8 +130,39 @@ class Construction:
 		for element in self.elements:
 			if type(element) == Node: self.nodeXs.append(element.x)
 		
-		if len(self.elements) != 0:
+		if len(self.elements) == 0:
+			self.calculated = False
+		else:
 			self.empty = False
+		
+		
+		if self.calculated:
+			for element in self.elements:
+				if type(element) == Bar:
+					c = element.maxComponents()
+					
+					self.maxN     = max(self.maxN,     c[0])
+					self.maxU     = max(self.maxU,     c[1])
+					self.maxSigma = max(self.maxSigma, c[2])
+	
+	
+	def dump(self, constructionFile):
+		retDict = {
+			"default": {
+				"node": self.defaultNode.dump(),
+				"bar": self.defaultBar.dump()
+			},
+			
+			"construction": [ element.dump() for element in self.elements ]
+		}
+		
+		if self.calculated:
+			retDict.update({ "A": str(self.A), "b": str(self.b) })
+		
+		json.dump(
+			retDict,
+			constructionFile
+		)
 	
 	
 	def calculate(self):
@@ -168,9 +213,9 @@ class Construction:
 				else:
 					element.Delta = res[self.Deltas[element.i]]
 			
-			self.maxN = 0
-			self.maxU = 0
-			self.maxSigma = 0
+			self.maxN = 0.0
+			self.maxU = 0.0
+			self.maxSigma = 0.0
 			
 			for element in self.elements:
 				if type(element) == Bar:
@@ -183,11 +228,11 @@ class Construction:
 			self.calculated = True
 		else:
 			if len(self.elements) == 1:	# Единственный узел неподвижен
-				self.element[0].Delta = 0.0
+				self.elements[0].Delta = 0.0
 				
-				self.maxN = 0
-				self.maxU = 0
-				self.maxSigma = 0
+				self.maxN = 0.0
+				self.maxU = 0.0
+				self.maxSigma = 0.0
 				
 				self.calculated = True
 			else:

@@ -19,14 +19,18 @@ class Logic:
 		self.application.elements = {}
 	
 	
-	def processConstructionFile(self, constructionFile, showMessage = None, showError = None):
-		try:
-			self.application.construction = Construction(constructionFile, showMessage, showError)
-		except Exception as e:
-			if showError is not None:
-				showError(str(e))
+	def openConstructionFile(self, constructionFile, showMessage = None, showError = None):
+		# try:
+		self.application.construction = Construction(constructionFile, showMessage, showError)
+		# except Exception as e:
+		# 	if showError is not None:
+		# 		showError(str(e))
 		self.draw()
 		self.application.onConstructionChanged()
+	
+	
+	def saveConstructionToFile(self, constructionFile):
+		self.application.construction.dump(constructionFile)
 	
 	
 	def offsetFunc(self, realSize, virtSize):

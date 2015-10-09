@@ -25,7 +25,7 @@ class MainWindow(Tk):
 						   onCursorMovement = self.application.logic.onCursorMovement,
 						   onMouse1Clicked = self.application.logic.onMouse1Clicked,
 						   **kwargs)
-		self.graph.grid(column = 0, row = 0, rowspan = 9, sticky = N + E + S + W)
+		self.graph.grid(column = 0, row = 0, rowspan = 10, sticky = N + E + S + W)
 		
 		# Делаем колонку с виджетом с графиком растяжимой
 		self.columnconfigure(0, weight = 1)
@@ -36,12 +36,16 @@ class MainWindow(Tk):
 									 command = self.onButtonOpenFileClicked)
 		self.buttonOpenFile.grid(column = 1, row = 0, sticky = E + W)
 		
+		self.buttonOpenFile = Button(self, text = "Сохранить в файл",
+									 command = self.onButtonSaveToFileClicked)
+		self.buttonOpenFile.grid(column = 1, row = 1, sticky = E + W)
+		
 		self.buttonCalculate = Button(self, text = "Рассчитать",
 									  command = self.onCalculateButtonClicked, state = DISABLED)
-		self.buttonCalculate.grid(column = 1, row = 1, sticky = E + W)
+		self.buttonCalculate.grid(column = 1, row = 2, sticky = E + W)
 		
 		# Пустое пространство (растяжимое)
-		self.rowconfigure(2, weight = 1)
+		self.rowconfigure(3, weight = 1)
 		
 		# Настройки отображения содержимого
 		self.graphOptions = GraphOptionsWidget(
@@ -55,26 +59,26 @@ class MainWindow(Tk):
 				("drawSigma",        "График σ",     False, DISABLED)
 			]
 		)
-		self.graphOptions.grid(column = 1, row = 3, sticky = E + W)
+		self.graphOptions.grid(column = 1, row = 4, sticky = E + W)
 		
 		# Пустое пространство (растяжимое)
-		self.rowconfigure(4, weight = 1)
+		self.rowconfigure(5, weight = 1)
 		
 		
 		self.buttonComponents = Button(self, text = "Компоненты",
 									   command = self.onComponentsButtonClicked, state = DISABLED)
-		self.buttonComponents.grid(column = 1, row = 5, sticky = E + W)
+		self.buttonComponents.grid(column = 1, row = 6, sticky = E + W)
 		
 		self.buttonMatrices = Button(self, text = "Матрицы", command = self.onMatricesButtonClicked,
 									 state = DISABLED)
-		self.buttonMatrices.grid(column = 1, row = 6, sticky = E + W)
+		self.buttonMatrices.grid(column = 1, row = 7, sticky = E + W)
 		
 		self.buttonDetails = Button(self, text = "Детали", command = self.onDetailButtonClicked,
 									state = DISABLED)
-		self.buttonDetails.grid(column = 1, row = 7, sticky = E + W)
+		self.buttonDetails.grid(column = 1, row = 8, sticky = E + W)
 		
 		self.buttonAbout = Button(self, text = "О программе", command = self.onAboutButtonClicked)
-		self.buttonAbout.grid(column = 1, row = 8, sticky = E + W)
+		self.buttonAbout.grid(column = 1, row = 9, sticky = E + W)
 		
 		
 		# Панель под графиком
@@ -89,7 +93,7 @@ class MainWindow(Tk):
 				("divsSigma", "Ось σ:",  0, DISABLED),
 			]
 		)
-		self.axisOptions.grid(column = 0, row = 9, sticky = E + W)
+		self.axisOptions.grid(column = 0, row = 10, sticky = E + W)
 		
 		
 		self.bind("<Configure>", self.onWindowConfigure)
@@ -105,12 +109,28 @@ class MainWindow(Tk):
 		if filename != "":
 			try:
 				file = open(filename, "r")
-				self.application.logic.processConstructionFile(file,
-															   showMessage = self.showMessage,
-															   showError = self.showError)
+				self.application.logic.openConstructionFile(file,
+															showMessage = self.showMessage,
+															showError = self.showError)
 				file.close()
 			except IOError as e:
 				self.showError("Невозможно открыть файл: %s" % e)
+			# except Exception as e:
+			# 	print("Неизвестная ошибка: %s" % e)
+	
+	
+	def onButtonSaveToFileClicked(self):
+		filename = tkinter.filedialog.asksaveasfilename(parent = self,
+														defaultextension = ".json",
+														filetypes = [ ("JSON", ".json") ])
+		
+		if filename != "":
+			try:
+				file = open(filename, "w")
+				self.application.logic.saveConstructionToFile(file)
+				file.close()
+			except IOError as e:
+				self.showError("Невозможно открыть для записи файл: %s" % e)
 			# except Exception as e:
 			# 	print("Неизвестная ошибка: %s" % e)
 	

@@ -10,20 +10,41 @@ class Node(ConstructionElement):
 		ConstructionElement.__init__(self, json, default)
 		
 		self.fixed = False
-		self.F = 0
+		self.F = 0.0
 		
 		self.Delta = None	# Смещение узла; вычисляется конструкцией
 		
 		if json is not None:
 			if default is None:
-				self.fixed = json.get("fixed", False)
-				self.F = json.get("F", 0)
+				self.fixed = bool(json.get("fixed", False))
+				self.F = float(json.get("F", 0.0))
+				
+				self.Delta = json.get("Delta")
 			else:
-				self.fixed = json.get("fixed", default.fixed)
-				self.F = json.get("F", default.F)
+				self.fixed = bool(json.get("fixed", default.fixed))
+				self.F = float(json.get("F", default.F))
+				
+				self.Delta = json.get("Delta", default.Delta)
 		elif default is not None:
-			self.fixed = default.fixed
-			self.F = default.F
+			self.fixed = bool(default.fixed)
+			self.F = float(default.F)
+			
+			self.Delta = default.Delta
+	
+	
+	def dump(self):
+		retDict = ConstructionElement.dump(self)
+		
+		retDict.update({
+			"fixed": self.fixed,
+			
+			"F": self.F
+		})
+		
+		if self.calculated():
+			retDict.update({ "Delta": round(self.Delta, 15) })
+		
+		return retDict
 	
 	
 	def __str__(self):
@@ -43,10 +64,14 @@ class Node(ConstructionElement):
 	
 	def loads(self):
 		return (self.F, 0)
+	
+	
+	def calculated(self):
+		return False if self.Delta is None else True
 
 
 def similarToNode(json):
-	for keyword in ["fixed", "F"]:
+	for keyword in [ "fixed", "F", "Delta" ]:
 		if keyword in json:
 			return True
 	return False

@@ -32,20 +32,46 @@ class Bar(ConstructionElement):
 				self.E = float(json.get("E", 0.0))
 				self.Sigma = float(json.get("Sigma", 0.0))
 				self.q = float(json.get("q", 0.0))
+				
+				self.K  = json.get("K")
+				self.Q  = json.get("Q")
+				self.U0 = json.get("U0")
+				self.UL = json.get("UL")
 			else:
 				self.L = float(json.get("L", default.L))
 				self.A = float(json.get("A", default.A))
 				self.E = float(json.get("E", default.E))
 				self.Sigma = float(json.get("Sigma", default.Sigma))
 				self.q = float(json.get("q", default.q))
+				
+				self.K  = json.get("K", default.K)
+				self.Q  = json.get("Q", default.Q)
+				self.U0 = json.get("U0", default.U0)
+				self.UL = json.get("UL", default.UL)
 		elif default is not None:
 			self.L = float(default.L)
 			self.A = float(default.A)
 			self.E = float(default.E)
 			self.Sigma = float(default.Sigma)
 			self.q = float(default.q)
+			
+			self.K  = default.K
+			self.Q  = default.Q
+			self.U0 = default.U0
+			self.UL = default.UL
 		
-		if json is not None or default is not None:
+		
+		if self.K is None or self.Q is None or self.U0 is None or self.UL is None:
+			self.K  = None
+			self.Q  = None
+			self.U0 = None
+			self.UL = None
+		else:
+			self.K = eval(self.K)
+			self.Q = eval(self.Q)
+		
+		
+		if default is not None:
 			if self.L <= 0:
 				raise Exception("Некорректная длина стержня: L = %f " \
 								"(ожидается: L > 0; %s)" % (self.L, self))
@@ -59,6 +85,35 @@ class Bar(ConstructionElement):
 								"(ожидается: E > 0; %s)" % (self.E, self))
 		
 		self.height = math.sqrt(self.A)		# Квадратное сечение
+	
+	
+	def dump(self):
+		retDict = ConstructionElement.dump(self)
+		
+		retDict.update({
+			"L": self.L,
+			"A": self.A,
+			
+			"E": self.E,
+			"Sigma": self.Sigma,
+			
+			"q": self.q
+		})
+		
+		if self.calculated():
+			retDict.update({
+				"K": str(self.K),
+				"Q": str(self.Q),
+				"U0": round(self.U0, 15),
+				"UL": round(self.UL, 15)
+			})
+		print(retDict)
+		print()
+		return retDict
+	
+	
+	def calculated(self):
+		return False if self.U0 is None else True
 	
 	
 	def calculate(self):
@@ -172,7 +227,7 @@ class Bar(ConstructionElement):
 
 
 def similarToBar(json):
-	for keyword in ["L", "A", "E", "Sigma", "q"]:
+	for keyword in [ "L", "A", "E", "Sigma", "q", "U0", "UL" ]:
 		if keyword in json:
 			return True
 	return False
