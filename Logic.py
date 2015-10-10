@@ -247,18 +247,27 @@ class Logic:
 		return self.application.construction.calculated
 	
 	
-	def matrices(self):
+	def matrices(self, barNumber = None):
 		if not self.constructionCalculated():
 			s = "<Не рассчитано>"
 			return [ s, s, s ]
 		
 		c = self.application.construction
-		Deltas = []
-		for element in self.application.construction.elements:
-			if type(element) == Node:
-				Deltas.append(element.Delta)
 		
-		return [ pretty(x) for x in (c.A, c.b, Matrix(self.nodesCount(), 1, Deltas)) ]
+		if barNumber is None:
+			Deltas = []
+			for element in self.application.construction.elements:
+				if type(element) == Node:
+					Deltas.append(element.Delta)
+			
+			return [ pretty(x) for x in (c.A, c.b, Matrix(self.nodesCount(), 1, Deltas)) ]
+		else:
+			if barNumber not in range(0, self.barsCount()):
+				s = "<Некорректный номер стержня>"
+				return [ s, s, s ]
+			
+			e = self.application.construction.elements[2 * barNumber + 1]
+			return [ pretty(x) for x in (e.K, e.Q, Matrix(2, 1, [e.U0, e.UL])) ]
 	
 	
 	def calculateComponents(self, xFrom, xTo, xStep, onPointCalculated):

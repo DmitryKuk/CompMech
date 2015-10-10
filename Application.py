@@ -31,12 +31,12 @@ class Application:
 		self.detailWindows.add(DetailWindow(self, barNumber = barNumber))
 	
 	
-	def createMatricesWindow(self):
-		self.matricesWindows.add(MatricesWindow(self))
+	def createMatricesWindow(self, barNumber = None):
+		self.matricesWindows.add(MatricesWindow(self, barNumber = barNumber))
 	
 	
-	def createComponentsDumpWindow(self):
-		self.componentsDumpWindows.add(ComponentsDumpWindow(self))
+	def createComponentsDumpWindow(self, barNumber = None):
+		self.componentsDumpWindows.add(ComponentsDumpWindow(self, barNumber = barNumber))
 	
 	
 	def onDetailWindowDestroy(self, window):

@@ -7,12 +7,13 @@ import tkinter.font
 
 
 class MatricesWindow(Toplevel):
-	def __init__(self, application, **kwargs):
+	def __init__(self, application, barNumber = None, **kwargs):
 		Toplevel.__init__(self)
 		
 		self.application = application
+		self.barNumber = barNumber
 		
-		self.title("%s%sМатрицы" % (self.application.name, self.application.nameDelim))
+		self.updateTitle()
 		
 		self.A = StringVar()
 		self.b = StringVar()
@@ -32,8 +33,13 @@ class MatricesWindow(Toplevel):
 		self.columnconfigure(0, weight = 1)
 		
 		
+		(ATitle, bTitle, DeltasTitle) = ("[A] =", "{b} =", "{Δ} =") \
+										if self.barNumber is None \
+										else ("[K] =", "{Q} =", "{U} =")
+		
+		
 		# A
-		self.ATitleLabel = Label(self, text = "[A] =", **labelArgs)
+		self.ATitleLabel = Label(self, text = ATitle, **labelArgs)
 		self.ATitleLabel.grid(column = 1, row = 0, sticky = N + S)
 		
 		self.ALabel = Label(self, textvariable = self.A, **labelArgs)
@@ -43,7 +49,7 @@ class MatricesWindow(Toplevel):
 		
 		
 		# b
-		self.bTitleLabel = Label(self, text = "{b} =", **labelArgs)
+		self.bTitleLabel = Label(self, text = bTitle, **labelArgs)
 		self.bTitleLabel.grid(column = 4, row = 0, sticky = N + S)
 		
 		self.bLabel = Label(self, textvariable = self.b, **labelArgs)
@@ -53,7 +59,7 @@ class MatricesWindow(Toplevel):
 		
 		
 		# Deltas
-		self.DeltasTitleLabel = Label(self, text = "{Δ} =", **labelArgs)
+		self.DeltasTitleLabel = Label(self, text = DeltasTitle, **labelArgs)
 		self.DeltasTitleLabel.grid(column = 7, row = 0, sticky = N + S)
 		
 		self.DeltasLabel = Label(self, textvariable = self.Deltas, **labelArgs)
@@ -67,12 +73,26 @@ class MatricesWindow(Toplevel):
 		self.onConstructionChanged()
 	
 	
+	def updateTitle(self):
+		self.title(
+			"%s%sМатрицы%s" \
+			% (self.application.name, self.application.nameDelim,
+			   "" if self.barNumber is None else "%sСтержень (%d)" \
+												 % (self.application.nameDelim, self.barNumber))
+		)
+	
+	
 	def onWindowDestroy(self, event):
 		self.application.onMatricesWindowDestroy(self)
 	
 	
 	def onConstructionChanged(self):
-		m = self.application.logic.matrices()
+		if self.barNumber is not None \
+			and self.barNumber not in range(0, self.application.logic.barsCount()):
+			self.barNumber = 0
+			self.updateTitle()
+		
+		m = self.application.logic.matrices(barNumber = self.barNumber)
 		self.A.set(m[0])
 		self.b.set(m[1])
 		self.Deltas.set(m[2])

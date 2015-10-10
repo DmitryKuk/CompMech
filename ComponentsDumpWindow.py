@@ -10,7 +10,7 @@ from EntryValidation import validateFloat
 
 
 class ComponentsDumpWindow(Toplevel):
-	def __init__(self, application, **kwargs):
+	def __init__(self, application, barNumber = None, **kwargs):
 		Toplevel.__init__(self)
 		
 		self.application = application

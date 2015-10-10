@@ -25,7 +25,7 @@ class DetailWindow(Toplevel):
 						   offsetFunc = self.application.logic.offsetFunc,
 						   onCursorMovement = self.application.logic.onCursorMovement,
 						   **kwargs)
-		self.graph.grid(column = 0, row = 0, rowspan = 4, sticky = N + E + S + W)
+		self.graph.grid(column = 0, row = 0, rowspan = 7, sticky = N + E + S + W)
 		
 		# Делаем колонку с виджетом с графиком растяжимой
 		self.columnconfigure(0, weight = 1)
@@ -70,7 +70,16 @@ class DetailWindow(Toplevel):
 				("divsSigma", "Ось σ:",  0, DISABLED),
 			]
 		)
-		self.axisOptions.grid(column = 0, row = 4, sticky = E + W)
+		self.axisOptions.grid(column = 0, row = 7, sticky = E + W)
+		
+		
+		self.buttonComponents = Button(self, text = "Компоненты",
+									   command = self.onComponentsButtonClicked, state = DISABLED)
+		self.buttonComponents.grid(column = 1, row = 5, columnspan = 2, sticky = E + W)
+		
+		self.buttonMatrices = Button(self, text = "Матрицы", command = self.onMatricesButtonClicked,
+									 state = DISABLED)
+		self.buttonMatrices.grid(column = 1, row = 6, columnspan = 2, sticky = E + W)
 		
 		
 		self.bind("<Configure>", self.onWindowConfigure)
@@ -91,6 +100,14 @@ class DetailWindow(Toplevel):
 		barsCount = self.application.logic.barsCount()
 		if barsCount > 0: self.barNumber = (self.barNumber + 1) % barsCount
 		self.draw()
+	
+	
+	def onMatricesButtonClicked(self):
+		self.application.createMatricesWindow(self.barNumber)
+	
+	
+	def onComponentsButtonClicked(self):
+		self.application.createComponentsDumpWindow(self.barNumber)
 	
 	
 	def onWindowConfigure(self, event):
@@ -116,6 +133,9 @@ class DetailWindow(Toplevel):
 							  drawN            = (None, state2),
 							  drawU            = (None, state2),
 							  drawSigma        = (None, state2))
+		
+		self.buttonComponents["state"] = state2
+		self.buttonMatrices["state"]   = state2
 		
 		# Панель под графиком
 		self.axisOptions.set(divsX     = (None, NORMAL),
