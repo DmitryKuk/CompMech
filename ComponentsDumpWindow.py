@@ -6,35 +6,46 @@ from tkinter import *
 from tkinter.ttk import Treeview
 import tkinter.messagebox
 
-from EntryValidation import validateFloat
-
 
 class ComponentsDumpWindow(Toplevel):
 	def __init__(self, application, barNumber = None, **kwargs):
 		Toplevel.__init__(self)
 		
 		self.application = application
-		
-		self.title("%s%sКомпоненты" % (self.application.name, self.application.nameDelim))
-		
-		self.validateFloatCommand = self.register(validateFloat)
-		validateArgs = { "validate": "key", "validatecommand": (self.validateFloatCommand, "%S") }
+		self.barNumber = barNumber
+		self.updateTitle()
 		
 		
-		self.fromLabel = Label(self, text = "От x(global):")
+		def onEntryFocusIn(reason, name, text):
+			widget = self.nametowidget(name)
+			if reason == "focusin":
+				widget.select_range(0, END)
+				widget.icursor(END)
+			elif text == "":
+				widget.insert(0, "0")
+			return True
+		
+		self.onEntryFocusInCommand = self.register(onEntryFocusIn)
+		validateArgs = { "validate": "focus",
+						 "validatecommand": (self.onEntryFocusInCommand, "%V", "%W", "%P") }
+		
+		
+		descStr = "global" if self.barNumber is None else "local"
+		
+		self.fromLabel = Label(self, text = "От x(" + descStr + "):")
 		self.fromLabel.grid(column = 0, row = 0)
 		
 		self.fromVar = StringVar()
-		self.fromEntry = Entry(self, textvariable = self.fromVar, **validateArgs)
+		self.fromEntry = Entry(self, textvariable = self.fromVar, justify = RIGHT, **validateArgs)
 		self.fromEntry.grid(column = 1, row = 0, sticky = W + E)
 		self.columnconfigure(1, weight = 1)
 		
 		
-		self.toLabel = Label(self, text = "До x(global):")
+		self.toLabel = Label(self, text = "До x(" + descStr + "):")
 		self.toLabel.grid(column = 2, row = 0)
 		
 		self.toVar = StringVar()
-		self.toEntry = Entry(self, textvariable = self.toVar, **validateArgs)
+		self.toEntry = Entry(self, textvariable = self.toVar, justify = RIGHT, **validateArgs)
 		self.toEntry.grid(column = 3, row = 0, sticky = W + E)
 		self.columnconfigure(3, weight = 1)
 		
@@ -43,7 +54,7 @@ class ComponentsDumpWindow(Toplevel):
 		self.stepLabel.grid(column = 4, row = 0)
 		
 		self.stepVar = StringVar()
-		self.stepEntry = Entry(self, textvariable = self.stepVar, **validateArgs)
+		self.stepEntry = Entry(self, textvariable = self.stepVar, justify = RIGHT, **validateArgs)
 		self.stepEntry.grid(column = 5, row = 0, sticky = W + E)
 		self.columnconfigure(5, weight = 1)
 		
@@ -59,6 +70,15 @@ class ComponentsDumpWindow(Toplevel):
 		self.createTree()
 		
 		self.onConstructionChanged(False)
+	
+	
+	def updateTitle(self):
+		self.title(
+			"%s%sКомпоненты%s" \
+			% (self.application.name, self.application.nameDelim,
+			   "" if self.barNumber is None else "%sСтержень (%d)" \
+												 % (self.application.nameDelim, self.barNumber))
+		)
 	
 	
 	def onWindowDestroy(self, event):

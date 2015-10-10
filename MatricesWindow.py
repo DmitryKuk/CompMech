@@ -12,7 +12,6 @@ class MatricesWindow(Toplevel):
 		
 		self.application = application
 		self.barNumber = barNumber
-		
 		self.updateTitle()
 		
 		self.A = StringVar()
