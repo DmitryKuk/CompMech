@@ -13,16 +13,15 @@ class ComponentsDumpWindow(Toplevel):
 		
 		self.application = application
 		self.barNumber = barNumber
-		self.updateTitle()
 		
 		
 		def onEntryFocusIn(reason, name, text):
-			widget = self.nametowidget(name)
 			if reason == "focusin":
+				widget = self.nametowidget(name)
 				widget.select_range(0, END)
 				widget.icursor(END)
 			elif text == "":
-				widget.insert(0, "0")
+				self.nametowidget(name).insert(0, "0")
 			return True
 		
 		self.onEntryFocusInCommand = self.register(onEntryFocusIn)
@@ -30,9 +29,7 @@ class ComponentsDumpWindow(Toplevel):
 						 "validatecommand": (self.onEntryFocusInCommand, "%V", "%W", "%P") }
 		
 		
-		descStr = "global" if self.barNumber is None else "local"
-		
-		self.fromLabel = Label(self, text = "От x(" + descStr + "):")
+		self.fromLabel = Label(self)
 		self.fromLabel.grid(column = 0, row = 0)
 		
 		self.fromVar = StringVar()
@@ -41,7 +38,7 @@ class ComponentsDumpWindow(Toplevel):
 		self.columnconfigure(1, weight = 1)
 		
 		
-		self.toLabel = Label(self, text = "До x(" + descStr + "):")
+		self.toLabel = Label(self)
 		self.toLabel.grid(column = 2, row = 0)
 		
 		self.toVar = StringVar()
@@ -69,16 +66,23 @@ class ComponentsDumpWindow(Toplevel):
 		self.tree = None
 		self.createTree()
 		
+		self.updateTitles()
 		self.onConstructionChanged(False)
 	
 	
-	def updateTitle(self):
-		self.title(
-			"%s%sКомпоненты%s" \
-			% (self.application.name, self.application.nameDelim,
-			   "" if self.barNumber is None else "%sСтержень (%d)" \
-												 % (self.application.nameDelim, self.barNumber))
-		)
+	def updateTitles(self):
+		if self.barNumber is None:
+			titleDescStr = ""
+			xDescStr     = "global"
+		else:
+			titleDescStr = "%sСтержень (%d)" % (self.application.nameDelim, self.barNumber)
+			xDescStr     = "local"
+		
+		self.title("%s%sКомпоненты%s" \
+				   % (self.application.name, self.application.nameDelim, titleDescStr))
+		
+		self.fromLabel["text"] = "От x(" + xDescStr + "):"
+		self.toLabel["text"] = "До x(" + xDescStr + "):"
 	
 	
 	def onWindowDestroy(self, event):
@@ -94,7 +98,7 @@ class ComponentsDumpWindow(Toplevel):
 	
 	def onConstructionChanged(self, constructed = True):
 		if not constructed:
-			for var in [ self.fromVar, self.toVar, self.stepVar ]:
+			for var in self.fromVar, self.toVar, self.stepVar:
 				var.set("0")
 			return
 		
@@ -104,20 +108,25 @@ class ComponentsDumpWindow(Toplevel):
 			self.clear()
 	
 	
-	def onPointCalculated(self, x, N, U, Sigma):
-		self.lastIID = self.tree.insert(parent = "", index = "end",
-										values = ("%.14f" % x, "%.14f" % N,
-												  "%.14f" % U, "%.14f" % Sigma))
+	def onPointCalculated(self, barNumber, x, N, U, Sigma):
+		self.tree.insert(parent = "", index = "end",
+						 values = ("—" if barNumber is None else str(barNumber),
+								   "%.14f" % x, "%.14f" % N,
+								   "%.14f" % U, "%.14f" % Sigma))
 	
 	
 	def createTree(self):
-		columns = ("x", "Nx", "U", "σ")
+		columns = ("№ стержня", "x", "Nx", "U", "σ")
 		
 		self.tree = Treeview(self, columns = columns, displaycolumns = columns)
 		self.tree.grid(column = 0, row = 1, columnspan = 7, sticky = W + N + E + S)
 		self.tree.column("#0", width = 0, stretch = 0)
 		
-		for x in columns:
+		# Настройки отображения таблицы
+		self.tree.column(columns[0], anchor = CENTER)
+		self.tree.heading(columns[0], text = columns[0], anchor = CENTER)
+		
+		for x in columns[1:]:
 			self.tree.column(x, anchor = E)
 			self.tree.heading(x, text = x, anchor = E)
 	
@@ -130,7 +139,11 @@ class ComponentsDumpWindow(Toplevel):
 	def calculate(self):
 		self.clear()
 		
-		for var in [ self.fromVar, self.toVar, self.stepVar ]:
+		if self.barNumber not in range(0, self.application.logic.barsCount()):
+			self.barNumber = None
+			self.updateTitles()
+		
+		for var in self.fromVar, self.toVar, self.stepVar:
 			try:
 				float(var.get())
 			except ValueError:
@@ -140,7 +153,7 @@ class ComponentsDumpWindow(Toplevel):
 		xTo = float(self.toVar.get())
 		xStep = float(self.stepVar.get())
 		
-		self.application.logic.calculateComponents(xFrom, xTo, xStep,
+		self.application.logic.calculateComponents(xFrom, xTo, xStep, barNumber = self.barNumber,
 												   onPointCalculated = self.onPointCalculated)
 	
 	

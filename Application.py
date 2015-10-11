@@ -57,6 +57,8 @@ class Application:
 			window.onConstructionChanged()
 		for window in self.matricesWindows:
 			window.onConstructionChanged()
+		for window in self.componentsDumpWindows:
+			window.onConstructionChanged()
 	
 	
 	def run(self):

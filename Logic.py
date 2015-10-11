@@ -144,11 +144,13 @@ class Logic:
 	
 	
 	def nearestBar(self, x):
-		if self.constructionEmpty(): return (None, None)
+		if self.constructionEmpty(): return None
 		
 		construction = self.application.construction
 		elements = construction.elements
 		nodeXs = construction.nodeXs
+		
+		if x == 0 and self.barsCount() > 0: return elements[1]
 		
 		nearestNode, nearestBar = None, None
 		
@@ -270,9 +272,9 @@ class Logic:
 			return [ pretty(x) for x in (e.K, e.Q, Matrix(2, 1, [e.U0, e.UL])) ]
 	
 	
-	def calculateComponents(self, xFrom, xTo, xStep, onPointCalculated):
+	def calculateComponents(self, xFrom, xTo, xStep, onPointCalculated, barNumber = None):
 		if (xFrom > xTo and xStep > 0) or (xFrom < xTo and xStep < 0):
-			raise Exception("Некорректный диапазон или шаг: (%.3f; %.3f), dx = %.3f" \
+			raise Exception("Некорректный диапазон или шаг:\n(%.3f; %.3f), dx = %.3f" \
 							% (xFrom, xTo, xStep))
 		
 		if self.constructionEmpty():
@@ -282,37 +284,64 @@ class Logic:
 			raise Exception("Конструкция не рассчитана")
 		
 		
-		bar = self.application.construction.elements[1] if xFrom == 0 else self.nearestBar(xFrom)
+		if barNumber is None:
+			xOffset = 0
+		else:
+			xOffset = self.application.construction.elements[2 * barNumber + 1].x
+			xFrom += xOffset
+			xTo   += xOffset
+		
+		
+		barNumber, bar = None, None
 		def calculatePoint(x):
-			if bar is None: onPointCalculated(x, 0, 0, 0)
-			else: onPointCalculated(x, bar.NGlobal(x), bar.UGlobal(x), bar.SigmaGlobal(x))
+			onPointCalculated(bar.i, x - xOffset, bar.NGlobal(x), bar.UGlobal(x), bar.SigmaGlobal(x))
 		
 		
 		if xStep == 0:
-			calculatePoint(xFrom)
+			bar = self.application.construction.elements[1] if xFrom == 0 else self.nearestBar(xFrom)
+			
+			if bar is None: onPointCalculated(x - xOffset, 0, 0, 0)
+			else: calculatePoint(xFrom)
 			return
 		
+		constructionWidth = self.application.construction.size()[0]
 		if xStep >= 0:
-			barNumber = 0
-			while xFrom <= xTo:
-				if xFrom < 0 or xFrom > self.application.construction.size()[0]:
-					onPointCalculated(xFrom, 0, 0, 0)
-				else:
-					if bar is None or xFrom > bar.x + bar.L:
-						bar = self.application.construction.elements[2 * barNumber + 1]
+			while xFrom <= xTo and xFrom < 0:
+				onPointCalculated(None, xFrom - xOffset, 0, 0, 0)
+				xFrom += xStep
+			
+			if xFrom <= xTo and xFrom <= constructionWidth:
+				bar = self.nearestBar(xFrom)
+				barNumber = bar.i
+				
+				while xFrom <= xTo and xFrom <= constructionWidth:
+					if xFrom > bar.x + bar.L:
 						barNumber += 1
-					calculatePoint(xFrom)
-				
-				xFrom += xStep
-		else:
-			barNumber = self.barsCount() - 1
-			while xFrom >= xTo:
-				if xFrom < 0 or xFrom > self.application.construction.size()[0]:
-					onPointCalculated(xFrom, 0, 0, 0)
-				else:
-					if bar is None or xFrom < bar.x:
 						bar = self.application.construction.elements[2 * barNumber + 1]
-						barNumber -= 1
 					calculatePoint(xFrom)
+					
+					xFrom += xStep
 				
+				while xFrom <= xTo:
+					onPointCalculated(None, xFrom - xOffset, 0, 0, 0)
+					xFrom += xStep
+		else:
+			while xFrom >= xTo and xFrom > constructionWidth:
+				onPointCalculated(None, xFrom - xOffset, 0, 0, 0)
 				xFrom += xStep
+			
+			if xFrom >= xTo and xFrom >= 0:
+				bar = self.nearestBar(xFrom)
+				barNumber = bar.i
+				
+				while xFrom >= xTo and xFrom >= 0:
+					if xFrom < bar.x:
+						barNumber -= 1
+						bar = self.application.construction.elements[2 * barNumber + 1]
+					calculatePoint(xFrom)
+					
+					xFrom += xStep
+				
+				while xFrom >= xTo:
+					onPointCalculated(None, xFrom - xOffset, 0, 0, 0)
+					xFrom += xStep
