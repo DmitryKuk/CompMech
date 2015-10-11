@@ -284,6 +284,7 @@ class Logic:
 			raise Exception("Конструкция не рассчитана")
 		
 		
+		# Учитываем смещение координат
 		if barNumber is None:
 			xOffset = 0
 		else:
@@ -292,56 +293,66 @@ class Logic:
 			xTo   += xOffset
 		
 		
+		# Вспомогательные функции
 		barNumber, bar = None, None
 		def calculatePoint(x):
-			onPointCalculated(bar.i, x - xOffset, bar.NGlobal(x), bar.UGlobal(x), bar.SigmaGlobal(x))
+			onPointCalculated(bar.i, x - xOffset, \
+							  bar.NGlobal(x), bar.UGlobal(x), bar.SigmaGlobal(x))
 		
 		
+		def emptyPointFound(x):
+			onPointCalculated(None, x - xOffset, 0, 0, 0)
+		
+		
+		# Вычисляем единственное значение
 		if xStep == 0:
-			bar = self.application.construction.elements[1] if xFrom == 0 else self.nearestBar(xFrom)
-			
-			if bar is None: onPointCalculated(x - xOffset, 0, 0, 0)
+			bar = self.nearestBar(xFrom)
+			if bar is None: emptyPointFound(xFrom)
 			else: calculatePoint(xFrom)
 			return
 		
+		
+		# Вычисляем множество значений
 		constructionWidth = self.application.construction.size()[0]
 		if xStep >= 0:
+			# Левее конструкции
 			while xFrom <= xTo and xFrom < 0:
-				onPointCalculated(None, xFrom - xOffset, 0, 0, 0)
+				emptyPointFound(xFrom)
 				xFrom += xStep
 			
+			# Конструкция
 			if xFrom <= xTo and xFrom <= constructionWidth:
 				bar = self.nearestBar(xFrom)
 				barNumber = bar.i
-				
 				while xFrom <= xTo and xFrom <= constructionWidth:
 					if xFrom > bar.x + bar.L:
 						barNumber += 1
 						bar = self.application.construction.elements[2 * barNumber + 1]
 					calculatePoint(xFrom)
-					
 					xFrom += xStep
-				
-				while xFrom <= xTo:
-					onPointCalculated(None, xFrom - xOffset, 0, 0, 0)
-					xFrom += xStep
+			
+			# Правее конструкции
+			while xFrom <= xTo:
+				emptyPointFound(xFrom)
+				xFrom += xStep
 		else:
+			# Правее конструкции
 			while xFrom >= xTo and xFrom > constructionWidth:
-				onPointCalculated(None, xFrom - xOffset, 0, 0, 0)
+				emptyPointFound(xFrom)
 				xFrom += xStep
 			
+			# Конструкция
 			if xFrom >= xTo and xFrom >= 0:
 				bar = self.nearestBar(xFrom)
 				barNumber = bar.i
-				
 				while xFrom >= xTo and xFrom >= 0:
 					if xFrom < bar.x:
 						barNumber -= 1
 						bar = self.application.construction.elements[2 * barNumber + 1]
 					calculatePoint(xFrom)
-					
 					xFrom += xStep
-				
-				while xFrom >= xTo:
-					onPointCalculated(None, xFrom - xOffset, 0, 0, 0)
-					xFrom += xStep
+			
+			# Левее конструкции
+			while xFrom >= xTo:
+				emptyPointFound(xFrom)
+				xFrom += xStep

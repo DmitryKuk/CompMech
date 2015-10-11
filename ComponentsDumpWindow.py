@@ -60,11 +60,24 @@ class ComponentsDumpWindow(Toplevel):
 									  command = self.onCalculateButtonClicked)
 		self.calculateButton.grid(column = 6, row = 0, columnspan = 2)
 		
+		
+		# Таблица рассчитанных значений
+		columns = ("№ стержня", "x", "Nx", "U", "σ")
+		
+		self.tree = Treeview(self, columns = columns, displaycolumns = columns)
+		self.tree.grid(column = 0, row = 1, columnspan = 7, sticky = W + N + E + S)
+		self.tree.column("#0", width = 0, stretch = 0)
+		
+		# Настройки отображения таблицы
+		self.tree.column(columns[0], anchor = CENTER)
+		self.tree.heading(columns[0], text = columns[0], anchor = CENTER)
+		
+		for x in columns[1:]:
+			self.tree.column(x, anchor = E)
+			self.tree.heading(x, text = x, anchor = E)
+		
 		self.rowconfigure(1, weight = 1)
 		
-		
-		self.tree = None
-		self.createTree()
 		
 		self.updateTitles()
 		self.onConstructionChanged(False)
@@ -115,25 +128,8 @@ class ComponentsDumpWindow(Toplevel):
 								   "%.14f" % U, "%.14f" % Sigma))
 	
 	
-	def createTree(self):
-		columns = ("№ стержня", "x", "Nx", "U", "σ")
-		
-		self.tree = Treeview(self, columns = columns, displaycolumns = columns)
-		self.tree.grid(column = 0, row = 1, columnspan = 7, sticky = W + N + E + S)
-		self.tree.column("#0", width = 0, stretch = 0)
-		
-		# Настройки отображения таблицы
-		self.tree.column(columns[0], anchor = CENTER)
-		self.tree.heading(columns[0], text = columns[0], anchor = CENTER)
-		
-		for x in columns[1:]:
-			self.tree.column(x, anchor = E)
-			self.tree.heading(x, text = x, anchor = E)
-	
-	
 	def clear(self):
-		del self.tree
-		self.createTree()
+		self.tree.delete(*self.tree.get_children())
 	
 	
 	def calculate(self):
