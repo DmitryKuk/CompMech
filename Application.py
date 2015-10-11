@@ -6,7 +6,8 @@ from MainWindow import MainWindow
 from DetailWindow import DetailWindow
 from MatricesWindow import MatricesWindow
 from ComponentsDumpWindow import ComponentsDumpWindow
-from Logic import *
+from EditConstructionWindow import EditConstructionWindow
+from Logic import Logic
 
 
 class Application:
@@ -21,10 +22,14 @@ class Application:
 		
 		self.logic = Logic(self)
 		
+		# Окна
 		self.mainWindow = MainWindow(self)
-		self.detailWindows = set()
-		self.matricesWindows = set()
-		self.componentsDumpWindows = set()
+		self.detailWindows			 = set()
+		self.matricesWindows		 = set()
+		self.componentsDumpWindows	 = set()
+		self.editConstructionWindows = set()
+		
+		self.createEditConstructionWindow()
 	
 	
 	def createDetailWindow(self, barNumber = 0):
@@ -39,6 +44,10 @@ class Application:
 		self.componentsDumpWindows.add(ComponentsDumpWindow(self, barNumber = barNumber))
 	
 	
+	def createEditConstructionWindow(self, barNumber = None):
+		self.editConstructionWindows.add(EditConstructionWindow(self, barNumber = barNumber))
+	
+	
 	def onDetailWindowDestroy(self, window):
 		self.detailWindows.discard(window)
 	
@@ -51,14 +60,16 @@ class Application:
 		self.componentsDumpWindows.discard(window)
 	
 	
+	def onEditConstructionDestroy(self, window):
+		self.editConstructionWindows.discard(window)
+	
+	
 	def onConstructionChanged(self):
 		self.mainWindow.onConstructionChanged()
-		for window in self.detailWindows:
-			window.onConstructionChanged()
-		for window in self.matricesWindows:
-			window.onConstructionChanged()
-		for window in self.componentsDumpWindows:
-			window.onConstructionChanged()
+		for s in self.detailWindows, self.matricesWindows, \
+				 self.componentsDumpWindows, self.editConstructionWindows:
+			for w in s:
+				w.onConstructionChanged()
 	
 	
 	def run(self):
