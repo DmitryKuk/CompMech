@@ -112,9 +112,9 @@ class Logic:
 			
 			
 			# Вспомогательные оси (вертикальные, по Ox)
-			if not self.constructionEmpty() and divsX > 0:	# Вертикальные
+			if not self.constructionEmpty():	# Вертикальные
 				maxX = virtSize[0]
-				dx = float(maxX) / divsX
+				dx = float(maxX) / (divsX + 1)
 				x = xOffset
 				while x < maxX + xOffset:
 					x += dx
