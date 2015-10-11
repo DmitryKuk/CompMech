@@ -279,7 +279,8 @@ class Construction:
 		return self.elementsCount() // 2
 	
 	def nodesCount(self):
-		return self.elementsCount() // 2 + 1 if self.elementsCount() > 0 else 0
+		elementsCount = self.elementsCount()
+		return elementsCount // 2 + 1 if elementsCount > 0 else 0
 	
 	
 	def element(self, i):
