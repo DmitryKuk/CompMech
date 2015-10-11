@@ -134,7 +134,7 @@ class Bar(ConstructionElement):
 	def supportDescStr(self, x):
 		return ("x(local) = %.3f" % (x - self.x)) \
 			   + ("" if self.U0 is None else \
-				  ";  Nx(x) = %.3f;  U(x) = %.3f;  σ(x) = %.3f;  U0 = %.3f;  U1 = %.3f" \
+				  ";  Nx(x) = %.3f;  U(x) = %.3f;  σ(x) = %.3f;  U0 = %.3f;  UL = %.3f" \
 				  % (self.NGlobal(x), self.UGlobal(x), self.SigmaGlobal(x), self.U0, self.UL))
 	
 	
