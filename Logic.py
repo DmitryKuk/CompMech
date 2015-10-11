@@ -146,29 +146,17 @@ class Logic:
 	def nearestBar(self, x):
 		if self.constructionEmpty(): return None
 		
-		construction = self.application.construction
-		elements = construction.elements
-		nodeXs = construction.nodeXs
+		c = self.application.construction
+		nearestBar = None
 		
-		if x == 0 and self.barsCount() > 0: return elements[1]
-		
-		nearestNode, nearestBar = None, None
-		
-		i = bisect_left(nodeXs, x)
+		i = bisect_left(c.nodeXs, x)
 		if i == 0:
-			nearestNode = elements[0]
+			if x == 0 and self.barsCount() > 0:
+				nearestBar = c.barFirst()
 		else:
 			i -= 1
-			if 2 * i + 1 < self.elementsCount():
-				nearestBar = elements[2 * i + 1]
-				
-				xl, xr = elements[2 * i].x, elements[2 * i + 2].x
-				if abs(x - xl) < abs(xr - x):
-					nearestNode = elements[2 * i]
-				else:
-					nearestNode = elements[2 * i + 2]
-			else:
-				nearestNode = elements[-1]
+			if i < self.barsCount():
+				nearestBar = c.bar(i)
 		
 		return nearestBar
 	
@@ -176,27 +164,15 @@ class Logic:
 	def nearestData(self, x, realToVirtXLen):
 		if self.constructionEmpty(): return (None, None)
 		
-		construction = self.application.construction
-		elements = construction.elements
-		nodeXs = construction.nodeXs
+		c = self.application.construction
+		nearestBar = self.nearestBar(x)
 		
-		nearestNode, nearestBar = None, None
-		
-		i = bisect_left(nodeXs, x)
-		if i == 0:
-			nearestNode = elements[0]
+		if nearestBar is None:
+			nearestNode = c.nodeFirst() if x < 0 else c.nodeLast()
 		else:
-			i -= 1
-			if 2 * i + 1 < self.elementsCount():
-				nearestBar = elements[2 * i + 1]
-				
-				xl, xr = elements[2 * i].x, elements[2 * i + 2].x
-				if abs(x - xl) < abs(xr - x):
-					nearestNode = elements[2 * i]
-				else:
-					nearestNode = elements[2 * i + 2]
-			else:
-				nearestNode = elements[-1]
+			nodeL, nodeR = c.nodeLeft(nearestBar.i), c.nodeRight(nearestBar.i)
+			xL, xR = nodeL.x, nodeR.x
+			nearestNode = nodeL if abs(x - xL) < abs(xR - x) else nodeR
 		
 		# Узел в окрестностях 10 пикселей считаем ближе, чем стержень
 		nearest = nearestNode if abs(x - nearestNode.x) < realToVirtXLen(10) else nearestBar
@@ -227,26 +203,6 @@ class Logic:
 		
 		# Уведомляем главное окно о том, что конструкция рассчитана
 		self.application.onConstructionChanged()
-	
-	
-	def elementsCount(self):
-		return len(self.application.construction.elements)
-	
-	
-	def barsCount(self):
-		return self.elementsCount() // 2
-	
-	
-	def nodesCount(self):
-		return self.elementsCount() // 2 + 1 if self.elementsCount() > 0 else 0
-	
-	
-	def constructionEmpty(self):
-		return self.application.construction.empty
-	
-	
-	def constructionCalculated(self):
-		return self.application.construction.calculated
 	
 	
 	def matrices(self, barNumber = None):
@@ -356,3 +312,32 @@ class Logic:
 			while xFrom >= xTo:
 				emptyPointFound(xFrom)
 				xFrom += xStep
+	
+	
+	# Работа с конструкцией
+	def constructionEmpty(self):
+		return self.application.construction.empty
+	
+	
+	def constructionCalculated(self):
+		return self.application.construction.calculated
+	
+	
+	def elementsCount(self):
+		return self.application.construction.elementsCount()
+	
+	
+	def barsCount(self):
+		return self.application.construction.barsCount()
+	
+	
+	def nodesCount(self):
+		return self.application.construction.nodesCount()
+	
+	
+	def bar(self, i):
+		return self.construction.bar(i)
+	
+	
+	def node(self, i):
+		return self.construction.node(i)

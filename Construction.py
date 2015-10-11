@@ -255,18 +255,59 @@ class Construction:
 	
 	def size(self, barNumber = None):
 		return (self.sizeX, self.sizeY) if barNumber is None \
-			   else self.elements[2 * barNumber + 1].size()
+			   else self.bar(barNumber).size()
 	
 	
 	def maxLoads(self, barNumber = None):
 		if barNumber is None:
 			return (self.maxF, self.specq, self.maxqOnL)
 		else:
-			bar = self.elements[2 * barNumber + 1]
-			node1, node2 = self.elements[2 * barNumber], self.elements[2 * barNumber + 2]
-			return (max(abs(node1.F), abs(node2.F)), abs(bar.q), abs(float(bar.q) / bar.L))
+			bar = self.bar(barNumber)
+			nodeL, nodeR = self.nodeLeft(barNumber), self.nodeRigth(barNumber)
+			return (max(abs(nodeL.F), abs(nodeR.F)), abs(bar.q), abs(float(bar.q) / bar.L))
 	
 	
 	def maxComponents(self, barNumber = None):
 		return (self.maxN, self.maxU, self.maxSigma) if barNumber is None \
-			   else self.elements[2 * barNumber + 1].maxComponents()
+			   else self.bar(barNumber).maxComponents()
+	
+	
+	def elementsCount(self):
+		return len(self.elements)
+	
+	def barsCount(self):
+		return self.elementsCount() // 2
+	
+	def nodesCount(self):
+		return self.elementsCount() // 2 + 1 if self.elementsCount() > 0 else 0
+	
+	
+	def element(self, i):
+		return self.elements[i]
+	
+	def bar(self, barNumber):
+		return self.element(2 * barNumber + 1)
+	
+	def node(self, nodeNumber):
+		return self.element(2 * nodeNumber)
+	
+	
+	def nodeLeft(self, barNumber):
+		return self.node(barNumber)
+	
+	def nodeRight(self, barNumber):
+		return self.node(barNumber + 1)
+	
+	
+	def barFirst(self):
+		return self.bar(0)
+	
+	def barLast(self):
+		return self.bar(self.barsCount() - 1)
+	
+	
+	def nodeFirst(self):
+		return self.node(0)
+	
+	def nodeLast(self):
+		return self.node(self.nodesCount() - 1)
