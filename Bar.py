@@ -125,7 +125,7 @@ class Bar(ConstructionElement):
 	
 	def __str__(self):
 		return \
-			"Стержень (%d)%s:  x = %.3f;  L = %.3f;  A = %.3f;  E = %.3f;  σ = %.3f;  q = %.3f" \
+			"Стержень (%d)%s:  x = %.3f;  L = %.3f;  A = %.3f;  E = %.3f;  [σ] = %.3f;  q = %.3f" \
 			% (self.i,
 			   "" if self.label == "" else "  \"" + self.label + "\"",
 			   self.x, self.L, self.A, self.E, self.Sigma, self.q)
