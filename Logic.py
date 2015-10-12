@@ -314,6 +314,12 @@ class Logic:
 				xFrom += xStep
 	
 	
+	def addElements(self, onNodeDetected, onBarDetected):
+		for element in self.application.construction.elements:
+			if type(element) == Node: onNodeDetected(element)
+			else:					  onBarDetected(element)
+	
+	
 	# Работа с конструкцией
 	def constructionEmpty(self):
 		return self.application.construction.empty
