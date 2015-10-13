@@ -15,25 +15,11 @@ class ComponentsDumpWindow(Toplevel):
 		self.barNumber = barNumber
 		
 		
-		def onEntryFocusIn(reason, name, text):
-			if reason == "focusin":
-				widget = self.nametowidget(name)
-				widget.select_range(0, END)
-				widget.icursor(END)
-			elif text == "":
-				self.nametowidget(name).insert(0, "0")
-			return True
-		
-		self.onEntryFocusInCommand = self.register(onEntryFocusIn)
-		validateArgs = { "validate": "focus",
-						 "validatecommand": (self.onEntryFocusInCommand, "%V", "%W", "%P") }
-		
-		
 		self.fromLabel = Label(self)
 		self.fromLabel.grid(column = 0, row = 0)
 		
 		self.fromVar = StringVar()
-		self.fromEntry = Entry(self, textvariable = self.fromVar, justify = RIGHT, **validateArgs)
+		self.fromEntry = Entry(self, textvariable = self.fromVar, justify = RIGHT)
 		self.fromEntry.grid(column = 1, row = 0, sticky = W + E)
 		self.columnconfigure(1, weight = 1)
 		
@@ -42,7 +28,7 @@ class ComponentsDumpWindow(Toplevel):
 		self.toLabel.grid(column = 2, row = 0)
 		
 		self.toVar = StringVar()
-		self.toEntry = Entry(self, textvariable = self.toVar, justify = RIGHT, **validateArgs)
+		self.toEntry = Entry(self, textvariable = self.toVar, justify = RIGHT)
 		self.toEntry.grid(column = 3, row = 0, sticky = W + E)
 		self.columnconfigure(3, weight = 1)
 		
@@ -51,7 +37,7 @@ class ComponentsDumpWindow(Toplevel):
 		self.stepLabel.grid(column = 4, row = 0)
 		
 		self.stepVar = StringVar()
-		self.stepEntry = Entry(self, textvariable = self.stepVar, justify = RIGHT, **validateArgs)
+		self.stepEntry = Entry(self, textvariable = self.stepVar, justify = RIGHT)
 		self.stepEntry.grid(column = 5, row = 0, sticky = W + E)
 		self.columnconfigure(5, weight = 1)
 		
