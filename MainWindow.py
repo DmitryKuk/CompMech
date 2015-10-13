@@ -14,6 +14,9 @@ class MainWindow(Tk):
 	def __init__(self, application, **kwargs):
 		Tk.__init__(self)
 		
+		# устанавливаем в Tkinter кодировку UTF-8
+		self.tk.call('encoding', 'system', 'utf-8')
+		
 		self.application = application
 		
 		self.title("%s%sКонструкция" % (self.application.name, self.application.nameDelim))
