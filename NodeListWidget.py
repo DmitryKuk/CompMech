@@ -66,7 +66,7 @@ class NodeListWidget(ElementListWidget):
 			
 			m = { "fixed": False if self.fixed[1].get() == 0 else True }
 			if label != "": m.update({ "label": label })
-			if F != "": m.update({ "F": F })
+			if F != "":     m.update({ "F":     F })
 			
 			n = Node(json = m)
 			n.i = len(self.tree.get_children())
