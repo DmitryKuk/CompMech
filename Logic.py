@@ -19,13 +19,17 @@ class Logic:
 		self.application.elements = {}
 	
 	
-	def openConstructionFile(self, constructionFile, showMessage = None, showError = None):
-		# try:
-		self.application.construction = Construction(constructionFile, showMessage, showError)
-		# except Exception as e:
-		# 	if showError is not None:
-		# 		showError(str(e))
-		self.draw()
+	def createConstructionFromElements(self, nodes, bars):
+		if len(nodes) != len(bars) + 1:
+			raise Exception("Некорректная конструкция " \
+							"(ожидается: количество узлов = количество стержней + 1)")
+		
+		self.application.construction = Construction(nodes = nodes, bars = bars)
+		self.application.onConstructionChanged()
+	
+	
+	def openConstructionFile(self, constructionFile):
+		self.application.construction = Construction(file = constructionFile)
 		self.application.onConstructionChanged()
 	
 	
@@ -328,7 +332,7 @@ class Logic:
 	
 	# Работа с конструкцией
 	def constructionEmpty(self):
-		return self.application.construction.empty
+		return self.application.construction.empty()
 	
 	
 	def constructionCalculated(self):

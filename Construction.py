@@ -10,7 +10,8 @@ from Node import *
 
 
 class Construction:
-	def __init__(self, constructionFile = None, showMessage = None, showError = None):
+	def __init__(self, file = None,
+				 nodes = None, bars = None):
 		self.defaultBar = Bar()
 		self.defaultNode = Node()
 		self.elements = []
@@ -35,43 +36,50 @@ class Construction:
 		self.Deltas = None
 		
 		self.calculated = False		# Конструкция была рассчитана
-		self.empty = True			# Конструкция пуста
 		
 		
-		if constructionFile is None:	# Пустая конструкция
-			return
-		
-		
-		try:
-			construction = json.load(constructionFile)
-		except Exception as e:
-			raise Exception("Невозможно обработать файл конструкции: %s" % e)
-		
-		
-		try:
-			self.defaultNode = Node(construction["default"]["node"])
-		except KeyError:
-			pass
-		
-		try:
-			self.defaultBar = Bar(construction["default"]["bar"])
-		except KeyError:
-			pass
-		
-		
-		try:
-			self.A = eval(construction["A"])
-			self.b = eval(construction["b"])
+		if file is None:
+			if nodes is None or bars is None:	# Создаём конструкцию из элементов
+				return
+			else:
+				if len(nodes) != len(bars) + 1:
+					raise Exception("Некорректная конструкция " \
+									"(ожидается: количество узлов = количество стержней + 1)")
+				
+				for i in range(0, len(bars)):
+					self.elements.append(nodes[i])
+					self.elements.append(bars[i])
+				self.elements.append(nodes[-1])
+		else:
+			try:
+				construction = json.load(file)
+			except Exception as e:
+				raise Exception("Невозможно обработать файл конструкции: %s" % e)
 			
-			self.calculated = True
-		except KeyError:
-			self.A = None
-			self.b = None
 			
-			self.calculated = False
-		
-		
-		try:
+			try:
+				self.defaultNode = Node(construction["default"]["node"])
+			except KeyError:
+				pass
+			
+			try:
+				self.defaultBar = Bar(construction["default"]["bar"])
+			except KeyError:
+				pass
+			
+			
+			try:
+				self.A = eval(construction["A"])
+				self.b = eval(construction["b"])
+				
+				self.calculated = True
+			except KeyError:
+				self.A = None
+				self.b = None
+				
+				self.calculated = False
+			
+			
 			lastWasBar = True
 			
 			for item in construction["construction"]:
@@ -90,12 +98,6 @@ class Construction:
 			
 			if lastWasBar:
 				self.elements.append(copy.deepcopy(self.defaultNode))
-		except KeyError:
-			if showMessage is not None:
-				showMessage("В конструкции нет элементов. Вы в порядке?")
-		except Exception as e:
-			if showError is not None:
-				showError(str(e))
 		
 		
 		# Вычисляем размеры конструкции, максимальные нагрузки, координаты и номера элементов
@@ -132,9 +134,6 @@ class Construction:
 		
 		if len(self.elements) == 0:
 			self.calculated = False
-		else:
-			self.empty = False
-		
 		
 		if self.calculated:
 			for element in self.elements:
@@ -146,7 +145,7 @@ class Construction:
 					self.maxSigma = max(self.maxSigma, c[2])
 	
 	
-	def dump(self, constructionFile):
+	def dump(self, file):
 		retDict = {
 			"default": {
 				"node": self.defaultNode.dump(),
@@ -161,12 +160,12 @@ class Construction:
 		
 		json.dump(
 			retDict,
-			constructionFile
+			file
 		)
 	
 	
 	def calculate(self):
-		if self.empty: return
+		if self.empty(): return
 		
 		bars = (len(self.elements) - 1) / 2
 		if bars > 0:
@@ -205,6 +204,8 @@ class Construction:
 			
 			# Вычисляем перемещения узлов
 			res = solve_linear_system(self.A.row_join(self.b), *self.Deltas)
+			if res is None:
+				raise Exception("Конструкция не может быть рассчитана!")
 			
 			for element in self.elements:
 				if type(element) == Bar:
@@ -270,6 +271,10 @@ class Construction:
 	def maxComponents(self, barNumber = None):
 		return (self.maxN, self.maxU, self.maxSigma) if barNumber is None \
 			   else self.bar(barNumber).maxComponents()
+	
+	
+	def empty(self):
+		return True if self.elementsCount() == 0 else False
 	
 	
 	def elementsCount(self):

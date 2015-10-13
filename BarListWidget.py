@@ -111,8 +111,6 @@ class BarListWidget(ElementListWidget):
 		self.tree.set(item, "[σ]", Sigma)
 		self.tree.set(item, "q",   q)
 		
-		print((L, A, E, Sigma, q))
-		
 		return item
 	
 	
@@ -143,3 +141,28 @@ class BarListWidget(ElementListWidget):
 		self.E[1].set(bar.E)
 		self.Sigma[1].set(bar.Sigma)
 		self.q[1].set(bar.q)
+	
+	
+	def bars(self):
+		def bar(item):
+			v = self.tree.set(item)
+			
+			label = v["Метка"]
+			L     = v["L"]
+			A     = v["A"]
+			E     = v["E"]
+			Sigma = v["[σ]"]
+			q     = v["q"]
+			
+			defaultNode = Bar(json = {
+				"label": label,
+				"L":     L,
+				"A":     A,
+				"E":     E,
+				"Sigma": Sigma,
+				"q":     q
+			})
+			
+			return Bar(default = defaultNode)
+		
+		return ElementListWidget.elements(self, bar)

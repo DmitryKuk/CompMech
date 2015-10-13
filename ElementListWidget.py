@@ -97,7 +97,7 @@ class ElementListWidget(Frame):
 		self.selectedFrame.columnconfigure(2, minsize = emptySpaceSize, weight = 0)
 		
 		# Метка
-		Entry(self.selectedFrame, textvariable = self.label) \
+		Entry(self.selectedFrame, textvariable = self.label[0]) \
 			.grid(column = 3, row = 0, sticky = W + E)
 		
 		Entry(self.selectedFrame, textvariable = self.label[1], bg = defaultValueBG) \
@@ -149,7 +149,18 @@ class ElementListWidget(Frame):
 	
 	
 	def onButtonRemoveClicked(self):
-		pass
+		item = self.selectedItem()
+		if item is None: return
+		
+		next = self.tree.next(item)
+		self.tree.delete(item)
+		
+		while next != "":
+			i = int(self.tree.set(next, "№"))
+			self.tree.set(next, "№", i - 1)
+			next = self.tree.next(next)
+		
+		self.onSelectionChanged()
 	
 	
 	def onButtonApplyClicked(self, item = None):
@@ -208,3 +219,11 @@ class ElementListWidget(Frame):
 	
 	def setDefaultElement(self, label):
 		self.label[1].set(label)
+	
+	
+	def elementsCount(self):
+		return len(self.tree.get_children())
+	
+	
+	def elements(self, transform):
+		return [ transform(item) for item in self.tree.get_children() ]

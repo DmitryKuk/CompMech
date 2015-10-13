@@ -45,7 +45,7 @@ class MainWindow(Tk):
 		self.buttonEdit.grid(column = 1, row = 2, sticky = E + W)
 		
 		self.buttonCalculate = Button(self, text = "Рассчитать", state = DISABLED,
-									  command = self.application.logic.calculate)
+									  command = self.onButtonCalculateClicked)
 		self.buttonCalculate.grid(column = 1, row = 3, sticky = E + W)
 		
 		# Пустое пространство (растяжимое)
@@ -113,14 +113,15 @@ class MainWindow(Tk):
 		if filename != "":
 			try:
 				file = open(filename, "r")
-				self.application.logic.openConstructionFile(file,
-															showMessage = self.showMessage,
-															showError = self.showError)
+				
+				try:
+					self.application.logic.openConstructionFile(file)
+				except Exception as e:
+					self.showError(str(e))
+				
 				file.close()
 			except IOError as e:
 				self.showError("Невозможно открыть файл: %s" % e)
-			# except Exception as e:
-			# 	print("Неизвестная ошибка: %s" % e)
 	
 	
 	def onButtonSaveToFileClicked(self):
@@ -137,6 +138,13 @@ class MainWindow(Tk):
 				self.showError("Невозможно открыть для записи файл: %s" % e)
 			# except Exception as e:
 			# 	print("Неизвестная ошибка: %s" % e)
+	
+	
+	def onButtonCalculateClicked(self):
+		try:
+			self.application.logic.calculate()
+		except Exception as e:
+			self.showError(str(e))
 	
 	
 	def onAboutButtonClicked(self):

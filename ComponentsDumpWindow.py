@@ -85,7 +85,7 @@ class ComponentsDumpWindow(Toplevel):
 	
 	
 	def onWindowDestroy(self, event):
-		self.application.onComponentsDumpWindowDestroy(self)
+		self.application.onWindowDestroy(self)
 	
 	
 	def onCalculateButtonClicked(self):

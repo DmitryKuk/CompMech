@@ -17,8 +17,10 @@ class EditConstructionWindow(Toplevel):
 		
 		self.title("%s%sРедактор конструкции" % (self.application.name, self.application.nameDelim))
 		
+		
+		# Панели редактора
 		self.panedWindow = PanedWindow(self, orient = HORIZONTAL)
-		self.panedWindow.pack(fill = BOTH, expand = 1)
+		self.panedWindow.grid(column = 0, row = 0, columnspan = 4, sticky = W + N + E + S)
 		
 		# Левая панель: редактор узлов
 		self.nodeList = NodeListWidget(self.panedWindow, showError = self.showError)
@@ -30,17 +32,35 @@ class EditConstructionWindow(Toplevel):
 		self.panedWindow.add(self.barList)
 		self.barList.addBar(self.application.construction.defaultBar)
 		
+		self.rowconfigure(0, weight = 1)
+		
+		
+		# Панель с кнопками снизу
+		self.columnconfigure(0, weight = 1)
+		
+		Button(self, text = "Отменить", command = self.onConstructionChanged) \
+			.grid(column = 1, row = 1)
+		
+		Button(self, text = "Применить", command = self.onApplyButtonClicked) \
+			.grid(column = 2, row = 1)
+		
+		self.columnconfigure(3, minsize = 20, weight = 0)
+		
+		
 		self.bind("<Destroy>", self.onWindowDestroy)
 		
 		self.onConstructionChanged()
 	
 	
 	def onWindowDestroy(self, event):
-		self.application.onEditConstructionWindowDestroy(self)
+		self.application.onWindowDestroy(self)
 	
 	
 	def onApplyButtonClicked(self):
-		pass
+		try:
+			self.application.logic.createConstructionFromElements(nodes = nodes, bars = bars)
+		except Exception as e:
+			self.showError(str(e))
 	
 	
 	def onConstructionChanged(self):

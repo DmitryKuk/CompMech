@@ -82,7 +82,7 @@ class MatricesWindow(Toplevel):
 	
 	
 	def onWindowDestroy(self, event):
-		self.application.onMatricesWindowDestroy(self)
+		self.application.onWindowDestroy(self)
 	
 	
 	def onConstructionChanged(self):

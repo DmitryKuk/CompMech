@@ -117,7 +117,7 @@ class DetailWindow(Toplevel):
 	
 	
 	def onWindowDestroy(self, event):
-		self.application.onDetailWindowDestroy(self)
+		self.application.onWindowDestroy(self)
 	
 	
 	def onConstructionChanged(self):

@@ -24,50 +24,33 @@ class Application:
 		
 		# Окна
 		self.mainWindow = MainWindow(self)
-		self.detailWindows			 = set()
-		self.matricesWindows		 = set()
-		self.componentsDumpWindows	 = set()
-		self.editConstructionWindows = set()
+		self.windows = set()
+		self.windows.add(self.mainWindow)
 	
 	
 	def createDetailWindow(self, barNumber = 0):
-		self.detailWindows.add(DetailWindow(self, barNumber = barNumber))
+		self.windows.add(DetailWindow(self, barNumber = barNumber))
 	
 	
 	def createMatricesWindow(self, barNumber = None):
-		self.matricesWindows.add(MatricesWindow(self, barNumber = barNumber))
+		self.windows.add(MatricesWindow(self, barNumber = barNumber))
 	
 	
 	def createComponentsDumpWindow(self, barNumber = None):
-		self.componentsDumpWindows.add(ComponentsDumpWindow(self, barNumber = barNumber))
+		self.windows.add(ComponentsDumpWindow(self, barNumber = barNumber))
 	
 	
 	def createEditConstructionWindow(self, barNumber = None):
-		self.editConstructionWindows.add(EditConstructionWindow(self, barNumber = barNumber))
+		self.windows.add(EditConstructionWindow(self, barNumber = barNumber))
 	
 	
-	def onDetailWindowDestroy(self, window):
-		self.detailWindows.discard(window)
-	
-	
-	def onMatricesWindowDestroy(self, window):
-		self.matricesWindows.discard(window)
-	
-	
-	def onComponentsWindowDestroy(self, window):
-		self.componentsDumpWindows.discard(window)
-	
-	
-	def onEditConstructionWindowDestroy(self, window):
-		self.editConstructionWindows.discard(window)
+	def onWindowDestroy(self, window):
+		self.windows.discard(window)
 	
 	
 	def onConstructionChanged(self):
-		self.mainWindow.onConstructionChanged()
-		for s in self.detailWindows, self.matricesWindows, \
-				 self.componentsDumpWindows, self.editConstructionWindows:
-			for w in s:
-				w.onConstructionChanged()
+		for w in self.windows:
+			w.onConstructionChanged()
 	
 	
 	def run(self):

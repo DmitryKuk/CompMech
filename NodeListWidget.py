@@ -113,3 +113,22 @@ class NodeListWidget(ElementListWidget):
 		
 		self.F[1].set(node.F)
 		self.fixed[1].set(node.fixed)
+	
+	
+	def nodes(self):
+		def node(item):
+			v = self.tree.set(item)
+			
+			label = v["Метка"]
+			F     = v["F"]
+			fixed = False if v["Заделка"] == "свободен" else True
+			
+			defaultNode = Node(json = {
+				"label": label,
+				"F":     F,
+				"fixed": fixed
+			})
+			
+			return Node(default = defaultNode)
+		
+		return ElementListWidget.elements(self, node)
