@@ -58,7 +58,8 @@ class EditConstructionWindow(Toplevel):
 	
 	def onApplyButtonClicked(self):
 		try:
-			self.application.logic.createConstructionFromElements(nodes = nodes, bars = bars)
+			self.application.logic.createConstructionFromElements(nodes = self.nodeList.nodes(),
+																  bars = self.barList.bars())
 		except Exception as e:
 			self.showError(str(e))
 	
