@@ -28,8 +28,6 @@ class Application:
 		self.matricesWindows		 = set()
 		self.componentsDumpWindows	 = set()
 		self.editConstructionWindows = set()
-		
-		self.createEditConstructionWindow()
 	
 	
 	def createDetailWindow(self, barNumber = 0):

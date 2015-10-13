@@ -25,7 +25,7 @@ class MainWindow(Tk):
 						   onCursorMovement = self.application.logic.onCursorMovement,
 						   onMouse1Clicked = self.application.logic.onMouse1Clicked,
 						   **kwargs)
-		self.graph.grid(column = 0, row = 0, rowspan = 10, sticky = N + E + S + W)
+		self.graph.grid(column = 0, row = 0, rowspan = 11, sticky = N + E + S + W)
 		
 		# Делаем колонку с виджетом с графиком растяжимой
 		self.columnconfigure(0, weight = 1)
@@ -40,12 +40,16 @@ class MainWindow(Tk):
 									 command = self.onButtonSaveToFileClicked)
 		self.buttonOpenFile.grid(column = 1, row = 1, sticky = E + W)
 		
-		self.buttonCalculate = Button(self, text = "Рассчитать",
-									  command = self.onCalculateButtonClicked, state = DISABLED)
-		self.buttonCalculate.grid(column = 1, row = 2, sticky = E + W)
+		self.buttonEdit = Button(self, text = "Редактировать",
+								 command = self.application.createEditConstructionWindow)
+		self.buttonEdit.grid(column = 1, row = 2, sticky = E + W)
+		
+		self.buttonCalculate = Button(self, text = "Рассчитать", state = DISABLED,
+									  command = self.application.logic.calculate)
+		self.buttonCalculate.grid(column = 1, row = 3, sticky = E + W)
 		
 		# Пустое пространство (растяжимое)
-		self.rowconfigure(3, weight = 1)
+		self.rowconfigure(4, weight = 1)
 		
 		# Настройки отображения содержимого
 		self.graphOptions = GraphOptionsWidget(
@@ -54,31 +58,31 @@ class MainWindow(Tk):
 			optionsDesc = [
 				("drawConstruction", "Конструкция", True,  DISABLED),
 				("drawLoads",        "Нагрузки",    True,  DISABLED),
-				("drawN",            "График Nx",    False, DISABLED),
-				("drawU",            "График U",     False, DISABLED),
-				("drawSigma",        "График σ",     False, DISABLED)
+				("drawN",            "График Nx",   False, DISABLED),
+				("drawU",            "График U",    False, DISABLED),
+				("drawSigma",        "График σ",    False, DISABLED)
 			]
 		)
-		self.graphOptions.grid(column = 1, row = 4, sticky = E + W)
+		self.graphOptions.grid(column = 1, row = 5, sticky = E + W)
 		
 		# Пустое пространство (растяжимое)
-		self.rowconfigure(5, weight = 1)
+		self.rowconfigure(6, weight = 1)
 		
 		
-		self.buttonComponents = Button(self, text = "Компоненты",
-									   command = self.onComponentsButtonClicked, state = DISABLED)
-		self.buttonComponents.grid(column = 1, row = 6, sticky = E + W)
+		self.buttonComponents = Button(self, text = "Компоненты", state = DISABLED,
+									   command = self.application.createComponentsDumpWindow)
+		self.buttonComponents.grid(column = 1, row = 7, sticky = E + W)
 		
-		self.buttonMatrices = Button(self, text = "Матрицы", command = self.onMatricesButtonClicked,
-									 state = DISABLED)
-		self.buttonMatrices.grid(column = 1, row = 7, sticky = E + W)
+		self.buttonMatrices = Button(self, text = "Матрицы", state = DISABLED,
+									 command = self.application.createMatricesWindow)
+		self.buttonMatrices.grid(column = 1, row = 8, sticky = E + W)
 		
-		self.buttonDetails = Button(self, text = "Детали", command = self.onDetailButtonClicked,
-									state = DISABLED)
-		self.buttonDetails.grid(column = 1, row = 8, sticky = E + W)
+		self.buttonDetails = Button(self, text = "Детали", state = DISABLED,
+									command = self.application.createDetailWindow)
+		self.buttonDetails.grid(column = 1, row = 9, sticky = E + W)
 		
 		self.buttonAbout = Button(self, text = "О программе", command = self.onAboutButtonClicked)
-		self.buttonAbout.grid(column = 1, row = 9, sticky = E + W)
+		self.buttonAbout.grid(column = 1, row = 10, sticky = E + W)
 		
 		
 		# Панель под графиком
@@ -93,7 +97,7 @@ class MainWindow(Tk):
 				("divsSigma", "Ось σ:",  0, DISABLED),
 			]
 		)
-		self.axisOptions.grid(column = 0, row = 10, sticky = E + W)
+		self.axisOptions.grid(column = 0, row = 11, sticky = E + W)
 		
 		
 		self.bind("<Configure>", self.onWindowConfigure)
@@ -133,22 +137,6 @@ class MainWindow(Tk):
 				self.showError("Невозможно открыть для записи файл: %s" % e)
 			# except Exception as e:
 			# 	print("Неизвестная ошибка: %s" % e)
-	
-	
-	def onCalculateButtonClicked(self):
-		self.application.logic.calculate()
-	
-	
-	def onMatricesButtonClicked(self):
-		self.application.createMatricesWindow()
-	
-	
-	def onComponentsButtonClicked(self):
-		self.application.createComponentsDumpWindow()
-	
-	
-	def onDetailButtonClicked(self):
-		self.application.createDetailWindow()
 	
 	
 	def onAboutButtonClicked(self):
