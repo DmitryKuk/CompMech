@@ -58,7 +58,7 @@ class Application:
 		self.componentsDumpWindows.discard(window)
 	
 	
-	def onEditConstructionDestroy(self, window):
+	def onEditConstructionWindowDestroy(self, window):
 		self.editConstructionWindows.discard(window)
 	
 	

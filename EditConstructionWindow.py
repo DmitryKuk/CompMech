@@ -30,6 +30,8 @@ class EditConstructionWindow(Toplevel):
 		self.panedWindow.add(self.barList)
 		self.barList.addBar(self.application.construction.defaultBar)
 		
+		self.bind("<Destroy>", self.onWindowDestroy)
+		
 		self.onConstructionChanged(False)
 	
 	
