@@ -10,7 +10,7 @@ class AxisOptionsWidget(Frame):
 		Frame.__init__(self, parent, **kwargs)
 		
 		# Пустое пространство (растяжимое)
-		Label(self, text = "  ").pack(side = LEFT, fill = X, expand = 1)
+		Label(self).pack(side = LEFT, fill = X, expand = 1)
 		
 		if label is not None:
 			Label(self, text = label).pack(side = LEFT)
@@ -19,7 +19,7 @@ class AxisOptionsWidget(Frame):
 						 for name, text, value, state in optionsDesc }
 		
 		# Пустое пространство (нерастяжимое)
-		Label(self, text = "  ").pack(side = LEFT)
+		Label(self).pack(side = LEFT)
 		
 		Button(self, text = "⟳", command = self.onSBChanged).pack(side = LEFT)
 		
