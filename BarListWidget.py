@@ -81,11 +81,11 @@ class BarListWidget(ElementListWidget):
 			
 			m = {}
 			if label != "": m.update({ "label": label })
-			if L != "":     m.update({ "L":     L })
-			if A != "":     m.update({ "A":     A })
-			if E != "":     m.update({ "E":     E })
+			if L     != "": m.update({ "L":     L })
+			if A     != "": m.update({ "A":     A })
+			if E     != "": m.update({ "E":     E })
 			if Sigma != "": m.update({ "Sigma": Sigma })
-			if q != "":     m.update({ "q":     q })
+			if q     != "": m.update({ "q":     q })
 			
 			n = Bar(json = m)
 			n.i = len(self.tree.get_children())
