@@ -13,17 +13,15 @@ class AxisOptionsWidget(Frame):
 		Label(self, text = "  ").pack(side = LEFT, fill = X, expand = 1)
 		
 		if label is not None:
-			self.label = Label(self, text = label)
-			self.label.pack(side = LEFT)
+			Label(self, text = label).pack(side = LEFT)
 		
 		self.options = { name: self.createElement(text, value, state) \
 						 for name, text, value, state in optionsDesc }
 		
 		# Пустое пространство (нерастяжимое)
-		Label(self, text = "  ").pack(side = LEFT)#, fill = X, expand = 1)
+		Label(self, text = "  ").pack(side = LEFT)
 		
-		self.buttonDraw = Button(self, text = "⟳", command = self.onSBChanged)
-		self.buttonDraw.pack(side = LEFT)
+		Button(self, text = "⟳", command = self.onSBChanged).pack(side = LEFT)
 		
 		# Пустое пространство (растяжимое)
 		Label(self, text = "  ").pack(side = LEFT, fill = X, expand = 1)
@@ -43,7 +41,7 @@ class AxisOptionsWidget(Frame):
 		if state in (NORMAL, DISABLED, ACTIVE):
 			lb["state"] = state
 			sb["state"] = state
-		lb.pack(side = LEFT)#, fill = X, expand = 1)
+		lb.pack(side = LEFT)
 		sb.pack(side = LEFT)
 		
 		return (text, var, sb, lb)
