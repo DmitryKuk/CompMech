@@ -152,8 +152,7 @@ class Bar(ConstructionElement):
 				"U0": round(self.U0, 15),
 				"UL": round(self.UL, 15)
 			})
-		print(retDict)
-		print()
+		
 		return retDict
 	
 	
