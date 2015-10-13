@@ -12,8 +12,11 @@ class ElementListWidget(Frame):
 		
 		self.onSelectionChangedCommand = onSelectionChanged
 		
+		
+		# Название таблицы
 		self.titleLabel = Label(self, text = label, anchor = W)
 		self.titleLabel.grid(column = 0, row = 0, sticky = W + E)
+		
 		
 		# Кнопки перемещения элемента
 		self.buttonUp = Button(self, text = "↑", width = 3, command = self.onButtonUpClicked)
@@ -22,17 +25,28 @@ class ElementListWidget(Frame):
 		self.buttonDown = Button(self, text = "↓", width = 3, command = self.onButtonDownClicked)
 		self.buttonDown.grid(column = 2, row = 0)
 		
+		
 		# Таблица значений
+		columns = ("Метка", "№") + columns
 		self.tree = Treeview(self, columns = columns, displaycolumns = columns,
 							 selectmode = "browse")
+		
+		# Настраиваем внешний вид таблицы (первые колонки)
 		self.tree.column("#0", width = 0, stretch = 0)	# Прячем колонку с иконкой
+		
+		self.tree.column( columns[0], anchor = W, width = 150)
+		self.tree.heading(columns[0], anchor = W, text = columns[0])
+		
+		self.tree.column( columns[1], anchor = E, width = 80)
+		self.tree.heading(columns[1], anchor = E, text = columns[1])
+		
 		
 		self.tree.grid(column = 0, row = 1, columnspan = 4, sticky = W + N + E + S)
 		self.columnconfigure(0, weight = 1)
 		self.rowconfigure(1, weight = 1)
 		
+		
 		self.tree.bind("<<TreeviewSelect>>", self.onSelectionChanged)
-		self.onSelectionChanged()
 	
 	
 	def onButtonUpClicked(self):
@@ -44,7 +58,7 @@ class ElementListWidget(Frame):
 			parent, index = self.tree.parent(item), self.tree.index(item)
 			self.tree.move(item, parent, index - 1)
 			
-			# Корректируем индексы
+			# Корректируем номера элементов
 			self.tree.set(item, "№", index - 1)
 			self.tree.set(prev, "№", index)
 	
@@ -58,7 +72,7 @@ class ElementListWidget(Frame):
 			parent, index = self.tree.parent(item), self.tree.index(item)
 			self.tree.move(item, parent, index + 1)
 			
-			# Корректируем индексы
+			# Корректируем номера элементов
 			self.tree.set(item, "№", index + 1)
 			self.tree.set(next, "№", index)
 	
