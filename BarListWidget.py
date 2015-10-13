@@ -68,6 +68,27 @@ class BarListWidget(ElementListWidget):
 		for x in (1, 2, 4, 5): self.detailFrame.columnconfigure(x, weight = 1)
 	
 	
+	def onButtonApplyClicked(self, item = None):
+		item = ElementListWidget.onButtonApplyClicked(self, item)
+		if item is None: return None
+		
+		L     = self.L[0].get()
+		A     = self.A[0].get()
+		E     = self.E[0].get()
+		Sigma = self.Sigma[0].get()
+		q     = self.q[0].get()
+		
+		self.tree.set(item, "L",   L)
+		self.tree.set(item, "A",   A)
+		self.tree.set(item, "E",   E)
+		self.tree.set(item, "[σ]", Sigma)
+		self.tree.set(item, "q",   q)
+		
+		print((L, A, E, Sigma, q))
+		
+		return item
+	
+	
 	def updateSelectedFrame(self, item = None, values = None):
 		(item, values) = ElementListWidget.updateSelectedFrame(self, item, values)
 		

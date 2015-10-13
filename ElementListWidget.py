@@ -47,7 +47,8 @@ class ElementListWidget(Frame):
 		
 		self.buttonPanel.columnconfigure(0, weight = 1)
 		self.buttonPanel.columnconfigure(3, minsize = emptySpaceSize, weight = 0)
-		self.buttonPanel.columnconfigure(6, weight = 1)
+		self.buttonPanel.columnconfigure(6, minsize = emptySpaceSize, weight = 0)
+		self.buttonPanel.columnconfigure(9, weight = 1)
 		
 		# Кнопки добавления/удаления элемента
 		self.buttonAdd = Button(self.buttonPanel, text = "+", width = 3,
@@ -67,11 +68,19 @@ class ElementListWidget(Frame):
 								 command = self.onButtonDownClicked)
 		self.buttonDown.grid(column = 5, row = 0)
 		
+		# Кнопки применить/отменить (для выбранного элемента)
+		self.buttonCancel = Button(self.buttonPanel, text = "✗", width = 3,
+								   command = self.updateSelectedFrame)
+		self.buttonCancel.grid(column = 7, row = 0)
+		
+		self.buttonApply = Button(self.buttonPanel, text = "✓", width = 3,
+								  command = self.onButtonApplyClicked)
+		self.buttonApply.grid(column = 8, row = 0)
+		
 		
 		# Редактирование выделенного элемента
-		self.i            = StringVar()
-		self.label        = StringVar()
-		self.labelDefault = StringVar()
+		self.i     = StringVar()
+		self.label = (StringVar(), StringVar())
 		
 		self.selectedFrame = Frame(self)
 		self.selectedFrame.grid(column = 0, row = 3, sticky = W + E)
@@ -89,7 +98,7 @@ class ElementListWidget(Frame):
 		Entry(self.selectedFrame, textvariable = self.label) \
 			.grid(column = 3, row = 0, sticky = W + E)
 		
-		Entry(self.selectedFrame, textvariable = self.labelDefault, bg = defaultValueBG) \
+		Entry(self.selectedFrame, textvariable = self.label[1], bg = defaultValueBG) \
 			.grid(column = 4, row = 0, sticky = W + E)
 		
 		# Виджет для элементов классов-потомков
@@ -141,6 +150,16 @@ class ElementListWidget(Frame):
 		pass
 	
 	
+	def onButtonApplyClicked(self, item = None):
+		if item is None: item = self.selectedItem()
+		if item is None: return None
+		
+		label = self.label[0].get()
+		self.tree.set(item, "Метка", label)
+		
+		return item
+	
+	
 	def onSelectionChanged(self, event = None):
 		item = self.selectedItem()
 		
@@ -150,22 +169,6 @@ class ElementListWidget(Frame):
 			x["state"] = state
 		
 		self.updateSelectedFrame(item)
-	
-	
-	def updateSelectedFrame(self, item = None, values = None):
-		if item is None: item = self.selectedItem()
-		values = None
-		
-		if item is None:
-			self.i.set("")
-			self.label.set("")
-		else:
-			if values is None: values = self.tree.set(item)
-			
-			self.i.set(values["№"])
-			self.label.set(values["Метка"])
-		
-		return (item, values)
 	
 	
 	def selectedItem(self):
@@ -178,9 +181,28 @@ class ElementListWidget(Frame):
 			self.tree.delete(item)
 	
 	
+	def updateSelectedFrame(self, item = None, values = None):
+		if item is None: item = self.selectedItem()
+		values = None
+		
+		if item is None:
+			i     = ""
+			label = ""
+		else:
+			if values is None: values = self.tree.set(item)
+			
+			i     = values["№"]
+			label = values["Метка"]
+		
+		self.i.set(i)
+		self.label[0].set(label)
+		
+		return (item, values)
+	
+	
 	def addElement(self, values):
 		self.tree.insert(parent = "", index = END, values = values)
 	
 	
 	def setDefaultElement(self, label):
-		self.labelDefault.set(label)
+		self.label[1].set(label)

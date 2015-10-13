@@ -23,8 +23,8 @@ class NodeListWidget(ElementListWidget):
 		
 		
 		# Параметры выбранного узла
-		self.F     = (StringVar(), StringVar())
-		self.fixed = (IntVar(),    IntVar())
+		self.F        = (StringVar(), StringVar())
+		self.fixed    = (IntVar(),    IntVar())
 		
 		
 		# Нагрузка
@@ -57,15 +57,31 @@ class NodeListWidget(ElementListWidget):
 		self.detailFrame.columnconfigure(1, weight = 1)
 	
 	
+	def onButtonApplyClicked(self, item = None):
+		item = ElementListWidget.onButtonApplyClicked(self, item)
+		if item is None: return None
+		
+		F     = self.F[0].get()
+		fixed = self.fixed[0].get()
+		
+		self.tree.set(item, "F", F)
+		self.tree.set(item, "Заделка", "свободен" if fixed == 0 else "зафиксирован")
+		
+		return item
+	
+	
 	def updateSelectedFrame(self, item = None, values = None):
 		(item, values) = ElementListWidget.updateSelectedFrame(self, item, values)
 		
 		if item is None:
-			self.F[0].set("")
-			self.fixed[0].set(0)
+			F     = ""
+			fixed = 0
 		else:
-			self.F[0].set(values["F"])
-			self.fixed[0].set(1 if values["Заделка"] == "зафиксирован" else 0)
+			F     = values["F"]
+			fixed = 1 if values["Заделка"] == "зафиксирован" else 0
+		
+		self.F[0].set(F)
+		self.fixed[0].set(fixed)
 	
 	
 	def addNode(self, node):
