@@ -11,7 +11,7 @@ class BarListWidget(ElementListWidget):
 	def __init__(self, parent):
 		columns = ("Метка", "№", "L", "A", "E", "[σ]", "q")
 		
-		ElementListWidget.__init__(self, parent, columns = columns)
+		ElementListWidget.__init__(self, parent, label = "Стержни:", columns = columns)
 		
 		# Настройки отображения таблицы
 		self.tree.column( columns[0], anchor = W, width = 150)

@@ -11,7 +11,7 @@ class NodeListWidget(ElementListWidget):
 	def __init__(self, parent):
 		columns = ("Метка", "№", "Заделка", "F")
 		
-		ElementListWidget.__init__(self, parent, columns = columns)
+		ElementListWidget.__init__(self, parent, label = "Узлы:", columns = columns)
 		
 		# Настройки отображения таблицы
 		self.tree.column( columns[0], anchor = W, width = 150)
