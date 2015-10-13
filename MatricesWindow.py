@@ -27,6 +27,9 @@ class MatricesWindow(Toplevel):
 				labelArgs = { "font": tkinter.font.Font(family = x) }
 				print("Выбран моноширинный шрифт: %s" % x)
 				break
+		if labelArgs == {} and "Courier" in fontFamilies:
+			labelArgs = { "font": tkinter.font.Font(family = "Courier") }
+			print("Выбран моноширинный шрифт: Courier")
 		
 		
 		self.columnconfigure(0, weight = 1)
