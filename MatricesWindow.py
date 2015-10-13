@@ -31,7 +31,6 @@ class MatricesWindow(Toplevel):
 			labelArgs = { "font": tkinter.font.Font(family = "Courier") }
 			print("Выбран моноширинный шрифт: Courier")
 		
-		
 		self.columnconfigure(0, weight = 1)
 		
 		
