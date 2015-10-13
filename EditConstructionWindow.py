@@ -32,7 +32,7 @@ class EditConstructionWindow(Toplevel):
 		
 		self.bind("<Destroy>", self.onWindowDestroy)
 		
-		self.onConstructionChanged(False)
+		self.onConstructionChanged()
 	
 	
 	def onWindowDestroy(self, event):
@@ -43,9 +43,11 @@ class EditConstructionWindow(Toplevel):
 		pass
 	
 	
-	def onConstructionChanged(self, constructed = True):
+	def onConstructionChanged(self):
 		self.clear()
-		self.application.logic.addElements(onNodeDetected = self.nodeList.addNode,
+		self.application.logic.getDefault(onNodeDetected = self.nodeList.setDefaultNode,
+										  onBarDetected  = self.barList.setDefaultBar)
+		self.application.logic.getElements(onNodeDetected = self.nodeList.addNode,
 										   onBarDetected  = self.barList.addBar)
 	
 	

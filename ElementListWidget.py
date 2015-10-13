@@ -5,6 +5,8 @@
 from tkinter import *
 from tkinter.ttk import Treeview
 
+from Style import defaultValueBG
+
 
 emptySpaceSize = 10
 
@@ -12,25 +14,20 @@ class ElementListWidget(Frame):
 	def __init__(self, parent, label, columns):
 		Frame.__init__(self, parent)
 		
+		self.columnconfigure(0, weight = 1)
+		self.rowconfigure(1, weight = 1)
+		
+		
 		# Название таблицы
-		self.titleLabel = Label(self, text = label, anchor = W)
+		self.titleLabel = Label(self, text = label)
 		self.titleLabel.grid(column = 0, row = 0, sticky = W + E)
-		
-		
-		# Кнопки перемещения элемента
-		self.buttonUp = Button(self, text = "↑", width = 3, state = DISABLED,
-							   command = self.onButtonUpClicked)
-		self.buttonUp.grid(column = 1, row = 0)
-		
-		self.buttonDown = Button(self, text = "↓", width = 3, state = DISABLED,
-								 command = self.onButtonDownClicked)
-		self.buttonDown.grid(column = 2, row = 0)
 		
 		
 		# Таблица значений
 		columns = ("Метка", "№") + columns
 		self.tree = Treeview(self, columns = columns, displaycolumns = columns,
 							 selectmode = "browse")
+		self.tree.grid(column = 0, row = 1, sticky = W + N + E + S)
 		
 		# Настраиваем внешний вид таблицы (первые колонки)
 		self.tree.column("#0", width = 0, stretch = 0)	# Прячем колонку с иконкой
@@ -41,21 +38,43 @@ class ElementListWidget(Frame):
 		self.tree.column( columns[1], anchor = E, width = 80)
 		self.tree.heading(columns[1], anchor = E, text = columns[1])
 		
-		
-		self.tree.grid(column = 0, row = 1, columnspan = 4, sticky = W + N + E + S)
-		self.columnconfigure(0, weight = 1)
-		self.rowconfigure(1, weight = 1)
-		
-		
 		self.tree.bind("<<TreeviewSelect>>", self.onSelectionChanged)
 		
 		
+		# Панель с кнопками
+		self.buttonPanel = Frame(self)
+		self.buttonPanel.grid(column = 0, row = 2, sticky = W + E)
+		
+		self.buttonPanel.columnconfigure(0, weight = 1)
+		self.buttonPanel.columnconfigure(3, minsize = emptySpaceSize, weight = 0)
+		self.buttonPanel.columnconfigure(6, weight = 1)
+		
+		# Кнопки добавления/удаления элемента
+		self.buttonAdd = Button(self.buttonPanel, text = "+", width = 3,
+								command = self.onButtonAddClicked)
+		self.buttonAdd.grid(column = 1, row = 0)
+		
+		self.buttonRemove = Button(self.buttonPanel, text = "-", width = 3, state = DISABLED,
+								   command = self.onButtonRemoveClicked)
+		self.buttonRemove.grid(column = 2, row = 0)
+		
+		# Кнопки перемещения элемента
+		self.buttonUp = Button(self.buttonPanel, text = "↑", width = 3, state = DISABLED,
+							   command = self.onButtonUpClicked)
+		self.buttonUp.grid(column = 4, row = 0)
+		
+		self.buttonDown = Button(self.buttonPanel, text = "↓", width = 3, state = DISABLED,
+								 command = self.onButtonDownClicked)
+		self.buttonDown.grid(column = 5, row = 0)
+		
+		
 		# Редактирование выделенного элемента
-		self.i     = StringVar()
-		self.label = StringVar()
+		self.i            = StringVar()
+		self.label        = StringVar()
+		self.labelDefault = StringVar()
 		
 		self.selectedFrame = Frame(self)
-		self.selectedFrame.grid(column = 0, row = 2, columnspan = 3, sticky = W + N + E + S)
+		self.selectedFrame.grid(column = 0, row = 3, sticky = W + E)
 		
 		# Номер
 		Label(self.selectedFrame, text = "№:") \
@@ -70,11 +89,15 @@ class ElementListWidget(Frame):
 		Entry(self.selectedFrame, textvariable = self.label) \
 			.grid(column = 3, row = 0, sticky = W + E)
 		
+		Entry(self.selectedFrame, textvariable = self.labelDefault, bg = defaultValueBG) \
+			.grid(column = 4, row = 0, sticky = W + E)
+		
 		# Виджет для элементов классов-потомков
 		self.detailFrame = Frame(self.selectedFrame)
-		self.detailFrame.grid(column = 3, row = 1, sticky = W + N + E + S)
+		self.detailFrame.grid(column = 3, row = 1, columnspan = 2, sticky = W + N + E + S)
 		
 		self.selectedFrame.columnconfigure(3, weight = 1)
+		self.selectedFrame.columnconfigure(4, weight = 1)
 		self.selectedFrame.rowconfigure(1, weight = 1)
 	
 	
@@ -110,12 +133,20 @@ class ElementListWidget(Frame):
 			self.updateSelectedFrame(item)
 	
 	
+	def onButtonAddClicked(self):
+		pass
+	
+	
+	def onButtonRemoveClicked(self):
+		pass
+	
+	
 	def onSelectionChanged(self, event = None):
 		item = self.selectedItem()
 		
 		# Обновляем состояние кнопок
 		state = DISABLED if item is None else NORMAL
-		for x in (self.buttonUp, self.buttonDown):
+		for x in (self.buttonRemove, self.buttonUp, self.buttonDown):
 			x["state"] = state
 		
 		self.updateSelectedFrame(item)
@@ -149,3 +180,7 @@ class ElementListWidget(Frame):
 	
 	def addElement(self, values):
 		self.tree.insert(parent = "", index = END, values = values)
+	
+	
+	def setDefaultElement(self, label):
+		self.labelDefault.set(label)
