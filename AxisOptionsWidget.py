@@ -9,6 +9,9 @@ class AxisOptionsWidget(Frame):
 	def __init__(self, parent, label = None, optionsDesc = [], command = None, **kwargs):
 		Frame.__init__(self, parent, **kwargs)
 		
+		# Пустое пространство (растяжимое)
+		Label(self, text = "  ").pack(side = LEFT, fill = X, expand = 1)
+		
 		if label is not None:
 			self.label = Label(self, text = label)
 			self.label.pack(side = LEFT)
@@ -16,11 +19,14 @@ class AxisOptionsWidget(Frame):
 		self.options = { name: self.createElement(text, value, state) \
 						 for name, text, value, state in optionsDesc }
 		
-		self.emptySpace = Label(self)
-		self.emptySpace.pack(side = LEFT, fill = X, expand = 1)
+		# Пустое пространство (нерастяжимое)
+		Label(self, text = "  ").pack(side = LEFT)#, fill = X, expand = 1)
 		
-		self.buttonDraw = Button(self, text = "Построить оси", command = self.onSBChanged)
+		self.buttonDraw = Button(self, text = "⟳", command = self.onSBChanged)
 		self.buttonDraw.pack(side = LEFT)
+		
+		# Пустое пространство (растяжимое)
+		Label(self, text = "  ").pack(side = LEFT, fill = X, expand = 1)
 		
 		# Будет вызвано при изменении состояния пользователем
 		self.command = command
@@ -30,15 +36,15 @@ class AxisOptionsWidget(Frame):
 		var = StringVar()
 		var.set("0" if value is None else str(int(value)))
 		
-		lb = Label(self, text = text, anchor = E)
+		lb = Label(self, text = "  " + text, anchor = E)
 		sb = Spinbox(self, textvariable = var, command = self.onSBChanged,
 					 justify = RIGHT, width = 3,
 					 from_ = 0, to = 999, increment = 1)
 		if state in (NORMAL, DISABLED, ACTIVE):
 			lb["state"] = state
 			sb["state"] = state
-		lb.pack(side = LEFT, fill = X, expand = 1)
-		sb.pack(side = LEFT, fill = X)
+		lb.pack(side = LEFT)#, fill = X, expand = 1)
+		sb.pack(side = LEFT)
 		
 		return (text, var, sb, lb)
 	
