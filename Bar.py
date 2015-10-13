@@ -27,48 +27,93 @@ class Bar(ConstructionElement):
 		
 		if json is not None:
 			if default is None:
-				self.L = float(json.get("L", 0.0))
-				self.A = float(json.get("A", 0.0))
-				self.E = float(json.get("E", 0.0))
-				self.Sigma = float(json.get("Sigma", 0.0))
-				self.q = float(json.get("q", 0.0))
+				L     = json.get("L", 0.0)
+				A     = json.get("A", 0.0)
+				E     = json.get("E", 0.0)
+				Sigma = json.get("Sigma", 0.0)
+				q     = json.get("q", 0.0)
 				
-				self.K  = json.get("K")
-				self.Q  = json.get("Q")
-				self.U0 = json.get("U0")
-				self.UL = json.get("UL")
+				K     = json.get("K")
+				Q     = json.get("Q")
+				U0    = json.get("U0")
+				UL    = json.get("UL")
 			else:
-				self.L = float(json.get("L", default.L))
-				self.A = float(json.get("A", default.A))
-				self.E = float(json.get("E", default.E))
-				self.Sigma = float(json.get("Sigma", default.Sigma))
-				self.q = float(json.get("q", default.q))
+				L     = json.get("L", default.L)
+				A     = json.get("A", default.A)
+				E     = json.get("E", default.E)
+				Sigma = json.get("Sigma", default.Sigma)
+				q     = json.get("q", default.q)
 				
-				self.K  = json.get("K", default.K)
-				self.Q  = json.get("Q", default.Q)
-				self.U0 = json.get("U0", default.U0)
-				self.UL = json.get("UL", default.UL)
+				K     = json.get("K", default.K)
+				Q     = json.get("Q", default.Q)
+				U0    = json.get("U0", default.U0)
+				UL    = json.get("UL", default.UL)
 		elif default is not None:
-			self.L = float(default.L)
-			self.A = float(default.A)
-			self.E = float(default.E)
-			self.Sigma = float(default.Sigma)
-			self.q = float(default.q)
+			L     = default.L
+			A     = default.A
+			E     = default.E
+			Sigma = default.Sigma
+			q     = default.q
 			
-			self.K  = default.K
-			self.Q  = default.Q
-			self.U0 = default.U0
-			self.UL = default.UL
+			K     = default.K
+			Q     = default.Q
+			U0    = default.U0
+			UL    = default.UL
+		else:
+			L     = 0.0
+			A     = 0.0
+			E     = 0.0
+			Sigma = 0.0
+			q     = 0.0
+			
+			K     = None
+			Q     = None
+			U0    = None
+			UL    = None
 		
 		
-		if self.K is None or self.Q is None or self.U0 is None or self.UL is None:
+		if K is None or Q is None or U0 is None or UL is None:
 			self.K  = None
 			self.Q  = None
 			self.U0 = None
 			self.UL = None
 		else:
-			self.K = eval(self.K)
-			self.Q = eval(self.Q)
+			try:
+				self.K  = eval(K)
+				self.Q  = eval(Q)
+				self.U0 = float(U0)
+				self.UL = float(UL)
+			except:
+				self.K  = None
+				self.Q  = None
+				self.U0 = None
+				self.UL = None
+		
+		
+		try:
+			self.L     = float(L)
+		except:
+			raise Exception("Некорректная длина стержня (ожидается: число)")
+		
+		try:
+			self.A     = float(A)
+		except:
+			raise Exception("Некорректная площадь поперечного сечения стержня (ожидается: число)")
+		
+		try:
+			self.E     = float(E)
+		except:
+			raise Exception("Некорректный модуль упругости стержня (ожидается: число)")
+		
+		try:
+			self.Sigma = float(Sigma)
+		except:
+			raise Exception("Некорректное допускаемое напряжение (ожидается: число)")
+		
+		try:
+			self.q     = float(q)
+		except:
+			raise Exception("Некорректная нагрузка на стержень (ожидается: число)")
 		
 		
 		if default is not None:
@@ -81,10 +126,10 @@ class Bar(ConstructionElement):
 								"(ожидается: A > 0; %s)" % (self.A, self))
 			
 			if self.E <= 0:
-				raise Exception("Некорректный модель упругости стержня: E = %f " \
+				raise Exception("Некорректный модуль упругости стержня: E = %f " \
 								"(ожидается: E > 0; %s)" % (self.E, self))
 		
-		self.height = math.sqrt(self.A)		# Квадратное сечение
+		self.height = 0 if self.A <= 0 else math.sqrt(self.A)
 	
 	
 	def dump(self):

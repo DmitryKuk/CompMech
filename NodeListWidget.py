@@ -4,15 +4,17 @@
 
 from tkinter import *
 
+from Node import Node
 from Style import defaultValueBG
 from ElementListWidget import *
 
 
 class NodeListWidget(ElementListWidget):
-	def __init__(self, parent):
+	def __init__(self, parent, showError):
 		columns = ("Заделка", "F")
 		
-		ElementListWidget.__init__(self, parent, label = "Узлы", columns = columns)
+		ElementListWidget.__init__(self, parent, label = "Узлы", columns = columns,
+								   showError = showError)
 		
 		# Настройки отображения таблицы
 		self.tree.column( columns[0], anchor = CENTER, width = 100)
@@ -55,6 +57,23 @@ class NodeListWidget(ElementListWidget):
 		
 		self.detailFrame.columnconfigure(2, minsize = emptySpaceSize, weight = 0)
 		self.detailFrame.columnconfigure(1, weight = 1)
+	
+	
+	def onButtonAddClicked(self):
+		try:
+			label = self.label[1].get()
+			F     = self.F[1].get()
+			
+			m = { "fixed": False if self.fixed[1].get() == 0 else True }
+			if label != "": m.update({ "label": label })
+			if F != "": m.update({ "F": F })
+			
+			n = Node(json = m)
+			n.i = len(self.tree.get_children())
+			
+			self.addNode(n)
+		except Exception as e:
+			self.showError(str(e))
 	
 	
 	def onButtonApplyClicked(self, item = None):

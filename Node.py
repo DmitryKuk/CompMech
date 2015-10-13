@@ -16,20 +16,41 @@ class Node(ConstructionElement):
 		
 		if json is not None:
 			if default is None:
-				self.fixed = bool(json.get("fixed", False))
-				self.F = float(json.get("F", 0.0))
+				fixed = json.get("fixed", False)
+				F     = json.get("F", 0.0)
 				
-				self.Delta = json.get("Delta")
+				Delta = json.get("Delta")
 			else:
-				self.fixed = bool(json.get("fixed", default.fixed))
-				self.F = float(json.get("F", default.F))
+				fixed = json.get("fixed", default.fixed)
+				F     = json.get("F", default.F)
 				
-				self.Delta = json.get("Delta", default.Delta)
+				Delta = json.get("Delta", default.Delta)
 		elif default is not None:
-			self.fixed = bool(default.fixed)
-			self.F = float(default.F)
+			fixed = default.fixed
+			F     = default.F
 			
-			self.Delta = default.Delta
+			Delta = default.Delta
+		else:
+			fixed = False
+			F     = 0.0
+			
+			Delta = None
+		
+		
+		try:
+			self.F = float(F)
+		except:
+			raise Exception("Некорректная нагрузка на узел (ожидается: число)")
+		
+		try:
+			self.fixed = bool(fixed)
+		except:
+			raise Exception("Некорректные данные о заделке (ожидается: булево значение")
+		
+		try:
+			self.Delta = float(Delta)
+		except:
+			pass
 	
 	
 	def dump(self):

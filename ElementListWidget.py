@@ -11,8 +11,10 @@ from Style import defaultValueBG
 emptySpaceSize = 10
 
 class ElementListWidget(Frame):
-	def __init__(self, parent, label, columns):
+	def __init__(self, parent, label, columns, showError):
 		Frame.__init__(self, parent)
+		
+		self.showError = showError
 		
 		self.columnconfigure(0, weight = 1)
 		self.rowconfigure(1, weight = 1)

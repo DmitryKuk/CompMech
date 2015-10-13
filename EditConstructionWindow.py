@@ -21,12 +21,12 @@ class EditConstructionWindow(Toplevel):
 		self.panedWindow.pack(fill = BOTH, expand = 1)
 		
 		# Левая панель: редактор узлов
-		self.nodeList = NodeListWidget(self.panedWindow)
+		self.nodeList = NodeListWidget(self.panedWindow, showError = self.showError)
 		self.panedWindow.add(self.nodeList)
 		self.nodeList.addNode(self.application.construction.defaultNode)
 		
 		# Правая панель: редактор стержней
-		self.barList = BarListWidget(self.panedWindow)
+		self.barList = BarListWidget(self.panedWindow, showError = self.showError)
 		self.panedWindow.add(self.barList)
 		self.barList.addBar(self.application.construction.defaultBar)
 		

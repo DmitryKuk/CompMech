@@ -4,15 +4,17 @@
 
 from tkinter import *
 
+from Bar import Bar
 from Style import defaultValueBG
 from ElementListWidget import *
 
 
 class BarListWidget(ElementListWidget):
-	def __init__(self, parent):
+	def __init__(self, parent, showError):
 		columns = ("L", "A", "E", "[σ]", "q")
 		
-		ElementListWidget.__init__(self, parent, label = "Стержни", columns = columns)
+		ElementListWidget.__init__(self, parent, label = "Стержни", columns = columns,
+								   showError = showError)
 		
 		# Настройки отображения таблицы
 		for x in columns:
@@ -66,6 +68,31 @@ class BarListWidget(ElementListWidget):
 		
 		self.detailFrame.columnconfigure(3, minsize = emptySpaceSize, weight = 0)
 		for x in (1, 2, 4, 5): self.detailFrame.columnconfigure(x, weight = 1)
+	
+	
+	def onButtonAddClicked(self):
+		try:
+			label = self.label[1].get()
+			L     = self.L[1].get()
+			A     = self.A[1].get()
+			E     = self.E[1].get()
+			Sigma = self.Sigma[1].get()
+			q     = self.q[1].get()
+			
+			m = {}
+			if label != "": m.update({ "label": label })
+			if L != "":     m.update({ "L":     L })
+			if A != "":     m.update({ "A":     A })
+			if E != "":     m.update({ "E":     E })
+			if Sigma != "": m.update({ "Sigma": Sigma })
+			if q != "":     m.update({ "q":     q })
+			
+			n = Bar(json = m)
+			n.i = len(self.tree.get_children())
+			
+			self.addBar(n)
+		except Exception as e:
+			self.showError(str(e))
 	
 	
 	def onButtonApplyClicked(self, item = None):
