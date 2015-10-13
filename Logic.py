@@ -92,8 +92,8 @@ class Logic:
 											drawN = drawN, drawU = drawU, drawSigma = drawSigma)
 		else:	# Указан номер стержня => рисуем его и 2 ближайших узла
 			bar = elements[2 * barNumber + 1]
-			if bar.label != "": bar.label = " \"" + bar.label + "\""
-			title = "Стержень (%d)%s" % (barNumber, bar.label)
+			label = "" if bar.label == "" else " \"" + bar.label + "\""
+			title = "Стержень (%d)%s" % (barNumber, label)
 			
 			xOffset = bar.x
 			
