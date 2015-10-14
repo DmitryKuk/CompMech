@@ -61,15 +61,8 @@ class NodeListWidget(ElementListWidget):
 	
 	def onButtonAddClicked(self):
 		try:
-			label = self.label[1].get()
-			F     = self.F[1].get()
-			
-			m = { "fixed": False if self.fixed[1].get() == 0 else True }
-			if label != "": m.update({ "label": label })
-			if F     != "": m.update({ "F":     F })
-			
-			n = Node(json = m)
-			n.i = len(self.tree.get_children())
+			n = self.defaultNode()
+			n.i = self.elementsCount()
 			
 			self.addNode(n)
 		except Exception as e:
@@ -106,6 +99,17 @@ class NodeListWidget(ElementListWidget):
 	def addNode(self, node):
 		self.addElement((node.label, str(node.i),
 						 "зафиксирован" if node.fixed else "свободен", str(node.F)))
+	
+	
+	def defaultNode(self):
+		label = self.label[1].get()
+		F     = self.F[1].get()
+		
+		m = { "fixed": False if self.fixed[1].get() == 0 else True }
+		if label != "": m.update({ "label": label })
+		if F     != "": m.update({ "F":     F })
+		
+		return Node(json = m)
 	
 	
 	def setDefaultNode(self, node):

@@ -19,12 +19,14 @@ class Logic:
 		self.application.elements = {}
 	
 	
-	def createConstructionFromElements(self, nodes, bars):
-		if len(nodes) != len(bars) + 1:
-			raise Exception("Некорректная конструкция " \
-							"(ожидается: количество узлов = количество стержней + 1)")
-		
-		self.application.construction = Construction(nodes = nodes, bars = bars)
+	def createConstructionFromElements(self, nodes, bars, defaultNode, defaultBar):
+		if len(nodes) == 0 and len(bars) == 0:
+			self.application.construction.defaultBar  = defaultBar
+			self.application.construction.defaultNode = defaultNode
+		else:
+			self.application.construction = Construction(nodes = nodes, bars = bars,
+														 defaultNode = defaultNode,
+														 defaultBar  = defaultBar)
 		self.application.onConstructionChanged()
 	
 	

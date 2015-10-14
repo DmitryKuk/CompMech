@@ -11,9 +11,11 @@ from Node import *
 
 class Construction:
 	def __init__(self, file = None,
-				 nodes = None, bars = None):
-		self.defaultBar = Bar()
-		self.defaultNode = Node()
+				 nodes = None, bars = None,
+				 defaultNode = None,
+				 defaultBar = None):
+		self.defaultBar = defaultBar or Bar()
+		self.defaultNode = defaultNode or Node()
 		self.elements = []
 		self.sizeX, self.sizeY = 0.0, 0.0
 		

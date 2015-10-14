@@ -72,23 +72,8 @@ class BarListWidget(ElementListWidget):
 	
 	def onButtonAddClicked(self):
 		try:
-			label = self.label[1].get()
-			L     = self.L[1].get()
-			A     = self.A[1].get()
-			E     = self.E[1].get()
-			Sigma = self.Sigma[1].get()
-			q     = self.q[1].get()
-			
-			m = {}
-			if label != "": m.update({ "label": label })
-			if L     != "": m.update({ "L":     L })
-			if A     != "": m.update({ "A":     A })
-			if E     != "": m.update({ "E":     E })
-			if Sigma != "": m.update({ "Sigma": Sigma })
-			if q     != "": m.update({ "q":     q })
-			
-			n = Bar(json = m)
-			n.i = len(self.tree.get_children())
+			n = self.defaultBar()
+			n.i = self.elementsCount()
 			
 			self.addBar(n)
 		except Exception as e:
@@ -131,6 +116,25 @@ class BarListWidget(ElementListWidget):
 	def addBar(self, bar):
 		self.addElement((bar.label, str(bar.i), str(bar.L), str(bar.A), str(bar.E), str(bar.Sigma),
 						 str(bar.q)))
+	
+	
+	def defaultBar(self):
+		label = self.label[1].get()
+		L     = self.L[1].get()
+		A     = self.A[1].get()
+		E     = self.E[1].get()
+		Sigma = self.Sigma[1].get()
+		q     = self.q[1].get()
+		
+		m = {}
+		if label != "": m.update({ "label": label })
+		if L     != "": m.update({ "L":     L     })
+		if A     != "": m.update({ "A":     A     })
+		if E     != "": m.update({ "E":     E     })
+		if Sigma != "": m.update({ "Sigma": Sigma })
+		if q     != "": m.update({ "q":     q     })
+		
+		return Bar(json = m)
 	
 	
 	def setDefaultBar(self, bar):
