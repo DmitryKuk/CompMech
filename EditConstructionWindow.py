@@ -57,15 +57,15 @@ class EditConstructionWindow(Toplevel):
 	
 	
 	def onApplyButtonClicked(self):
-		try:
-			self.application.logic.createConstructionFromElements(
-				nodes = self.nodeList.nodes(),
-				bars = self.barList.bars(),
-				defaultNode = self.nodeList.defaultNode(),
-				defaultBar = self.barList.defaultBar()
-			)
-		except Exception as e:
-			self.showError(str(e))
+		# try:
+		self.application.logic.createConstructionFromElements(
+			nodes = self.nodeList.nodes(),
+			bars = self.barList.bars(),
+			defaultNode = self.nodeList.defaultNode(),
+			defaultBar = self.barList.defaultBar()
+		)
+		# except Exception as e:
+		# 	self.showError(str(e))
 	
 	
 	def onConstructionChanged(self):

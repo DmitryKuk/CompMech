@@ -207,7 +207,7 @@ class Graph(Frame):
 			qSpace = 5 * self.mainScale.kX		# Пробелы 5 пикселей между стрелками
 			qIndent = 12 * self.mainScale.kX	# Отступы в 10 пикселей по границам стержней
 			
-			qLen = (bar.q ** 2) / (self.maxqOnL * self.specq)	# Длина стрелки q
+			qLen = (bar.q ** 2) / (2 * self.maxqOnL * self.specq)	# Длина стрелки q
 			
 			if bar.q > 0:
 				x1, xmin = bar.x + bar.L, bar.x + qIndent

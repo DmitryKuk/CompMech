@@ -117,10 +117,10 @@ class MainWindow(Tk):
 			try:
 				file = open(filename, "r")
 				
-				try:
-					self.application.logic.openConstructionFile(file)
-				except Exception as e:
-					self.showError(str(e))
+				# try:
+				self.application.logic.openConstructionFile(file)
+				# except Exception as e:
+				# 	self.showError(str(e))
 				
 				file.close()
 			except IOError as e:
@@ -144,10 +144,10 @@ class MainWindow(Tk):
 	
 	
 	def onButtonCalculateClicked(self):
-		try:
-			self.application.logic.calculate()
-		except Exception as e:
-			self.showError(str(e))
+		# try:
+		self.application.logic.calculate()
+		# except Exception as e:
+		# 	self.showError(str(e))
 	
 	
 	def onAboutButtonClicked(self):

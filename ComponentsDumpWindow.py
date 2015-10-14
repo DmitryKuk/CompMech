@@ -65,6 +65,9 @@ class ComponentsDumpWindow(Toplevel):
 		self.rowconfigure(1, weight = 1)
 		
 		
+		self.bind("<Destroy>", self.onWindowDestroy)
+		
+		
 		self.updateTitles()
 		self.onConstructionChanged(False)
 	
@@ -108,6 +111,9 @@ class ComponentsDumpWindow(Toplevel):
 	
 	
 	def onPointCalculated(self, barNumber, x, N, U, Sigma):
+		if self.barNumber is not None and barNumber != self.barNumber:
+			return
+		
 		self.tree.insert(parent = "", index = "end",
 						 values = ("—" if barNumber is None else str(barNumber),
 								   "%.14f" % x, "%.14f" % N,
