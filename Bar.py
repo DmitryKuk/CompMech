@@ -191,9 +191,17 @@ class Bar(ConstructionElement):
 	
 	
 	def maxComponents(self):
+		if self.q == 0:
+			UMax = max(abs(self.ULocal(0)), abs(self.ULocal(self.L)))
+		else:
+			a = - self.q / (2 * self.E * self.A)
+			b = (self.UL - self.U0) / self.L + self.q * self.L / (2 * self.E * self.A)
+			xUMax = - b / (2 * a)
+			UMax = abs(self.ULocal(xUMax))
+		
 		return ( \
 			max(abs(self.NLocal(0)), abs(self.NLocal(self.L))), \
-			max(abs(self.ULocal(0)), abs(self.ULocal(self.L))), \
+			UMax, \
 			max(abs(self.SigmaLocal(0)), abs(self.SigmaLocal(self.L)), \
 				abs(self.Sigma)) \
 		)

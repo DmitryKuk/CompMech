@@ -20,15 +20,19 @@ UColor					= "green"
 SigmaColor				= "blue"
 
 
+# Толщина линий
+curveWidth				= 2
+barLineWidth			= 2
+
 # Стили элементов
-barStyle				= { "fill": barColor, "activefill": activeBarColor }
+barStyle				= { "fill": barColor, "activefill": activeBarColor, "width": barLineWidth }
 qLineStyle				= { "fill": qColor, "width": 5,
 							"arrow": FIRST, "arrowshape": (5, 12, 13) }
 
-NLineStyle				= { "fill": NColor }
-ULineStyle				= { "fill": UColor }
-SigmaLineStyle			= { "fill": SigmaColor }
-SigmaMaxLineStyle		= { "fill": SigmaColor, "dash": (10, 10) }
+NLineStyle				= { "fill": NColor, "width": curveWidth }
+ULineStyle				= { "fill": UColor, "width": curveWidth }
+SigmaLineStyle			= { "fill": SigmaColor, "width": curveWidth }
+SigmaMaxLineStyle		= { "fill": SigmaColor, "dash": (10, 10), "width": curveWidth }
 
 nodeAxisStyle			= { "fill": nodeColor, "dash": (3, 3) }
 FLineStyle				= { "fill": FColor, "width": 11,
