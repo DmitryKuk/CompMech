@@ -77,14 +77,21 @@ class Logic:
 			title = "Конструкция"
 			
 			# Сначала рисуем только стержни, чтобы нагрузки узлов отображались поверх них
-			for element in elements:
-				if type(element) == Bar:
-					graph.drawBar(element, drawBar = drawConstruction, drawLoads = drawLoads)
+			if drawConstruction:
+				for element in elements:
+					if type(element) == Bar:
+						graph.drawBar(element, drawBar = True, drawLoads = False)
 			
 			# Рисуем узлы (с нагрузками)
 			for element in elements:
 				if type(element) == Node:
 					graph.drawNode(element, drawNode = drawConstruction, drawLoads = drawLoads)
+			
+			# Теперь рисуем только распределённые нагрузки на стержни, чтобы они были поверх F
+			if drawLoads:
+				for element in elements:
+					if type(element) == Bar:
+						graph.drawBar(element, drawBar = False, drawLoads = True)
 			
 			# Рисуем эпюры
 			if (drawN or drawU or drawSigma) and self.constructionCalculated():
@@ -100,6 +107,9 @@ class Logic:
 			xOffset = bar.x
 			
 			# Рисуем стержень
+			# Сначала рисуем только стержни, чтобы нагрузки узлов отображались поверх них
+			graph.drawBar(bar, drawBar = drawConstruction, drawLoads = False)
+			
 			graph.setLocalCoordinate(bar.x)
 			graph.drawBar(bar, drawBar = drawConstruction, drawLoads = drawLoads)
 			
@@ -107,6 +117,9 @@ class Logic:
 			for element in elements[2 * barNumber], elements[2 * barNumber + 2]:
 				graph.drawNode(element, drawNode = drawConstruction, drawLoads = drawLoads)
 			
+			# Теперь рисуем только распределённые нагрузки на стержни, чтобы они были поверх F
+			graph.drawBar(bar, drawBar = False, drawLoads = drawLoads)
+				
 			# Рисуем эпюры
 			graph.drawBarCurves(bar, drawN = drawN, drawU = drawU, drawSigma = drawSigma)
 		

@@ -26,7 +26,7 @@ barLineWidth			= 2
 
 # Стили элементов
 barStyle				= { "fill": barColor, "activefill": activeBarColor, "width": barLineWidth }
-qLineStyle				= { "fill": qColor, "width": 5,
+qLineStyle				= { "fill": qColor, "width": 7,
 							"arrow": FIRST, "arrowshape": (5, 12, 13) }
 
 NLineStyle				= { "fill": NColor, "width": curveWidth }
@@ -35,7 +35,7 @@ SigmaLineStyle			= { "fill": SigmaColor, "width": curveWidth }
 SigmaMaxLineStyle		= { "fill": SigmaColor, "dash": (10, 10), "width": curveWidth }
 
 nodeAxisStyle			= { "fill": nodeColor, "dash": (3, 3) }
-FLineStyle				= { "fill": FColor, "width": 11,
+FLineStyle				= { "fill": FColor, "width": 15,
 							"arrow": LAST, "arrowshape": (5, 12, 13) }
 hatchStyle				= {}
 

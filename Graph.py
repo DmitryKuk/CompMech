@@ -203,9 +203,13 @@ class Graph(Frame):
 		
 		if drawLoads and bar.q != 0 and self.maxqOnL != 0 and self.specq != 0:
 			qSpace = 5 * self.mainScale.kX		# Пробелы 5 пикселей между стрелками
-			qIndent = 12 * self.mainScale.kX	# Отступы в 10 пикселей по границам стержней
+			qIndent = 12 * self.mainScale.kX	# Отступы в 12 пикселей по границам стержней
 			
-			qLen = (bar.q ** 2) / (2 * self.maxqOnL * self.specq)	# Длина стрелки q
+			# Масштабированная длина стрелки q:
+			# qLen = (bar.q ** 2) / (2 * self.maxqOnL * self.specq)
+			
+			# Фиксированная длина стрелки q:
+			qLen = self.mainScale.realToVirtXLen(50)
 			
 			if bar.q > 0:
 				x1, xmin = bar.x + bar.L, bar.x + qIndent
@@ -228,7 +232,6 @@ class Graph(Frame):
 		
 		
 		if drawU:
-			# self.drawCurve(self.UScale, bar.ULineGlobal(), **ULineStyle)
 			rX, maxRX = self.UScale.virtToRealX(bar.x), self.UScale.virtToRealX(bar.x + bar.L)
 			rY = self.UScale.virtToRealY(bar.UGlobal(self.UScale.realToVirtX(rX)))
 			while rX <= maxRX:
@@ -286,10 +289,19 @@ class Graph(Frame):
 		if drawLoads:
 			# Отображаем нагрузку
 			if node.F != 0:
-				p0 = (node.x - float(node.F * self.maxFReal * self.mainScale.vW) \
-							   / (self.maxF * self.mainScale.rW), 0)
-				p1 = (node.x, 0)
+				# Масштабированная длина стрелки:
+				# p0 = (node.x - float(node.F * self.maxFReal * self.mainScale.vW) \
+				# 			   / (self.maxF * self.mainScale.rW), 0)
+				# p1 = (node.x, 0)
 				
+				
+				# Фиксированная длина стерлки:
+				FSign = +1 if node.F >= 0 else -1
+				realFLen = min(self.mainScale.roW, self.mainScale.roE)
+				FLen = FSign * self.mainScale.realToVirtXLen(realFLen)
+				
+				p0 = (node.x - FLen, 0)
+				p1 = (node.x, 0)
 				self.drawLine(p0, p1, **FLineStyle)
 	
 	
